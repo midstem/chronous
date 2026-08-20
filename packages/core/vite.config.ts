@@ -7,16 +7,29 @@ const FILE_NAME_BY_FORMAT: Record<string, string> = {
   cjs: 'index.cjs'
 }
 
+const NATIVE_TEMPORAL_FLAG = '--harmony-temporal'
+
+const usesNativeTemporal = process.env.CHRONOUS_TEMPORAL === 'native'
+
 export default defineConfig({
   test: {
-    environment: 'node'
+    environment: 'node',
+    pool: 'forks',
+    execArgv: usesNativeTemporal ? [NATIVE_TEMPORAL_FLAG] : [],
+    setupFiles: usesNativeTemporal ? [] : ['./src/test/setup.ts'],
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.ts'],
+      exclude: ['src/test/**', 'src/**/__test__/**'],
+      thresholds: { statements: 90, branches: 90, functions: 90, lines: 90 }
+    }
   },
   plugins: [
     dts({
       bundleTypes: true,
       compilerOptions: { paths: { '#src/*': ['./src/*/index.ts'] } },
       include: ['src'],
-      exclude: ['src/**/__test__/**', 'src/**/*.test.ts']
+      exclude: ['src/test', 'src/**/__test__/**', 'src/**/*.test.ts']
     })
   ],
   build: {

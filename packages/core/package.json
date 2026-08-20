@@ -6,6 +6,14 @@
   "description": "Headless scheduling engine: time model, layout and recurrence. No React, no DOM",
   "author": "Midstem",
   "sideEffects": false,
+  "peerDependencies": {
+    "temporal-polyfill": ">=0.3.0"
+  },
+  "peerDependenciesMeta": {
+    "temporal-polyfill": {
+      "optional": true
+    }
+  },
   "imports": {
     "#src/*": "./src/*/index.ts"
   },
@@ -49,7 +57,10 @@
     "build": "vite build",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
-    "test:run": "vitest run",
+    "test:polyfill": "vitest run",
+    "test:native": "CHRONOUS_TEMPORAL=native vitest run",
+    "test:run": "npm run test:polyfill && npm run test:native",
+    "test:coverage": "vitest run --coverage",
     "prepack": "node ../../tools/scripts/copy-license.mjs"
   }
 }
