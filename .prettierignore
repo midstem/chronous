@@ -1,1 +1,5 @@
-README.md
+node_modules
+dist
+coverage
+package-lock.json
+CHANGELOG.md

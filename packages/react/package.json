@@ -1,0 +1,62 @@
+{
+  "name": "@midstem/chronous-react",
+  "version": "0.0.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Headless React primitives for @midstem/chronous",
+  "author": "Midstem",
+  "sideEffects": false,
+  "imports": {
+    "#src/*": "./src/*/index.ts"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/midstem/chronous.git",
+    "directory": "packages/react"
+  },
+  "bugs": {
+    "url": "https://github.com/midstem/chronous/issues"
+  },
+  "homepage": "https://github.com/midstem/chronous#readme",
+  "keywords": [
+    "react",
+    "calendar",
+    "scheduler",
+    "headless",
+    "hooks",
+    "typescript"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "prepack": "node ../../tools/scripts/copy-license.mjs"
+  },
+  "peerDependencies": {
+    "@midstem/chronous": "0.0.0",
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@midstem/chronous": "*"
+  }
+}

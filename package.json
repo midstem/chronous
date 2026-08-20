@@ -1,68 +1,56 @@
 {
-  "name": "chronous",
-  "version": "1.0.2",
+  "name": "chronous-monorepo",
+  "private": true,
+  "type": "module",
   "license": "MIT",
-  "author": "Maksym Tkachuk, Oleksandr Didyshen, Igor Kozlovskyi",
-  "description": "Event Calendar written in TypeScript",
-  "main": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
-  "peerDependencies": {
-    "react": ">=17"
-  },
+  "author": "Midstem",
+  "description": "Monorepo for Chronous: a headless scheduling engine and the adapters built on it",
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "tools/*"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/midstem/chronous.git"
   },
-  "files": [
-    "dist",
-    "LICENSE",
-    "README.md"
-  ],
-  "keywords": [
-    "react",
-    "typescript",
-    "calendar",
-    "event calendar"
-  ],
   "bugs": {
     "url": "https://github.com/midstem/chronous/issues"
   },
   "homepage": "https://github.com/midstem/chronous#readme",
   "scripts": {
-    "start": "vite --open",
-    "test": "vitest --watch=false",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "lint": "eslint ./src",
-    "tsc": "tsc --incremental",
-    "lint:format": "prettier --write --loglevel warn \"./**/*.{js,jsx,ts,tsx,css,md,json}\"",
-    "lint:fix": "eslint --cache ./src --ext .jsx,.js,.ts,.tsx --fix --ignore-path ./.gitignore",
-    "lint-tsc": "yarn tsc && yarn lint:format && yarn lint:fix"
+    "build": "npm run build --workspace @midstem/chronous --workspace @midstem/chronous-react",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test:run --workspaces --if-present",
+    "lint": "eslint .",
+    "lint:fix": "eslint --cache ./packages --quiet --fix",
+    "lint:format": "prettier --write --log-level warn \"./**/*.{js,mjs,ts,tsx,css,md,json}\"",
+    "lint-tsc": "npm run build --workspace @midstem/chronous && npm run lint:format && npm run lint:fix && npm run typecheck"
   },
   "devDependencies": {
-    "@types/react": "^18.0.28",
-    "@types/react-dom": "^18.2.7",
-    "@typescript-eslint/eslint-plugin": "^5.57.1",
-    "@typescript-eslint/parser": "^5.57.1",
-    "@vitejs/plugin-react": "^4.0.0",
-    "date-fns": "^2.30.0",
-    "eslint": "^8.39.0",
-    "eslint-config-airbnb-typescript": "^17.0.0",
-    "eslint-config-prettier": "^8.8.0",
-    "eslint-import-resolver-typescript": "^3.5.5",
-    "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-jsx-a11y": "^6.7.1",
-    "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-react": "^7.32.2",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "pre-commit": "^1.2.2",
-    "prettier": "^2.8.8",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "typescript": "^5.0.2",
-    "vite": "^4.3.2",
-    "vite-plugin-dts": "^2.3.0",
-    "vitest": "^0.30.1"
+    "@eslint/js": "^9.39.0",
+    "@microsoft/api-extractor": "^7.58.12",
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "^19.2.18",
+    "@typescript-eslint/eslint-plugin": "^8.67.0",
+    "@typescript-eslint/parser": "^8.67.0",
+    "eslint": "^9.39.5",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-prettier": "^5.5.6",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.11.0",
+    "jsdom": "^30.0.1",
+    "pre-commit": "^2.0.0",
+    "prettier": "^3.9.6",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "typescript": "^6.0.3",
+    "vite": "^8.2.2",
+    "vite-plugin-dts": "^5.0.3",
+    "vitest": "^4.1.11"
   },
   "pre-commit": "lint-tsc"
 }
