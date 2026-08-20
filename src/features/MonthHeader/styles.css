@@ -1,7 +1,0 @@
-.month-header-mobile {
-  flex: 1 1 calc(100% / 7);
-}
-
-.month-header-mobile p:nth-last-child(-n + 2) {
-  color: var(--grey);
-}
