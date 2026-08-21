@@ -111,16 +111,69 @@ type RangeSpec = {
 - An anchor date that cannot be read, a `slotMinutes` outside 1 to 1440 or a
   `dayCount` below one throws `InvalidRangeError`.
 
+## Calendars
+
+`buildCalendar` is the whole public surface: a spec and a list of events in, one
+plain object out.
+
+```ts
+const calendar = buildCalendar(
+  { view: 'week', date: '2026-03-18', timeZone: 'Europe/Kyiv' },
+  [{ id: 'standup', start: '2026-03-18T09:00', duration: 'PT30M' }]
+)
+```
+
+```ts
+type Calendar<TData = unknown> = {
+  view: ViewKind
+  start: IsoDateTime
+  end: IsoDateTime
+  days: CalendarDay<TData>[]
+  rows: CalendarRow<TData>[]
+}
+
+type CalendarDay<TData = unknown> = {
+  date: IsoDate
+  start: IsoDateTime
+  end: IsoDateTime
+  minutes: number
+  inPeriod: boolean
+  slots: CalendarSlot[]
+  boxes: CalendarBox<TData>[]
+}
+
+type CalendarSlot = {
+  minuteOfDay: number
+  start: IsoDateTime
+  end: IsoDateTime
+  minutes: number
+}
+```
+
+- Everything crossing the boundary is a string or a number. Temporal types stay
+  inside the engine, so a calendar is plain JSON: it survives `JSON.stringify`,
+  a server-to-client payload and a React state update unchanged.
+- A moment comes back as an ISO-8601 string carrying its offset —
+  `2026-10-25T03:00:00+03:00` — so `new Date(value)` is exact without knowing
+  the calendar's time zone. A date with no time comes back as `2026-03-18`.
+- `days` are the days the grid draws, `rows` the bands of bars above it.
+- Every box and bar carries the normalized event as `event`, discriminated by
+  `allDay`: a timed entry holds date-times, an all-day entry plain dates.
+- The spec's `timeZone` and `disambiguation` are the ones the events are read
+  with, so a calendar is built from one consistent point of view.
+- Input that cannot be read throws `InvalidEventError` or `InvalidRangeError`.
+  One unusable event fails the whole call.
+
 ## Layout
 
 Overlapping events are packed into columns the way a calendar draws them, one
 day at a time.
 
 ```ts
-type PlacedEvent<TData = unknown> = {
-  event: TimedEvent<TData>
-  start: Moment
-  end: Moment
+type CalendarBox<TData = unknown> = {
+  event: TimedEntry<TData>
+  start: IsoDateTime
+  end: IsoDateTime
   startMinute: number
   endMinute: number
   minutes: number
@@ -159,18 +212,18 @@ type PlacedEvent<TData = unknown> = {
 Long events are drawn as bars above the grid instead of inside it.
 
 ```ts
-type LaneRow<TData = unknown> = {
-  start: CalendarDate
-  end: CalendarDate
+type CalendarRow<TData = unknown> = {
+  start: IsoDate
+  end: IsoDate
   days: number
   lanes: number
-  spans: PlacedSpan<TData>[]
+  bars: CalendarBar<TData>[]
 }
 
-type PlacedSpan<TData = unknown> = {
-  event: CalendarEvent<TData>
-  start: CalendarDate
-  end: CalendarDate
+type CalendarBar<TData = unknown> = {
+  event: CalendarEntry<TData>
+  start: IsoDate
+  end: IsoDate
   startDay: number
   endDay: number
   days: number
@@ -196,7 +249,7 @@ type PlacedSpan<TData = unknown> = {
   `days` is the length in days, and `left` / `width` are the same span as
   fractions of the row.
 - `start` and `end` are the dates the bar covers, `end` exclusive as everywhere
-  else. For a timed event the original moments stay on `event`.
+  else. For a promoted timed event the original moments stay on `event`.
 - Bars read across the row, longest first, and each takes the lowest free lane.
   A bar never grows into a free lane beside it. Every bar in a row reports the
   same `lanes` count, so a row can be sized before it is drawn, and a renderer
