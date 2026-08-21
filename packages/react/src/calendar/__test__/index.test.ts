@@ -116,10 +116,10 @@ describe('useCalendar', () => {
   })
 
   it('lets an error that is not a calendar error through', () => {
-    const broken: RangeSpec = { ...SPEC, timeZone: 'Not/AZone' }
+    const missing = undefined as unknown as EventInput[]
 
-    expect(() => renderHook(() => useCalendar(broken, EVENTS))).toThrow(
-      RangeError
+    expect(() => renderHook(() => useCalendar(SPEC, missing))).toThrow(
+      TypeError
     )
   })
 })
