@@ -1,8 +1,8 @@
-import { isTimedEvent } from '#src/event'
 import type { CalendarEvent, TimedEvent } from '#src/event'
+import { buildLanes } from '#src/lanes'
 import type { DateRange, RangeDay } from '#src/range'
 
-import { clip, cluster, order, place } from './helpers'
+import { clip, cluster, isGridEvent, order, place } from './helpers'
 import type { DayLayout, RangeLayout, Segment } from './types'
 
 const segmentsOf = <TData>(
@@ -27,9 +27,12 @@ export const buildLayout = <TData>(
   range: DateRange,
   events: readonly CalendarEvent<TData>[]
 ): RangeLayout<TData> => {
-  const timed = events.filter(isTimedEvent)
+  const timed = events.filter(isGridEvent)
 
-  return { days: range.days.map((day) => layoutDay(timed, day)) }
+  return {
+    days: range.days.map((day) => layoutDay(timed, day)),
+    rows: buildLanes(range, events)
+  }
 }
 
 export type * from './types'

@@ -154,9 +154,9 @@ describe('ordering', () => {
 })
 
 describe('events that cross midnight', () => {
-  const spec = { ...base, view: 'days', dayCount: 3 } as const
+  const spec = { ...base, view: 'days', dayCount: 2 } as const
   const days = layoutOf(
-    [{ id: 'a', start: '2026-03-18T22:00', end: '2026-03-20T02:00' }],
+    [{ id: 'a', start: '2026-03-18T22:00', end: '2026-03-19T02:00' }],
     spec
   )
 
@@ -173,19 +173,8 @@ describe('events that cross midnight', () => {
     expect(toIso(placed.end)).toBe('2026-03-19T00:00:00+02:00')
   })
 
-  it('fills the whole of a day in the middle', () => {
-    const [placed] = days[1]
-
-    expect(placed.top).toBe(0)
-    expect(placed.height).toBe(1)
-    expect(placed).toMatchObject({
-      continuesBefore: true,
-      continuesAfter: true
-    })
-  })
-
   it('clips the last day to the end of the event', () => {
-    const [placed] = days[2]
+    const [placed] = days[1]
 
     expect(placed.startMinute).toBe(0)
     expect(placed.endMinute).toBe(2 * MINUTES_IN_HOUR)
@@ -193,6 +182,25 @@ describe('events that cross midnight', () => {
       continuesBefore: true,
       continuesAfter: false
     })
+  })
+})
+
+describe('events of a whole day or longer', () => {
+  const spec = { ...base, view: 'days', dayCount: 3 } as const
+  const input = { id: 'a', start: '2026-03-18T22:00', end: '2026-03-20T02:00' }
+
+  it('leaves the grid for a lane', () => {
+    expect(layoutOf([input], spec).flat()).toEqual([])
+  })
+
+  it('is placed as one bar across the days it covers', () => {
+    const [span] = buildLayout(
+      buildRange(spec),
+      normalizeEvents([input], { timeZone: KYIV })
+    ).rows[0].spans
+
+    expect(span.event.id).toBe('a')
+    expect(span).toMatchObject({ startDay: 0, days: 3 })
   })
 })
 
