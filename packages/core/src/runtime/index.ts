@@ -1,4 +1,3 @@
-type TemporalCarrier = { Temporal?: unknown }
+import { readTemporal } from '../time/temporal'
 
-export const hasNativeTemporal = (): boolean =>
-  typeof (globalThis as TemporalCarrier).Temporal !== 'undefined'
+export const isTemporalAvailable = (): boolean => readTemporal() !== undefined
