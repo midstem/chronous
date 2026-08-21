@@ -6,6 +6,8 @@ import {
   DEFAULT_DISAMBIGUATION,
   FIRST_DAY_OF_MONTH,
   MILLISECONDS_IN_MINUTE,
+  MINUTES_IN_HOUR,
+  SECONDS_IN_MINUTE,
   SMALLEST_ISO_UNIT,
   UTC_TIME_ZONE
 } from './constants'
@@ -150,6 +152,11 @@ export const hoursInDay = (moment: Moment): number => moment.hoursInDay
 
 export const minutesBetween = (from: Moment, to: Moment): number =>
   (to.epochMilliseconds - from.epochMilliseconds) / MILLISECONDS_IN_MINUTE
+
+export const minuteOfDay = (moment: Moment): number =>
+  moment.hour * MINUTES_IN_HOUR +
+  moment.minute +
+  moment.second / SECONDS_IN_MINUTE
 
 export { timeZoneOf } from './helpers'
 

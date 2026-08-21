@@ -111,6 +111,49 @@ type RangeSpec = {
 - An anchor date that cannot be read, a `slotMinutes` outside 1 to 1440 or a
   `dayCount` below one throws `InvalidRangeError`.
 
+## Layout
+
+Overlapping events are packed into columns the way a calendar draws them, one
+day at a time.
+
+```ts
+type PlacedEvent<TData = unknown> = {
+  event: TimedEvent<TData>
+  start: Moment
+  end: Moment
+  startMinute: number
+  endMinute: number
+  minutes: number
+  top: number
+  height: number
+  left: number
+  width: number
+  column: number
+  columns: number
+  span: number
+  continuesBefore: boolean
+  continuesAfter: boolean
+}
+```
+
+- Only timed events are placed. All-day events carry no time of day and get
+  their own lanes elsewhere.
+- An event is clipped to every day it touches, so one event crossing midnight
+  is placed once per day with `continuesBefore` and `continuesAfter` saying
+  where it carries on.
+- Events that overlap form a cluster. The cluster is cut into as few columns as
+  it needs, and each event then widens to the right until it meets a
+  neighbour — an event with nothing beside it takes the full width.
+- `startMinute` and `endMinute` are wall-clock minutes from midnight, the same
+  coordinates the grid rows use, and `top` / `height` / `left` / `width` are
+  those coordinates as fractions of the day. `minutes` is the real elapsed
+  length of the clipped piece: on 29 March 2026 in `Europe/Kyiv` an event from
+  01:00 to 04:00 is drawn three hours tall and reports two hours.
+- A box never runs backwards. An event that starts and ends inside a repeated
+  hour collapses to zero height, exactly as its row does.
+- Days without a time grid are placed all the same, so `month` and `agenda`
+  cells can order their events by the same numbers.
+
 ## License
 
 MIT
