@@ -13,6 +13,12 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.ts'],
     alias: {
       '@midstem/chronous': resolve('..', 'core', 'src', 'index.ts')
+    },
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.ts'],
+      exclude: ['src/test/**', 'src/**/__test__/**'],
+      thresholds: { statements: 90, branches: 90, functions: 90, lines: 90 }
     }
   },
   plugins: [
