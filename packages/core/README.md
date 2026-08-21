@@ -77,6 +77,40 @@ type EventInput<TData = unknown> = {
 - Input that cannot be read, or an event that ends before it starts, throws
   `InvalidEventError` carrying the offending `eventId`.
 
+## Views
+
+A range turns an anchor date into the days a calendar draws, and the rows it
+draws them on.
+
+```ts
+type RangeSpec = {
+  view: 'day' | 'week' | 'days' | 'month' | 'agenda'
+  date: string
+  timeZone: string
+  weekStartsOn?: 0 | 1 | 2 | 3 | 4 | 5 | 6
+  dayCount?: number
+  slotMinutes?: number
+  disambiguation?: Disambiguation
+}
+```
+
+- `day` is one day and `week` is seven from `weekStartsOn` (Monday by
+  default). `days` and `agenda` span `dayCount`, which defaults to a week and
+  to thirty days. `month` covers the anchor's month padded out to whole weeks;
+  the padding days are marked `inPeriod: false`.
+- A time grid is built for `day`, `week` and `days`. `month` and `agenda`
+  carry no slots.
+- Slots are wall-clock rows. A day always has `1440 / slotMinutes` of them —
+  twenty-four by default — whatever the time zone does that day. Each slot
+  knows its `minuteOfDay`, its real `start` and `end`, and its length in
+  `minutes`: a row is placed by the wall clock and sized by elapsed time.
+- A DST transition is absorbed by the row it falls in. In `Europe/Kyiv` the
+  03:00 row runs two hours on 25 October 2026 and zero on 29 March 2026; in
+  `Australia/Lord_Howe` a row can be ninety or thirty minutes long. No row is
+  ever negative, and a day's rows always add up to its real length.
+- An anchor date that cannot be read, a `slotMinutes` outside 1 to 1440 or a
+  `dayCount` below one throws `InvalidRangeError`.
+
 ## License
 
 MIT

@@ -1,6 +1,9 @@
 import {
+  DAYS_IN_WEEK,
   FIRST_MONTH_INDEX,
   FORMAT_CACHE_LIMIT,
+  ISO_SUNDAY,
+  SUNDAY_WEEK_START,
   UTC_TIME_ZONE,
   ZONE_ANNOTATION_PATTERN
 } from './constants'
@@ -10,13 +13,24 @@ import type {
   LocaleId,
   Moment,
   TimePoint,
-  TimeZoneId
+  TimeZoneId,
+  WeekStartsOn
 } from './types'
 
 const formatterCache = new Map<string, Intl.DateTimeFormat>()
 
 export const isMoment = (value: TimePoint): value is Moment =>
   'epochMilliseconds' in value
+
+export const daysSinceWeekStart = (
+  dayOfWeek: number,
+  weekStartsOn: WeekStartsOn
+): number => {
+  const isoWeekStart =
+    weekStartsOn === SUNDAY_WEEK_START ? ISO_SUNDAY : weekStartsOn
+
+  return (dayOfWeek - isoWeekStart + DAYS_IN_WEEK) % DAYS_IN_WEEK
+}
 
 export const timeZoneOf = (moment: Moment): TimeZoneId => {
   const declared = (moment as { timeZoneId?: TimeZoneId }).timeZoneId

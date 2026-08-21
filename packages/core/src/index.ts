@@ -6,6 +6,10 @@ export { InvalidEventError } from '#src/event'
 
 export type { EventId, EventInput, NormalizeContext } from '#src/event'
 
+export { InvalidRangeError } from '#src/range'
+
+export type { RangeSpec, ViewKind } from '#src/range'
+
 export type {
   Disambiguation,
   IsoDate,
