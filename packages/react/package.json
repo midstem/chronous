@@ -50,6 +50,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "prepack": "node ../../tools/scripts/copy-license.mjs"
   },
   "peerDependencies": {
