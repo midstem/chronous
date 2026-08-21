@@ -1,3 +1,6 @@
+import { isTimedEvent } from '#src/event'
+import type { CalendarEvent, TimedEvent } from '#src/event'
+import { isLaneEvent } from '#src/lanes'
 import {
   MINUTES_IN_DAY,
   compare,
@@ -6,11 +9,14 @@ import {
   toCalendarDate
 } from '#src/time'
 import type { Moment } from '#src/time'
-import type { TimedEvent } from '#src/event'
 import type { RangeDay } from '#src/range'
 
 import { NO_REACH, SINGLE_COLUMN } from './constants'
 import type { PlacedEvent, Segment } from './types'
+
+export const isGridEvent = <TData>(
+  event: CalendarEvent<TData>
+): event is TimedEvent<TData> => isTimedEvent(event) && !isLaneEvent(event)
 
 const later = (a: Moment, b: Moment): Moment => (compare(a, b) > 0 ? a : b)
 

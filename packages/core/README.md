@@ -136,8 +136,8 @@ type PlacedEvent<TData = unknown> = {
 }
 ```
 
-- Only timed events are placed. All-day events carry no time of day and get
-  their own lanes elsewhere.
+- Only events shorter than a day are placed here. All-day events, and timed
+  events long enough to cover a whole day, move up into the lanes below.
 - An event is clipped to every day it touches, so one event crossing midnight
   is placed once per day with `continuesBefore` and `continuesAfter` saying
   where it carries on.
@@ -153,6 +153,54 @@ type PlacedEvent<TData = unknown> = {
   hour collapses to zero height, exactly as its row does.
 - Days without a time grid are placed all the same, so `month` and `agenda`
   cells can order their events by the same numbers.
+
+## Lanes
+
+Long events are drawn as bars above the grid instead of inside it.
+
+```ts
+type LaneRow<TData = unknown> = {
+  start: CalendarDate
+  end: CalendarDate
+  days: number
+  lanes: number
+  spans: PlacedSpan<TData>[]
+}
+
+type PlacedSpan<TData = unknown> = {
+  event: CalendarEvent<TData>
+  start: CalendarDate
+  end: CalendarDate
+  startDay: number
+  endDay: number
+  days: number
+  lane: number
+  lanes: number
+  left: number
+  width: number
+  continuesBefore: boolean
+  continuesAfter: boolean
+}
+```
+
+- Every all-day event gets a bar. A timed event gets one when it covers
+  twenty-four hours or more **by the wall clock**, and it then leaves the grid
+  entirely. An event from 09:00 to 09:00 the next day is a bar on any date,
+  including the day a DST transition cuts to twenty-three real hours; an event
+  from 22:00 to 02:00 stays in the grid, split across the two days it touches.
+- A range is cut into lane rows: a month grid breaks at every week, so a bar
+  never crosses a grid row, and every other view is one row.
+- A bar is clipped to its row and placed once per row, with `continuesBefore`
+  and `continuesAfter` saying where it carries on.
+- `startDay` and `endDay` are day indices inside the row, `endDay` exclusive.
+  `days` is the length in days, and `left` / `width` are the same span as
+  fractions of the row.
+- `start` and `end` are the dates the bar covers, `end` exclusive as everywhere
+  else. For a timed event the original moments stay on `event`.
+- Bars read across the row, longest first, and each takes the lowest free lane.
+  A bar never grows into a free lane beside it. Every bar in a row reports the
+  same `lanes` count, so a row can be sized before it is drawn, and a renderer
+  that shows only the first few lanes picks its own cut-off.
 
 ## License
 

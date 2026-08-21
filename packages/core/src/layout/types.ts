@@ -1,4 +1,5 @@
 import type { TimedEvent } from '#src/event'
+import type { LaneRow } from '#src/lanes'
 import type { CalendarDate, Moment } from '#src/time'
 
 export type PlacedEvent<TData = unknown> = {
@@ -31,4 +32,5 @@ export type DayLayout<TData = unknown> = {
 
 export type RangeLayout<TData = unknown> = {
   days: DayLayout<TData>[]
+  rows: LaneRow<TData>[]
 }
