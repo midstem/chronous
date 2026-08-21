@@ -28,3 +28,9 @@ export const BRACKETED_ZONE_PATTERN = /\[[^\]=!]+\]$/
 export const SMALLEST_ISO_UNIT = 'second' as const
 
 export const FIRST_MONTH_INDEX = 1
+
+export const MINUTES_IN_DAY = 1440
+
+export const FIRST_DAY_OF_MONTH = 1
+
+export const DAY_UNIT = 'day' as const

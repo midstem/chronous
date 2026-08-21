@@ -2,15 +2,20 @@ import {
   ABSOLUTE_INSTANT_PATTERN,
   BRACKETED_ZONE_PATTERN,
   DATE_ONLY_PATTERN,
-  DAYS_IN_WEEK,
+  DAY_UNIT,
   DEFAULT_DISAMBIGUATION,
-  ISO_SUNDAY,
+  FIRST_DAY_OF_MONTH,
   MILLISECONDS_IN_MINUTE,
   SMALLEST_ISO_UNIT,
-  SUNDAY_WEEK_START,
   UTC_TIME_ZONE
 } from './constants'
-import { getFormatter, isMoment, timeZoneOf, toFormattable } from './helpers'
+import {
+  daysSinceWeekStart,
+  getFormatter,
+  isMoment,
+  timeZoneOf,
+  toFormattable
+} from './helpers'
 import { requireTemporal } from './temporal'
 import type {
   CalendarDate,
@@ -80,14 +85,36 @@ export const startOfDay = (moment: Moment): Moment => moment.startOfDay()
 export const startOfWeek = (
   moment: Moment,
   weekStartsOn: WeekStartsOn
-): Moment => {
-  const isoWeekStart =
-    weekStartsOn === SUNDAY_WEEK_START ? ISO_SUNDAY : weekStartsOn
-  const daysSinceWeekStart =
-    (moment.dayOfWeek - isoWeekStart + DAYS_IN_WEEK) % DAYS_IN_WEEK
+): Moment =>
+  moment
+    .subtract({ days: daysSinceWeekStart(moment.dayOfWeek, weekStartsOn) })
+    .startOfDay()
 
-  return moment.subtract({ days: daysSinceWeekStart }).startOfDay()
-}
+export const startOfWeekDate = (
+  date: CalendarDate,
+  weekStartsOn: WeekStartsOn
+): CalendarDate =>
+  date.subtract({ days: daysSinceWeekStart(date.dayOfWeek, weekStartsOn) })
+
+export const startOfMonth = (date: CalendarDate): CalendarDate =>
+  date.with({ day: FIRST_DAY_OF_MONTH })
+
+export const dayStart = (date: CalendarDate, timeZone: TimeZoneId): Moment =>
+  date.toZonedDateTime(timeZone)
+
+export const atWallTime = (
+  date: CalendarDate,
+  minuteOfDay: number,
+  timeZone: TimeZoneId,
+  disambiguation: Disambiguation = DEFAULT_DISAMBIGUATION
+): Moment =>
+  date
+    .toPlainDateTime()
+    .add({ minutes: minuteOfDay })
+    .toZonedDateTime(timeZone, { disambiguation })
+
+export const daysBetween = (from: CalendarDate, to: CalendarDate): number =>
+  from.until(to, { largestUnit: DAY_UNIT }).days
 
 export const withTimeZone = (moment: Moment, timeZone: TimeZoneId): Moment =>
   moment.withTimeZone(timeZone)
@@ -125,5 +152,7 @@ export const minutesBetween = (from: Moment, to: Moment): number =>
   (to.epochMilliseconds - from.epochMilliseconds) / MILLISECONDS_IN_MINUTE
 
 export { timeZoneOf } from './helpers'
+
+export { DAYS_IN_WEEK, MINUTES_IN_DAY } from './constants'
 
 export type * from './types'
