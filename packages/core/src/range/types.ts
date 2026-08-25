@@ -22,7 +22,6 @@ export type RangeSpec = {
 export type ResolvedSpec = {
   timeZone: TimeZoneId
   weekStartsOn: WeekStartsOn
-  disambiguation?: Disambiguation
   slotMinutes: number
   slotted: boolean
 }

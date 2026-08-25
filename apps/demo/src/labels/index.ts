@@ -22,8 +22,13 @@ const TITLE_OPTIONS: FormatOptions = {
 
 const labelWith =
   (options: FormatOptions): ((at: IsoDateTime, locale: LocaleId) => string) =>
-  (at, locale) =>
-    formatIso(at, { locale, options })
+  (at, locale) => {
+    try {
+      return formatIso(at, { locale, options })
+    } catch {
+      return at
+    }
+  }
 
 export const dayLabel = labelWith(DAY_OPTIONS)
 

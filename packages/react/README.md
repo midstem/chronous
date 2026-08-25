@@ -27,11 +27,11 @@ The memo is keyed on the fields of the spec rather than on its identity, so an
 inline object literal does not rebuild the calendar on every render. Events are
 keyed by reference — memoize that array yourself if it is built inline.
 
-`buildCalendar` throws on the first unusable event and on an unreadable spec,
-and a throw during render takes the whole tree down. The hook catches both
-`InvalidEventError` and `InvalidRangeError` and hands them back instead:
-`calendar` is null exactly when `error` is set. Anything else is a bug and is
-left to propagate.
+`buildCalendar` throws on the first unusable event, on an unreadable spec and on
+a recurrence rule it cannot read, and a throw during render takes the whole tree
+down. The hook catches `InvalidEventError`, `InvalidRangeError` and
+`InvalidRecurrenceError` and hands them back instead: `calendar` is null exactly
+when `error` is set. Anything else is a bug and is left to propagate.
 
 ## `useCalendarNavigation`
 

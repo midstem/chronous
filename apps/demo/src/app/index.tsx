@@ -1,38 +1,67 @@
-import type { RangeSpec } from '@midstem/chronous'
-import { useCalendar, useCalendarNavigation } from '@midstem/chronous-react'
-import { useState } from 'react'
 import type { ReactElement } from 'react'
 
-import { Grid } from '../grid'
-import { titleLabel } from '../labels'
-import { Lanes } from '../lanes'
-import { Toolbar } from '../toolbar'
+import { Board } from '../board'
+import { Boundary } from '../boundary'
+import { REPOSITORY_URL } from '../constants'
+import { Controls } from '../controls'
+import { Events } from '../events'
+import { presetOf } from '../fixtures'
+import { usePlayground } from '../playground'
+import { Runtime } from '../runtime'
+import { Snippet } from '../snippet'
 
-import { EVENTS, INITIAL_SPEC, LOCALE } from './constants'
-import { isSlotted, periodDate } from './helpers'
-import type { EventData } from './types'
+import { HEADLINE, MASTHEAD_HINT } from './constants'
 
 export const App = (): ReactElement => {
-  const [spec, setSpec] = useState<RangeSpec>(INITIAL_SPEC)
-  const { calendar, error } = useCalendar<EventData>(spec, EVENTS)
-  const navigation = useCalendarNavigation(calendar, spec)
-  const slotted = calendar ? isSlotted(calendar) : false
+  const playground = usePlayground()
+  const { state, spec, source, events, problem } = playground
 
   return (
-    <main className="app">
-      <Toolbar
-        spec={spec}
-        navigation={navigation}
-        title={calendar ? titleLabel(periodDate(calendar), LOCALE) : spec.date}
-        onChange={setSpec}
-      />
-      {error && <p className="error">{error.message}</p>}
-      {calendar && (
-        <section className="board">
-          <Lanes calendar={calendar} locale={LOCALE} withCells={!slotted} />
-          {slotted && <Grid days={calendar.days} locale={LOCALE} />}
-        </section>
-      )}
-    </main>
+    <div className="page">
+      <header className="masthead">
+        <div>
+          <h1 className="masthead-title">{HEADLINE}</h1>
+          <p className="masthead-hint">{MASTHEAD_HINT}</p>
+        </div>
+        <div className="masthead-actions">
+          <Runtime />
+          <button type="button" onClick={playground.reset}>
+            Reset
+          </button>
+          <a className="masthead-link" href={REPOSITORY_URL}>
+            Documentation
+          </a>
+        </div>
+      </header>
+
+      <div className="layout">
+        <Controls
+          state={state}
+          update={playground.update}
+          choosePreset={playground.choosePreset}
+        />
+
+        <main className="stage">
+          <Boundary key={JSON.stringify(spec)}>
+            <Board
+              spec={spec}
+              events={events}
+              locale={state.locale}
+              onNavigate={playground.applySpec}
+            />
+          </Boundary>
+
+          <Events
+            source={source}
+            problem={problem}
+            hint={presetOf(state.preset).hint}
+            count={events.length}
+            onChange={playground.changeSource}
+          />
+
+          <Snippet spec={spec} locale={state.locale} />
+        </main>
+      </div>
+    </div>
   )
 }

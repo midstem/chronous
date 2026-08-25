@@ -29,7 +29,6 @@ import type { DateRange, RangeDay, RangeSpec, ResolvedSpec } from './types'
 const resolveSpec = (spec: RangeSpec): ResolvedSpec => ({
   timeZone: requireTimeZone(spec.timeZone),
   weekStartsOn: spec.weekStartsOn ?? DEFAULT_WEEK_STARTS_ON,
-  disambiguation: spec.disambiguation,
   slotMinutes: requireSlotMinutes(spec.slotMinutes ?? DEFAULT_SLOT_MINUTES),
   slotted: SLOTTED_VIEWS.includes(spec.view)
 })

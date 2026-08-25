@@ -20,6 +20,28 @@ opt-in.</p>
 The previous generation shipped as `chronous@1.0.2` and stays available under
 the git tag [`1.0.2`](https://github.com/midstem/chronous/tree/1.0.2).
 
+## Playground
+
+[`apps/demo`](apps/demo) is an interactive playground: every field of
+`RangeSpec` on one side, the events as editable JSON on the other, and between
+them nothing but what `buildCalendar` returned — plus the raw result and the
+call your settings describe.
+
+```bash
+npm run start
+```
+
+It resolves the packages by name, so it reads their built output the way an
+outside consumer would. Build them first:
+
+```bash
+npm run build
+```
+
+Every push to `main` publishes it to GitHub Pages through
+[`.github/workflows/pages.yml`](.github/workflows/pages.yml), which runs
+`npm run build:pages` and uploads `apps/demo/dist`.
+
 ## Benchmarks
 
 The engine carries a `vitest bench` suite in

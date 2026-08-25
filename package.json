@@ -20,6 +20,8 @@
   "homepage": "https://github.com/midstem/chronous#readme",
   "scripts": {
     "build": "npm run build --workspace @midstem/chronous --workspace @midstem/chronous-react",
+    "build:pages": "npm run build && npm run build --workspace @midstem/chronous-demo",
+    "start": "npm run dev --workspace @midstem/chronous-demo",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test:run --workspaces --if-present",
     "lint": "eslint .",

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { hoursInDay, toIso, zoned } from '#src/time'
+import type { Disambiguation } from '#src/time'
 
 import { buildRange } from '../index'
 import type { RangeDay } from '../types'
@@ -8,6 +9,13 @@ import type { RangeDay } from '../types'
 const MINUTES_IN_HOUR = 60
 const SLOTS_PER_DAY = 24
 const SLOT_STEPS = [60, 30, 15]
+
+const DISAMBIGUATIONS: Disambiguation[] = [
+  'compatible',
+  'earlier',
+  'later',
+  'reject'
+]
 
 const dayOf = (timeZone: string, date: string, slotMinutes = 60): RangeDay =>
   buildRange({ view: 'day', date, timeZone, slotMinutes }).days[0]
@@ -118,5 +126,23 @@ describe('spans crossing a transition', () => {
     expect(range.days.map((day) => day.minutes / MINUTES_IN_HOUR)).toEqual([
       24, 24, 24, 24, 24, 24, 23
     ])
+  })
+})
+
+describe('the grid ignores the disambiguation events are read with', () => {
+  const startsUnder = (disambiguation: Disambiguation): string[] =>
+    buildRange({
+      view: 'day',
+      date: '2026-03-29',
+      timeZone: 'Europe/Kyiv',
+      disambiguation
+    }).days[0].slots.map((slot) => toIso(slot.start))
+
+  it('never refuses a row the zone skipped', () => {
+    expect(() => startsUnder('reject')).not.toThrow()
+  })
+
+  it.each(DISAMBIGUATIONS)('draws the same rows under %s', (disambiguation) => {
+    expect(startsUnder(disambiguation)).toEqual(startsUnder('compatible'))
   })
 })

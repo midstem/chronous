@@ -3,7 +3,7 @@ import type { CSSProperties, ReactElement } from 'react'
 
 import { CONTINUES, PERCENT } from '../constants'
 import { numberLabel } from '../labels'
-import type { EventData } from '../app/types'
+import type { EventData } from '../types'
 
 import { LANE_HEIGHT, NUMBER_HEIGHT } from './constants'
 import { rowsWithDays } from './helpers'

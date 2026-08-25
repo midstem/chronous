@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import { InvalidEventError } from '#src/event'
 import type { EventInput } from '#src/event'
 import type { RangeSpec } from '#src/range'
 
@@ -134,6 +135,19 @@ describe('the spec reaches event normalization', () => {
     ]).days[0].boxes
 
     expect(box.event.start).toBe('2026-03-29T02:30:00+02:00')
+  })
+
+  it('refuses a skipped wall time without touching the grid', () => {
+    const refusing: RangeSpec = { ...spec, disambiguation: 'reject' }
+
+    expect(buildCalendar(refusing, []).days[0].slots).toHaveLength(
+      SLOTS_PER_DAY
+    )
+    expect(() =>
+      buildCalendar(refusing, [
+        { id: 'a', start: '2026-03-29T03:30', duration: 'PT30M' }
+      ])
+    ).toThrow(InvalidEventError)
   })
 
   it('lifts a wall-clock day that is only twenty-three real hours', () => {

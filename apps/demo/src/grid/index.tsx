@@ -3,7 +3,7 @@ import type { CSSProperties, ReactElement } from 'react'
 
 import { CONTINUES, PERCENT } from '../constants'
 import { dayLabel, timeLabel } from '../labels'
-import type { EventData } from '../app/types'
+import type { EventData } from '../types'
 
 import { DAY_HEIGHT } from './constants'
 import { wallTimeOn } from './helpers'
