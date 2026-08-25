@@ -16,6 +16,14 @@ export type {
   TimedEntry
 } from '#src/calendar'
 
+export { calendarReducer, initialCalendarState } from '#src/navigation'
+
+export type {
+  CalendarAction,
+  CalendarSelection,
+  CalendarState
+} from '#src/navigation'
+
 export { InvalidEventError } from '#src/event'
 
 export type {

@@ -164,9 +164,51 @@ type RangeSpec = {
   checked once, where the spec is resolved, so a mistyped one never reaches the
   engine as a bare `RangeError`.
 
+## Navigation
+
+Moving around a calendar is a reducer over the spec, so next and previous can be
+tested without rendering anything.
+
+```ts
+import { calendarReducer, initialCalendarState } from '@midstem/chronous'
+
+const state = initialCalendarState({
+  view: 'week',
+  date: '2026-08-25',
+  timeZone: 'Europe/Kyiv'
+})
+
+calendarReducer(state, { type: 'next' }).spec.date
+calendarReducer(state, { type: 'view', view: 'month' }).spec.view
+calendarReducer(state, {
+  type: 'select',
+  selection: { kind: 'event', id: 'standup' }
+})
+```
+
+- The state is `{ spec, selection }` and nothing else. Every action returns a
+  new state, or the state it was handed when the move changes nothing, so a
+  consumer can compare by identity.
+- `next` and `prev` move by the period the spec asks for: `day` by one day,
+  `week` by seven, `days` and `agenda` by their own length, `month` by one
+  month anchored on the first. Anchoring the month is what keeps 31 January
+  from stepping to 28 February and staying there. Every other view keeps the
+  weekday of the anchor, so `prev` always undoes `next`.
+- The step is computed from the same resolved span the range is built from, so
+  one period ends exactly where the next begins — no repeated day, no gap.
+- `today` carries the moment: `{ type: 'today', now }`, where `now` is any ISO
+  string. The reducer reads it in `spec.timeZone` and never looks at the clock
+  itself, which is what keeps it pure and testable. An absolute instant is read
+  as one; a bare wall-clock string is read as local to the spec.
+- `goto` sets the anchor, `view` swaps the view, `select` and `clear` hold and
+  drop a selection — an event, a slot or a date. Moving does not clear the
+  selection; drop it yourself if that is what the interface wants.
+- Everything `buildCalendar` would refuse, the reducer refuses the same way,
+  with `InvalidRangeError`.
+
 ## Calendars
 
-`buildCalendar` is the whole public surface: a spec and a list of events in, one
+`buildCalendar` is the front door: a spec and a list of events in, one
 plain object out.
 
 ```ts

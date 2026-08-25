@@ -25,7 +25,7 @@ export const Board = ({
   onNavigate
 }: BoardProps): ReactElement => {
   const { calendar, error } = useCalendar<EventData>(spec, events)
-  const navigation = useCalendarNavigation(calendar, spec)
+  const navigation = useCalendarNavigation(spec)
   const slotted = calendar ? isSlotted(calendar) : false
 
   return (
