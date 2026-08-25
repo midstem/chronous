@@ -26,6 +26,9 @@ jobs:
       - name: Build the packages
         run: npm run build
 
+      - name: Verify the build invariants
+        run: npm run verify:dist
+
       - name: Lint
         run: npm run lint
 
