@@ -26,7 +26,11 @@ export const Toolbar = ({
       >
         Back
       </button>
-      <button type="button" onClick={() => onChange(navigation.today())}>
+      <button
+        type="button"
+        disabled={!navigation.today}
+        onClick={() => navigation.today && onChange(navigation.today())}
+      >
         Today
       </button>
       <button

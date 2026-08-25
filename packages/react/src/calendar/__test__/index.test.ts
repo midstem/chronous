@@ -108,6 +108,14 @@ describe('useCalendar', () => {
     expect(result.current.error).toBeInstanceOf(InvalidRangeError)
   })
 
+  it('reports an unreadable time zone instead of throwing', () => {
+    const broken: RangeSpec = { ...SPEC, timeZone: 'Not/AZone' }
+    const { result } = renderHook(() => useCalendar(broken, EVENTS))
+
+    expect(result.current.calendar).toBeNull()
+    expect(result.current.error).toBeInstanceOf(InvalidRangeError)
+  })
+
   it('reports an out of range slot size instead of throwing', () => {
     const broken: RangeSpec = { ...SPEC, slotMinutes: 0 }
     const { result } = renderHook(() => useCalendar(broken, EVENTS))

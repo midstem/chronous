@@ -138,8 +138,8 @@ describe('useCalendarNavigation', () => {
       timeZone: 'Pacific/Honolulu'
     })
 
-    expect(ahead.result.current.navigation.today().date).toBe('2026-08-22')
-    expect(behind.result.current.navigation.today().date).toBe('2026-08-21')
+    expect(ahead.result.current.navigation.today?.().date).toBe('2026-08-22')
+    expect(behind.result.current.navigation.today?.().date).toBe('2026-08-21')
   })
 
   it('reads today at the moment it is called, not at the last render', () => {
@@ -152,11 +152,11 @@ describe('useCalendarNavigation', () => {
       timeZone: ZONE
     })
 
-    expect(result.current.navigation.today().date).toBe('2026-08-21')
+    expect(result.current.navigation.today?.().date).toBe('2026-08-21')
 
     vi.setSystemTime(new Date('2026-08-22T09:00:00Z'))
 
-    expect(result.current.navigation.today().date).toBe('2026-08-22')
+    expect(result.current.navigation.today?.().date).toBe('2026-08-22')
   })
 
   it('carries the rest of the spec into every move', () => {
@@ -177,6 +177,34 @@ describe('useCalendarNavigation', () => {
       ...spec,
       view: 'month'
     })
+  })
+
+  it('has no today to read when the zone cannot be read', () => {
+    const spec: RangeSpec = {
+      view: 'day',
+      date: ANCHOR,
+      timeZone: 'Not/AZone'
+    }
+    const { result } = renderNavigation(spec)
+
+    expect(result.current.calendar).toBeNull()
+    expect(result.current.navigation.today).toBeNull()
+    expect(result.current.navigation.withView('week').view).toBe('week')
+  })
+
+  it('still reads today when only the anchor date is unreadable', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-08-21T09:00:00Z'))
+
+    const spec: RangeSpec = {
+      view: 'day',
+      date: 'not a date',
+      timeZone: ZONE
+    }
+    const { result } = renderNavigation(spec)
+
+    expect(result.current.calendar).toBeNull()
+    expect(result.current.navigation.today?.().date).toBe('2026-08-21')
   })
 
   it('has nowhere to step when there is no calendar', () => {

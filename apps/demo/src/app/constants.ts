@@ -28,7 +28,8 @@ export const ZONES: readonly TimeZoneId[] = [
   'Europe/Kyiv',
   'America/Santiago',
   'Australia/Lord_Howe',
-  'Asia/Kolkata'
+  'Asia/Kolkata',
+  'Not/AZone'
 ]
 
 export const EVENTS: readonly EventInput<EventData>[] = [

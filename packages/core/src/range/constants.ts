@@ -23,7 +23,11 @@ export const MIN_DAY_COUNT = 1
 
 export const SLOTTED_VIEWS: readonly ViewKind[] = ['day', 'week', 'days']
 
+export const TIME_ZONE_PROBE = '1970-01-01T00:00:00'
+
 export const UNREADABLE_DATE_REASON = 'the anchor date cannot be read'
+
+export const UNREADABLE_TIME_ZONE_REASON = 'the time zone cannot be read'
 
 export const INVALID_SLOT_MINUTES_REASON = `slotMinutes must be a whole number between ${MIN_SLOT_MINUTES} and ${MAX_SLOT_MINUTES}`
 

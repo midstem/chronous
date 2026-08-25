@@ -25,11 +25,20 @@ export const shift = (date: IsoDate, days: number): IsoDate => {
   return moment.toISOString().slice(0, ISO_DATE_LENGTH)
 }
 
-export const todayIn = (timeZone: TimeZoneId, now: Date): IsoDate => {
+const readerFor = (timeZone: TimeZoneId): Intl.DateTimeFormat | null => {
+  try {
+    return new Intl.DateTimeFormat(ISO_LOCALE, {
+      ...DATE_PART_OPTIONS,
+      timeZone
+    })
+  } catch {
+    return null
+  }
+}
+
+export const dateOf = (reader: Intl.DateTimeFormat, now: Date): IsoDate => {
   const parts = Object.fromEntries(
-    new Intl.DateTimeFormat(ISO_LOCALE, { ...DATE_PART_OPTIONS, timeZone })
-      .formatToParts(now)
-      .map((part) => [part.type, part.value])
+    reader.formatToParts(now).map((part) => [part.type, part.value])
   ) as Record<Intl.DateTimeFormatPartTypes, string>
 
   return [parts.year, parts.month, parts.day].join(DATE_PART_SEPARATOR)
@@ -58,11 +67,14 @@ export const navigationOf = <TData>(
 ): CalendarNavigation => {
   const dates = calendar ? periodDates(calendar) : []
   const movable = dates.length > 0
+  const reader = readerFor(spec.timeZone)
 
   return {
     next: movable ? stepped(spec, dates, true) : null,
     prev: movable ? stepped(spec, dates, false) : null,
-    today: () => ({ ...spec, date: todayIn(spec.timeZone, new Date()) }),
+    today: reader
+      ? () => ({ ...spec, date: dateOf(reader, new Date()) })
+      : null,
     withView: (view) => ({ ...spec, view })
   }
 }

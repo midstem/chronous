@@ -108,8 +108,10 @@ type RangeSpec = {
   03:00 row runs two hours on 25 October 2026 and zero on 29 March 2026; in
   `Australia/Lord_Howe` a row can be ninety or thirty minutes long. No row is
   ever negative, and a day's rows always add up to its real length.
-- An anchor date that cannot be read, a `slotMinutes` outside 1 to 1440 or a
-  `dayCount` below one throws `InvalidRangeError`.
+- An anchor date or a time zone that cannot be read, a `slotMinutes` outside 1
+  to 1440 or a `dayCount` below one throws `InvalidRangeError`. The zone is
+  checked once, where the spec is resolved, so a mistyped one never reaches the
+  engine as a bare `RangeError`.
 
 ## Calendars
 
