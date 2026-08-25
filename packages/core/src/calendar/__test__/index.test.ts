@@ -265,4 +265,19 @@ describe('invalid input', () => {
       InvalidRangeError
     )
   })
+
+  it('throws on a time zone that cannot be read', () => {
+    expect(() => calendarOf([], { ...week, timeZone: 'Not/AZone' })).toThrow(
+      InvalidRangeError
+    )
+  })
+
+  it('names the zone before it reads any event', () => {
+    expect(() =>
+      calendarOf([{ id: 'a', start: 'yesterday' }], {
+        ...week,
+        timeZone: 'Not/AZone'
+      })
+    ).toThrow(InvalidRangeError)
+  })
 })

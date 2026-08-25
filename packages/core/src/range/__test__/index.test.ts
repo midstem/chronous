@@ -156,6 +156,29 @@ describe('rejected specs', () => {
     ).toThrow(InvalidRangeError)
   })
 
+  it('rejects an unreadable time zone', () => {
+    expect(() =>
+      buildRange({ view: 'day', date: ANCHOR, timeZone: 'Not/AZone' })
+    ).toThrow(InvalidRangeError)
+  })
+
+  it('names the time zone and keeps what Temporal threw', () => {
+    try {
+      buildRange({ view: 'day', date: ANCHOR, timeZone: 'Not/AZone' })
+      expect.unreachable()
+    } catch (error) {
+      expect(error).toBeInstanceOf(InvalidRangeError)
+      expect((error as InvalidRangeError).reason).toContain('time zone')
+      expect((error as InvalidRangeError).cause).toBeInstanceOf(Error)
+    }
+  })
+
+  it('reads a zone whose name is spelled in another case', () => {
+    expect(() =>
+      buildRange({ view: 'day', date: ANCHOR, timeZone: 'europe/kyiv' })
+    ).not.toThrow()
+  })
+
   it('carries the reason', () => {
     try {
       buildRange({ ...base, view: 'day', slotMinutes: 0 })

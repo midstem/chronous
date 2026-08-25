@@ -42,16 +42,19 @@ sets state itself.
 const { next, prev, today, withView } = useCalendarNavigation(calendar, spec)
 
 <button disabled={!prev} onClick={() => prev && setSpec(prev)}>Back</button>
-<button onClick={() => setSpec(today())}>Today</button>
+<button disabled={!today} onClick={() => today && setSpec(today())}>Today</button>
 <button disabled={!next} onClick={() => next && setSpec(next)}>Forward</button>
 ```
 
 `next` and `prev` are read off the calendar on screen, so `month` lands on the
 neighbouring month and a span moves by its own length. They are null while
-there is no calendar to step from; `today` still works and is the way out of a
-spec that cannot be read. `today` is a function rather than a value because it
-depends on the wall clock, not on the inputs — it is read at the click, in the
-calendar's own zone.
+there is no calendar to step from — and `today` still works there, which is the
+way out of an anchor date that cannot be read.
+
+`today` is a function rather than a value because it depends on the wall clock
+and not on the inputs: it is read at the click, in the calendar's own zone. It
+is null only when that zone itself cannot be read, because then there is no
+today to read and no move that would help — fix the zone instead.
 
 ## Labels
 

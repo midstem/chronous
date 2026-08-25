@@ -5,9 +5,10 @@ import {
   compare,
   dayStart,
   minutesBetween,
-  plainDate
+  plainDate,
+  zoned
 } from '#src/time'
-import type { CalendarDate, IsoDate, Moment } from '#src/time'
+import type { CalendarDate, IsoDate, Moment, TimeZoneId } from '#src/time'
 
 import {
   INVALID_DAY_COUNT_REASON,
@@ -16,7 +17,9 @@ import {
   MIN_DAY_COUNT,
   MIN_SLOT_MINUTES,
   SINGLE_DAY,
-  UNREADABLE_DATE_REASON
+  TIME_ZONE_PROBE,
+  UNREADABLE_DATE_REASON,
+  UNREADABLE_TIME_ZONE_REASON
 } from './constants'
 import { InvalidRangeError } from './errors'
 import type { DaySlot, RangeDay, ResolvedSpec } from './types'
@@ -27,6 +30,16 @@ export const readAnchor = (iso: IsoDate): CalendarDate => {
   } catch (cause) {
     throw new InvalidRangeError(UNREADABLE_DATE_REASON, cause)
   }
+}
+
+export const requireTimeZone = (value: TimeZoneId): TimeZoneId => {
+  try {
+    zoned(TIME_ZONE_PROBE, value)
+  } catch (cause) {
+    throw new InvalidRangeError(UNREADABLE_TIME_ZONE_REASON, cause)
+  }
+
+  return value
 }
 
 export const requireSlotMinutes = (value: number): number => {
