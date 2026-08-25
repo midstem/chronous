@@ -61,6 +61,10 @@
     "test:native": "CHRONOUS_TEMPORAL=native vitest run",
     "test:run": "npm run test:polyfill && npm run test:native",
     "test:coverage": "vitest run --coverage",
+    "bench": "vitest bench --run",
+    "bench:save": "vitest bench --run --outputJson=bench.json",
+    "bench:compare": "vitest bench --run --compare=bench.json",
+    "bench:native": "CHRONOUS_TEMPORAL=native vitest bench --run",
     "prepack": "node ../../tools/scripts/copy-license.mjs"
   }
 }

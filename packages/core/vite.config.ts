@@ -17,10 +17,11 @@ export default defineConfig({
     pool: 'forks',
     execArgv: usesNativeTemporal ? [NATIVE_TEMPORAL_FLAG] : [],
     setupFiles: usesNativeTemporal ? [] : ['./src/test/setup.ts'],
+    benchmark: { include: ['src/**/*.bench.ts'] },
     coverage: {
       provider: 'v8',
       include: ['src/**/*.ts'],
-      exclude: ['src/test/**', 'src/**/__test__/**'],
+      exclude: ['src/test/**', 'src/bench/**', 'src/**/__test__/**'],
       thresholds: { statements: 90, branches: 90, functions: 90, lines: 90 }
     }
   },
@@ -29,7 +30,13 @@ export default defineConfig({
       bundleTypes: true,
       compilerOptions: { paths: { '#src/*': ['./src/*/index.ts'] } },
       include: ['src'],
-      exclude: ['src/test', 'src/**/__test__/**', 'src/**/*.test.ts']
+      exclude: [
+        'src/test',
+        'src/bench',
+        'src/**/__test__/**',
+        'src/**/*.test.ts',
+        'src/**/*.bench.ts'
+      ]
     })
   ],
   build: {
