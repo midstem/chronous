@@ -6,6 +6,7 @@ import { dayLabel, timeLabel } from '../labels'
 import type { EventData } from '../app/types'
 
 import { DAY_HEIGHT } from './constants'
+import { wallTimeOn } from './helpers'
 
 type GridProps = {
   days: readonly CalendarDay<EventData>[]
@@ -29,7 +30,7 @@ export const Grid = ({ days, locale }: GridProps): ReactElement => (
       <div className="gutter-body">
         {days[0].slots.map((slot) => (
           <div className="gutter-slot" key={slot.minuteOfDay}>
-            {timeLabel(slot.start, locale)}
+            {timeLabel(wallTimeOn(days[0].date, slot.minuteOfDay), locale)}
           </div>
         ))}
       </div>
