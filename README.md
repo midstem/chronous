@@ -20,6 +20,32 @@ opt-in.</p>
 The previous generation shipped as `chronous@1.0.2` and stays available under
 the git tag [`1.0.2`](https://github.com/midstem/chronous/tree/1.0.2).
 
+## Benchmarks
+
+The engine carries a `vitest bench` suite in
+[`packages/core/src/bench`](packages/core/src/bench): the layout and
+`buildCalendar` at ten thousand events, recurrence expanded from series anchored
+near and far, and the label formatter over a month grid.
+
+```bash
+npm run bench --workspace @midstem/chronous
+```
+
+The numbers only compare against themselves on one machine. Hold a baseline and
+check a change against it:
+
+```bash
+npm run bench:save --workspace @midstem/chronous
+```
+
+```bash
+npm run bench:compare --workspace @midstem/chronous
+```
+
+`bench.json` stays out of git. `bench:native` runs the same suite on a runtime
+that already carries `Temporal`; expect it to take considerably longer, so reach
+for it to compare runtimes rather than to gate a change.
+
 ## License
 
 MIT
