@@ -257,6 +257,49 @@ type CalendarBar<TData = unknown> = {
   same `lanes` count, so a row can be sized before it is drawn, and a renderer
   that shows only the first few lanes picks its own cut-off.
 
+## Labels
+
+`formatIso` turns a string a calendar hands back into a label, without asking
+the consumer which of the two shapes it is holding.
+
+```ts
+formatIso(day.date, {
+  locale: 'uk-UA',
+  options: { day: 'numeric', month: 'long' }
+})
+formatIso(slot.start, {
+  locale: 'en-GB',
+  options: { hour: '2-digit', minute: '2-digit' }
+})
+formatIso(box.start, {
+  locale: 'en-GB',
+  timeZone: 'America/New_York',
+  options: { timeStyle: 'short' }
+})
+```
+
+```ts
+type FormatSpec = {
+  locale: LocaleId
+  timeZone?: TimeZoneId
+  options?: FormatOptions
+}
+```
+
+- The spec is scalars only, so it crosses the boundary with everything else:
+  `locale`, an optional `timeZone` and `Intl.DateTimeFormatOptions`.
+- A date — `2026-03-18` — is formatted as the floating date it is and is never
+  moved into a zone, so a day heading cannot slip a day. `timeZone` is ignored
+  for it. This is what `new Date('2026-03-18')` gets wrong: that reads UTC
+  midnight, which is the previous day west of Greenwich.
+- A date-time carries its offset, which fixes the instant. `timeZone` decides
+  the zone it is shown in and defaults to the offset the string already has, so
+  `slot.start` reads back as the wall time the row stands for — both times an
+  hour repeats, and either side of an hour that is skipped.
+- A date-time with no offset is floating too, and reads as written.
+- Formatters are cached, so a month grid formatting forty-two cells on every
+  render builds one formatter, not forty-two.
+
 ## License
 
 MIT

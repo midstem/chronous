@@ -29,6 +29,12 @@ export const ZONE_ANNOTATION_PATTERN = /\[([^\]=!]+)\]$/
 
 export const BRACKETED_ZONE_PATTERN = /\[[^\]=!]+\]$/
 
+export const UTC_DESIGNATOR_PATTERN = /^z$/i
+
+export const OFFSET_SEPARATOR = ':'
+
+export const OFFSET_HOUR_END = 3
+
 export const SMALLEST_ISO_UNIT = 'second' as const
 
 export const FIRST_MONTH_INDEX = 1

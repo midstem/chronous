@@ -1,4 +1,4 @@
-import type { CalendarDay, LocaleId, TimeZoneId } from '@midstem/chronous'
+import type { CalendarDay, LocaleId } from '@midstem/chronous'
 import type { CSSProperties, ReactElement } from 'react'
 
 import { CONTINUES, PERCENT } from '../constants'
@@ -6,16 +6,16 @@ import { dayLabel, timeLabel } from '../labels'
 import type { EventData } from '../app/types'
 
 import { DAY_HEIGHT } from './constants'
+import { wallTimeOn } from './helpers'
 
 type GridProps = {
   days: readonly CalendarDay<EventData>[]
   locale: LocaleId
-  timeZone: TimeZoneId
 }
 
 const edge = (shown: boolean): string => (shown ? CONTINUES : '')
 
-export const Grid = ({ days, locale, timeZone }: GridProps): ReactElement => (
+export const Grid = ({ days, locale }: GridProps): ReactElement => (
   <div
     className="grid"
     style={
@@ -30,7 +30,7 @@ export const Grid = ({ days, locale, timeZone }: GridProps): ReactElement => (
       <div className="gutter-body">
         {days[0].slots.map((slot) => (
           <div className="gutter-slot" key={slot.minuteOfDay}>
-            {timeLabel(slot.start, locale, timeZone)}
+            {timeLabel(wallTimeOn(days[0].date, slot.minuteOfDay), locale)}
           </div>
         ))}
       </div>
@@ -38,9 +38,7 @@ export const Grid = ({ days, locale, timeZone }: GridProps): ReactElement => (
     <div className="columns">
       {days.map((day) => (
         <div className="column" key={day.date}>
-          <div className="column-head">
-            {dayLabel(day.start, locale, timeZone)}
-          </div>
+          <div className="column-head">{dayLabel(day.date, locale)}</div>
           <div className="column-body">
             {day.slots.map((slot) => (
               <div className="slot" key={slot.minuteOfDay} />
@@ -61,9 +59,7 @@ export const Grid = ({ days, locale, timeZone }: GridProps): ReactElement => (
                   {box.event.data?.title}
                   {edge(box.continuesAfter)}
                 </span>
-                <span className="box-time">
-                  {timeLabel(box.start, locale, timeZone)}
-                </span>
+                <span className="box-time">{timeLabel(box.start, locale)}</span>
               </div>
             ))}
           </div>

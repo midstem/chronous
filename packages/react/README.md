@@ -58,19 +58,26 @@ today to read and no move that would help — fix the zone instead.
 
 ## Labels
 
-No formatting ships here. Format from `day.start`, `slot.start` or `box.start`,
-which are full date-times carrying their offset:
+No formatting ships here, and the hooks take no `locale`. Labels are the
+consumer's, and `formatIso` from `@midstem/chronous` reads either shape a
+calendar hands back:
 
 ```tsx
-new Intl.DateTimeFormat(locale, {
-  timeZone: spec.timeZone,
-  hour: '2-digit'
-}).format(new Date(slot.start))
+import { formatIso } from '@midstem/chronous'
+
+formatIso(day.date, { locale, options: { weekday: 'short', day: 'numeric' } })
+formatIso(slot.start, {
+  locale,
+  options: { hour: '2-digit', minute: '2-digit' }
+})
 ```
 
-`day.date` is a bare `2026-03-18` with no time and no offset, meant for keys and
-comparisons. `new Date('2026-03-18')` reads it as UTC midnight, which is the
-previous day west of Greenwich — reach for `day.start` instead.
+`day.date` is a bare `2026-03-18` with no time and no offset, meant for keys,
+comparisons and headings; `day.start`, `slot.start` and `box.start` are full
+date-times carrying their offset. `formatIso` keeps the first floating and reads
+the second in the offset it carries, so neither needs `spec.timeZone` passed
+back in. Reach for raw `Intl` only to step outside that — `new Date(day.date)`
+is UTC midnight, which is the previous day west of Greenwich.
 
 ## License
 

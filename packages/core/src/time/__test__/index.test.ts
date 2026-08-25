@@ -5,7 +5,6 @@ import {
   add,
   compare,
   duration,
-  format,
   now,
   plainDate,
   startOfDay,
@@ -16,21 +15,10 @@ import {
   withTimeZone,
   zoned
 } from '../index'
-import type { FormatOptions, Moment, WeekStartsOn } from '../types'
+import type { Moment, WeekStartsOn } from '../types'
 
 const KYIV = 'Europe/Kyiv'
 const NEW_YORK = 'America/New_York'
-const CLOCK_OPTIONS: FormatOptions = {
-  hour: '2-digit',
-  minute: '2-digit',
-  hour12: false
-}
-const DATE_OPTIONS: FormatOptions = {
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit'
-}
-
 afterEach(() => {
   vi.unstubAllGlobals()
 })
@@ -150,73 +138,6 @@ describe('duration', () => {
   it('accepts a plain object', () => {
     expect(duration({ hours: 1, minutes: 30 }).total({ unit: 'minute' })).toBe(
       90
-    )
-  })
-})
-
-describe('format', () => {
-  const moment = zoned('2026-05-10T14:30:00', KYIV)
-
-  it('renders a moment in its own zone', () => {
-    expect(format(moment, { locale: 'en-GB', options: CLOCK_OPTIONS })).toBe(
-      '14:30'
-    )
-  })
-
-  it('renders the same moment in another zone', () => {
-    expect(
-      format(moment, {
-        locale: 'en-GB',
-        timeZone: NEW_YORK,
-        options: CLOCK_OPTIONS
-      })
-    ).toBe('07:30')
-  })
-
-  it('renders a calendar date without drifting across the date line', () => {
-    expect(
-      format(plainDate('2026-03-15'), {
-        locale: 'en-CA',
-        options: DATE_OPTIONS
-      })
-    ).toBe('2026-03-15')
-  })
-
-  it('respects the locale', () => {
-    expect(
-      format(moment, { locale: 'uk-UA', options: { month: 'long' } })
-    ).toBe('травень')
-  })
-
-  it('reuses a formatter for a repeated request', () => {
-    const spec = { locale: 'en-GB', options: CLOCK_OPTIONS }
-
-    expect(format(moment, spec)).toBe(format(moment, spec))
-  })
-
-  it('falls back to the locale default when no options are given', () => {
-    expect(format(moment, { locale: 'en-GB' })).toBe('10/05/2026')
-  })
-
-  it('keeps formatting correctly after the cache is recycled', () => {
-    const zones = Array.from({ length: 27 }, (_, index) =>
-      index < 13 ? `Etc/GMT+${index}` : `Etc/GMT-${index - 12}`
-    )
-
-    zones.forEach((timeZone) => {
-      ;[true, false].forEach((hour12) => {
-        ;['en-GB', 'en-US'].forEach((locale) => {
-          format(moment, {
-            locale,
-            timeZone,
-            options: { ...CLOCK_OPTIONS, hour12 }
-          })
-        })
-      })
-    })
-
-    expect(format(moment, { locale: 'en-GB', options: CLOCK_OPTIONS })).toBe(
-      '14:30'
     )
   })
 })

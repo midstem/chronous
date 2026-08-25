@@ -1,4 +1,4 @@
-import type { Calendar, LocaleId, TimeZoneId } from '@midstem/chronous'
+import type { Calendar, LocaleId } from '@midstem/chronous'
 import type { CSSProperties, ReactElement } from 'react'
 
 import { CONTINUES, PERCENT } from '../constants'
@@ -11,7 +11,6 @@ import { rowsWithDays } from './helpers'
 type LanesProps = {
   calendar: Calendar<EventData>
   locale: LocaleId
-  timeZone: TimeZoneId
   withCells: boolean
 }
 
@@ -20,7 +19,6 @@ const edge = (shown: boolean): string => (shown ? CONTINUES : '')
 export const Lanes = ({
   calendar,
   locale,
-  timeZone,
   withCells
 }: LanesProps): ReactElement => (
   <div className={withCells ? 'lanes' : 'lanes lanes-gutter'}>
@@ -45,7 +43,7 @@ export const Lanes = ({
                 key={day.date}
               >
                 <span className="cell-number">
-                  {numberLabel(day.start, locale, timeZone)}
+                  {numberLabel(day.date, locale)}
                 </span>
                 <span className="cell-lanes" />
                 <span className="chips">

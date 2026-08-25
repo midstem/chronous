@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   add,
+  formatIso,
   hoursInDay,
   minutesBetween,
   startOfWeek,
@@ -9,6 +10,7 @@ import {
   withTimeZone,
   zoned
 } from '../index'
+import type { FormatOptions } from '../types'
 
 const MINUTES_IN_HOUR = 60
 
@@ -141,5 +143,63 @@ describe('rendering the same instant in another zone', () => {
     expect(toIso(zoned('2026-03-15T09:00:00', 'Asia/Kolkata'))).toBe(
       '2026-03-15T09:00:00+05:30'
     )
+  })
+})
+
+describe('labels across DST transitions', () => {
+  const CLOCK: FormatOptions = {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZoneName: 'short'
+  }
+  const DAY: FormatOptions = { day: 'numeric', month: 'long' }
+
+  it.each([
+    ['2026-10-25T03:00:00+03:00', '03:00 GMT+3'],
+    ['2026-10-25T03:00:00+02:00', '03:00 GMT+2']
+  ])('tells the two Kyiv %s apart by its offset', (iso, expected) => {
+    expect(formatIso(iso, { locale: 'en-GB', options: CLOCK })).toBe(expected)
+  })
+
+  it.each([
+    ['2026-03-29T02:00:00+02:00', '02:00 GMT+2'],
+    ['2026-03-29T04:00:00+03:00', '04:00 GMT+3']
+  ])('labels %s around the Kyiv skipped hour', (iso, expected) => {
+    expect(formatIso(iso, { locale: 'en-GB', options: CLOCK })).toBe(expected)
+  })
+
+  it.each([
+    ['2026-10-04T01:30:00+10:30', '01:30 GMT+10:30'],
+    ['2026-10-04T02:30:00+11:00', '02:30 GMT+11'],
+    ['2026-09-06T01:00:00-03:00', '01:00 GMT-3'],
+    ['2026-03-15T09:00:00+05:30', '09:00 GMT+5:30']
+  ])('labels %s in the offset it carries', (iso, expected) => {
+    expect(formatIso(iso, { locale: 'en-GB', options: CLOCK })).toBe(expected)
+  })
+
+  it('keeps the day of a Santiago date whose midnight does not exist', () => {
+    expect(formatIso('2026-09-06', { locale: 'en-GB', options: DAY })).toBe(
+      '6 September'
+    )
+  })
+
+  it('keeps the day of a date west of Greenwich in an eastern zone', () => {
+    expect(
+      formatIso('2026-09-06', {
+        locale: 'en-GB',
+        timeZone: 'Australia/Lord_Howe',
+        options: DAY
+      })
+    ).toBe('6 September')
+  })
+
+  it('labels the repeated Kyiv hour in a locale that needs full ICU', () => {
+    expect(
+      formatIso('2026-10-25T03:00:00+02:00', {
+        locale: 'uk-UA',
+        options: DAY
+      })
+    ).toBe('25 жовтня')
   })
 })
