@@ -88,12 +88,7 @@ const buildSlots = (
   const count = Math.ceil(MINUTES_IN_DAY / spec.slotMinutes)
   const starts = clampAscending(
     Array.from({ length: count }, (_, index) =>
-      atWallTime(
-        date,
-        index * spec.slotMinutes,
-        spec.timeZone,
-        spec.disambiguation
-      )
+      atWallTime(date, index * spec.slotMinutes, spec.timeZone)
     ),
     dayEnd
   )

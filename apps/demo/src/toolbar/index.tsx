@@ -1,18 +1,14 @@
-import type { RangeSpec, ViewKind } from '@midstem/chronous'
+import type { RangeSpec } from '@midstem/chronous'
 import type { CalendarNavigation } from '@midstem/chronous-react'
 import type { ReactElement } from 'react'
 
-import { VIEWS, ZONES } from '../app/constants'
-
 type ToolbarProps = {
-  spec: RangeSpec
   navigation: CalendarNavigation
   title: string
   onChange: (spec: RangeSpec) => void
 }
 
 export const Toolbar = ({
-  spec,
   navigation,
   title,
   onChange
@@ -42,33 +38,5 @@ export const Toolbar = ({
       </button>
     </div>
     <h1 className="title">{title}</h1>
-    <div className="pickers">
-      <select
-        aria-label="View"
-        value={spec.view}
-        onChange={(event) =>
-          onChange(navigation.withView(event.target.value as ViewKind))
-        }
-      >
-        {VIEWS.map((view) => (
-          <option key={view} value={view}>
-            {view}
-          </option>
-        ))}
-      </select>
-      <select
-        aria-label="Time zone"
-        value={spec.timeZone}
-        onChange={(event) =>
-          onChange({ ...spec, timeZone: event.target.value })
-        }
-      >
-        {ZONES.map((zone) => (
-          <option key={zone} value={zone}>
-            {zone}
-          </option>
-        ))}
-      </select>
-    </div>
   </header>
 )

@@ -1,4 +1,8 @@
-import { InvalidEventError, InvalidRangeError } from '@midstem/chronous'
+import {
+  InvalidEventError,
+  InvalidRangeError,
+  InvalidRecurrenceError
+} from '@midstem/chronous'
 import type { EventInput, IsoDate, RangeSpec } from '@midstem/chronous'
 import { renderHook } from '@testing-library/react'
 import type { RenderHookResult } from '@testing-library/react'
@@ -121,6 +125,21 @@ describe('useCalendar', () => {
     const { result } = renderHook(() => useCalendar(broken, EVENTS))
 
     expect(result.current.error).toBeInstanceOf(InvalidRangeError)
+  })
+
+  it('reports an unreadable recurrence rule instead of throwing', () => {
+    const broken: EventInput[] = [
+      {
+        id: 'a',
+        start: '2026-03-18T09:00:00',
+        duration: 'PT30M',
+        recurrence: { rule: 'FREQ=HOURLY' }
+      }
+    ]
+    const { result } = renderHook(() => useCalendar(SPEC, broken))
+
+    expect(result.current.calendar).toBeNull()
+    expect(result.current.error).toBeInstanceOf(InvalidRecurrenceError)
   })
 
   it('lets an error that is not a calendar error through', () => {
