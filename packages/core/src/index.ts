@@ -24,8 +24,12 @@ export { InvalidRangeError } from '#src/range'
 
 export type { RangeSpec, ViewKind } from '#src/range'
 
+export { formatIso } from '#src/time'
+
 export type {
   Disambiguation,
+  FormatOptions,
+  FormatSpec,
   IsoDate,
   IsoDateTime,
   LocaleId,

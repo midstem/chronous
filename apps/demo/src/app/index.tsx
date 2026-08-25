@@ -9,7 +9,7 @@ import { Lanes } from '../lanes'
 import { Toolbar } from '../toolbar'
 
 import { EVENTS, INITIAL_SPEC, LOCALE } from './constants'
-import { isSlotted, periodStart } from './helpers'
+import { isSlotted, periodDate } from './helpers'
 import type { EventData } from './types'
 
 export const App = (): ReactElement => {
@@ -23,29 +23,14 @@ export const App = (): ReactElement => {
       <Toolbar
         spec={spec}
         navigation={navigation}
-        title={
-          calendar
-            ? titleLabel(periodStart(calendar), LOCALE, spec.timeZone)
-            : spec.date
-        }
+        title={calendar ? titleLabel(periodDate(calendar), LOCALE) : spec.date}
         onChange={setSpec}
       />
       {error && <p className="error">{error.message}</p>}
       {calendar && (
         <section className="board">
-          <Lanes
-            calendar={calendar}
-            locale={LOCALE}
-            timeZone={spec.timeZone}
-            withCells={!slotted}
-          />
-          {slotted && (
-            <Grid
-              days={calendar.days}
-              locale={LOCALE}
-              timeZone={spec.timeZone}
-            />
-          )}
+          <Lanes calendar={calendar} locale={LOCALE} withCells={!slotted} />
+          {slotted && <Grid days={calendar.days} locale={LOCALE} />}
         </section>
       )}
     </main>

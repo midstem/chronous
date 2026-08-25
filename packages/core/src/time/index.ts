@@ -15,6 +15,7 @@ import {
   daysSinceWeekStart,
   getFormatter,
   isMoment,
+  isoZoneOf,
   timeZoneOf,
   toFormattable
 } from './helpers'
@@ -132,6 +133,14 @@ export const format = (value: TimePoint, spec: FormatSpec): string => {
   return getFormatter(spec.locale, timeZone, spec.options ?? {}).format(
     toFormattable(value)
   )
+}
+
+export const formatIso = (value: IsoDateTime, spec: FormatSpec): string => {
+  if (isDateOnly(value)) return format(plainDate(value), spec)
+
+  const timeZone = spec.timeZone ?? isoZoneOf(value) ?? UTC_TIME_ZONE
+
+  return format(zoned(value, timeZone), { ...spec, timeZone })
 }
 
 export const now = (timeZone: TimeZoneId): Moment =>

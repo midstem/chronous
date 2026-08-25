@@ -1,15 +1,20 @@
 import {
+  ABSOLUTE_INSTANT_PATTERN,
   DAYS_IN_WEEK,
   FIRST_MONTH_INDEX,
   FORMAT_CACHE_LIMIT,
   ISO_SUNDAY,
+  OFFSET_HOUR_END,
+  OFFSET_SEPARATOR,
   SUNDAY_WEEK_START,
+  UTC_DESIGNATOR_PATTERN,
   UTC_TIME_ZONE,
   ZONE_ANNOTATION_PATTERN
 } from './constants'
 import type {
   CalendarDate,
   FormatOptions,
+  IsoDateTime,
   LocaleId,
   Moment,
   TimePoint,
@@ -38,6 +43,25 @@ export const timeZoneOf = (moment: Moment): TimeZoneId => {
   if (declared) return declared
 
   return ZONE_ANNOTATION_PATTERN.exec(moment.toString())?.[1] ?? UTC_TIME_ZONE
+}
+
+const withOffsetSeparator = (offset: string): TimeZoneId =>
+  offset.includes(OFFSET_SEPARATOR)
+    ? offset
+    : `${offset.slice(0, OFFSET_HOUR_END)}${OFFSET_SEPARATOR}${offset.slice(OFFSET_HOUR_END)}`
+
+export const isoZoneOf = (iso: IsoDateTime): TimeZoneId | null => {
+  const annotated = ZONE_ANNOTATION_PATTERN.exec(iso)?.[1]
+
+  if (annotated) return annotated
+
+  const offset = ABSOLUTE_INSTANT_PATTERN.exec(iso)?.[1]
+
+  if (!offset) return null
+
+  return UTC_DESIGNATOR_PATTERN.test(offset)
+    ? UTC_TIME_ZONE
+    : withOffsetSeparator(offset)
 }
 
 export const getFormatter = (
