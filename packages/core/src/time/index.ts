@@ -5,6 +5,7 @@ import {
   DAY_UNIT,
   DEFAULT_DISAMBIGUATION,
   FIRST_DAY_OF_MONTH,
+  FIRST_MONTH_INDEX,
   MILLISECONDS_IN_MINUTE,
   MINUTES_IN_HOUR,
   SECONDS_IN_MINUTE,
@@ -118,6 +119,51 @@ export const atWallTime = (
 
 export const daysBetween = (from: CalendarDate, to: CalendarDate): number =>
   from.until(to, { largestUnit: DAY_UNIT }).days
+
+export const dayOfWeek = (date: CalendarDate): number => date.dayOfWeek
+
+export const dayOfMonth = (date: CalendarDate): number => date.day
+
+export const monthOfYear = (date: CalendarDate): number => date.month
+
+export const daysInMonth = (date: CalendarDate): number => date.daysInMonth
+
+export const startOfYear = (date: CalendarDate): CalendarDate =>
+  date.with({ month: FIRST_MONTH_INDEX, day: FIRST_DAY_OF_MONTH })
+
+export const withMonthOfYear = (
+  date: CalendarDate,
+  month: number
+): CalendarDate => date.with({ day: FIRST_DAY_OF_MONTH }).with({ month })
+
+export const withDayOfMonth = (date: CalendarDate, day: number): CalendarDate =>
+  date.with({ day })
+
+export const atWallTimeOf = (
+  date: CalendarDate,
+  moment: Moment,
+  timeZone: TimeZoneId,
+  disambiguation: Disambiguation = DEFAULT_DISAMBIGUATION
+): Moment =>
+  date
+    .toPlainDateTime(moment.toPlainTime())
+    .toZonedDateTime(timeZone, { disambiguation })
+
+export const addWallSpan = (
+  moment: Moment,
+  span: TimeSpan,
+  timeZone: TimeZoneId,
+  disambiguation: Disambiguation = DEFAULT_DISAMBIGUATION
+): Moment =>
+  moment
+    .toPlainDateTime()
+    .add(span)
+    .toZonedDateTime(timeZone, { disambiguation })
+
+export const wallSpanBetween = (from: Moment, to: Moment): TimeSpan =>
+  from.toPlainDateTime().until(to.toPlainDateTime(), { largestUnit: DAY_UNIT })
+
+export const spanToIso = (span: TimeSpan): string => span.toString()
 
 export const withTimeZone = (moment: Moment, timeZone: TimeZoneId): Moment =>
   moment.withTimeZone(timeZone)

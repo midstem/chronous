@@ -59,6 +59,7 @@ type EventInput<TData = unknown> = {
   duration?: string
   allDay?: boolean
   timeZone?: string
+  recurrence?: RecurrenceInput<TData>
   data?: TData
 }
 ```
@@ -76,6 +77,53 @@ type EventInput<TData = unknown> = {
   `reject`).
 - Input that cannot be read, or an event that ends before it starts, throws
   `InvalidEventError` carrying the offending `eventId`.
+
+## Recurrence
+
+An event that carries `recurrence` is a series. Building a calendar expands it
+into instances, and only for the range asked for — an unbounded rule is never
+walked past the last day on screen.
+
+```ts
+type RecurrenceInput<TData = unknown> = {
+  rule?: string
+  dates?: string[]
+  exceptions?: string[]
+  overrides?: RecurrenceOverride<TData>[]
+}
+
+type RecurrenceOverride<TData = unknown> = {
+  recurrenceId: string
+  cancelled?: boolean
+  start?: string
+  end?: string
+  duration?: string
+  data?: TData
+}
+```
+
+- `rule` is an RFC 5545 `RRULE`, with or without the `RRULE:` prefix. Supported
+  parts are `FREQ` (`DAILY`, `WEEKLY`, `MONTHLY`, `YEARLY`), `INTERVAL`,
+  `COUNT`, `UNTIL`, `BYDAY` (with ordinals such as `-1FR` under `MONTHLY` and
+  `YEARLY`), `BYMONTHDAY`, `BYMONTH`, `BYSETPOS` and `WKST`. Anything else
+  throws `InvalidRecurrenceError` rather than being ignored.
+- The event's own `start` is the anchor. An anchor the rule does not match is
+  not an instance: `FREQ=WEEKLY;BYDAY=MO` on a Tuesday starts the following
+  Monday.
+- Every instance keeps the wall clock and the wall length of the series, so a
+  09:00 meeting stays at 09:00 through a DST change and an instance that lands
+  in a skipped hour follows the calendar's `disambiguation`.
+- `dates` adds starts the rule does not produce, each with its own time of day.
+- `exceptions` removes instances by their start. `COUNT` is counted before they
+  are removed, exactly as RFC 5545 asks.
+- `overrides` replaces one instance, or drops it with `cancelled`. An override
+  with no `end` or `duration` keeps the length of the series, and one that
+  moves an instance into the range brings it into view.
+- Instances are matched by the moment they name, so an exception or an override
+  may be written in any zone that resolves to it.
+- An instance is a full event: its `id` is the series id, `__` and its
+  `recurrenceId`, and it carries `seriesId` and `recurrenceId` of its own. A
+  plain event has neither.
 
 ## Views
 
