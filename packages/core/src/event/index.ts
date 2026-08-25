@@ -88,7 +88,14 @@ const normalizeTimedEvent = <TData>(
   if (compare(end, start) < 0)
     throw new InvalidEventError(input.id, END_BEFORE_START_REASON)
 
-  return { id: input.id, allDay: false, start, end, data: input.data }
+  return {
+    id: input.id,
+    allDay: false,
+    start,
+    end,
+    recurrence: input.recurrence,
+    data: input.data
+  }
 }
 
 const normalizeAllDayEvent = <TData>(
@@ -113,6 +120,7 @@ const normalizeAllDayEvent = <TData>(
     allDay: true,
     start,
     end: atLeastOneDay(start, end),
+    recurrence: input.recurrence,
     data: input.data
   }
 }

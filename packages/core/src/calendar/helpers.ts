@@ -21,6 +21,8 @@ const timedEntryOf = <TData>(event: TimedEvent<TData>): TimedEntry<TData> => ({
   allDay: false,
   start: toIso(event.start),
   end: toIso(event.end),
+  seriesId: event.seriesId,
+  recurrenceId: event.recurrenceId,
   data: event.data
 })
 
@@ -31,6 +33,8 @@ const allDayEntryOf = <TData>(
   allDay: true,
   start: toIso(event.start),
   end: toIso(event.end),
+  seriesId: event.seriesId,
+  recurrenceId: event.recurrenceId,
   data: event.data
 })
 

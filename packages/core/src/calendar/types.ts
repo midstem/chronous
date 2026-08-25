@@ -7,6 +7,8 @@ export type TimedEntry<TData = unknown> = {
   allDay: false
   start: IsoDateTime
   end: IsoDateTime
+  seriesId?: EventId
+  recurrenceId?: IsoDateTime
   data?: TData
 }
 
@@ -15,6 +17,8 @@ export type AllDayEntry<TData = unknown> = {
   allDay: true
   start: IsoDate
   end: IsoDate
+  seriesId?: EventId
+  recurrenceId?: IsoDateTime
   data?: TData
 }
 

@@ -18,9 +18,17 @@ export type {
 
 export { InvalidEventError } from '#src/event'
 
-export type { EventId, EventInput, NormalizeContext } from '#src/event'
+export type {
+  EventId,
+  EventInput,
+  NormalizeContext,
+  RecurrenceInput,
+  RecurrenceOverride
+} from '#src/event'
 
 export { InvalidRangeError } from '#src/range'
+
+export { InvalidRecurrenceError } from '#src/recurrence'
 
 export type { RangeSpec, ViewKind } from '#src/range'
 

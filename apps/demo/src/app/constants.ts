@@ -70,6 +70,23 @@ export const EVENTS: readonly EventInput<EventData>[] = [
     data: { title: 'Offsite' }
   },
   {
+    id: 'daily-check',
+    start: '2026-03-23T08:00:00',
+    duration: 'PT15M',
+    recurrence: {
+      rule: 'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
+      exceptions: ['2026-03-25T08:00:00'],
+      overrides: [
+        {
+          recurrenceId: '2026-03-27T08:00:00',
+          start: '2026-03-27T11:00:00',
+          data: { title: 'Daily check (moved)' }
+        }
+      ]
+    },
+    data: { title: 'Daily check' }
+  },
+  {
     id: 'clocks',
     start: '2026-03-29T01:30:00',
     end: '2026-03-29T04:00:00',
