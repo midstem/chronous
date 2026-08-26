@@ -3,33 +3,33 @@
 @source '.';
 
 @theme {
-  --color-canvas: light-dark(#eef1f5, #0a0c0f);
-  --color-surface: light-dark(#ffffff, #14171c);
-  --color-raised: light-dark(#f7f8fa, #1a1e25);
-  --color-sunken: light-dark(#f1f3f7, #101318);
-  --color-line: light-dark(#dde1e8, #2a2f38);
-  --color-hair: light-dark(#eceff3, #1f242b);
-  --color-ink: light-dark(#11151a, #e6eaf0);
-  --color-muted: light-dark(#5a6371, #98a2b0);
-  --color-faint: light-dark(#8b93a0, #69727e);
-  --color-accent: light-dark(#1a56db, #7fa9ff);
-  --color-accent-soft: light-dark(#e7efff, #1b2a45);
-  --color-danger: light-dark(#b42318, #ff9c90);
-  --color-danger-soft: light-dark(#fdeceb, #35181a);
-  --color-now: light-dark(#d93025, #ff6f61);
+  --color-canvas: light-dark(#f4f4f5, #09090b);
+  --color-surface: light-dark(#ffffff, #18181b);
+  --color-raised: light-dark(#fafafa, #131317);
+  --color-sunken: light-dark(#f4f4f5, #101013);
+  --color-line: light-dark(#e4e4e7, #3f3f46);
+  --color-hair: light-dark(#f4f4f5, #27272a);
+  --color-ink: light-dark(#18181b, #f4f4f5);
+  --color-muted: light-dark(#71717a, #a1a1aa);
+  --color-faint: light-dark(#a1a1aa, #71717a);
+  --color-accent: light-dark(#1d4ed8, #93c5fd);
+  --color-accent-soft: light-dark(#eff6ff, #1e3a8a);
+  --color-danger: light-dark(#b91c1c, #fca5a5);
+  --color-danger-soft: light-dark(#fef2f2, #450a0a);
+  --color-now: light-dark(#dc2626, #f87171);
 
-  --color-tone-1: light-dark(#1a73e8, #2c4f8a);
-  --color-tone-1-ink: light-dark(#ffffff, #d7e6ff);
-  --color-tone-2: light-dark(#7b3fbf, #4a3273);
-  --color-tone-2-ink: light-dark(#ffffff, #e6d9ff);
-  --color-tone-3: light-dark(#0f766e, #1d5150);
-  --color-tone-3-ink: light-dark(#ffffff, #cdece9);
-  --color-tone-4: light-dark(#b45309, #6b421a);
-  --color-tone-4-ink: light-dark(#ffffff, #ffe4c2);
-  --color-tone-5: light-dark(#be123c, #6d2237);
-  --color-tone-5-ink: light-dark(#ffffff, #ffd7e0);
-  --color-tone-6: light-dark(#3f6212, #3a4a1f);
-  --color-tone-6-ink: light-dark(#ffffff, #ddf0c2);
+  --color-tone-1: light-dark(#1d4ed8, #1e3a8a);
+  --color-tone-1-ink: light-dark(#ffffff, #dbeafe);
+  --color-tone-2: light-dark(#6d28d9, #4c1d95);
+  --color-tone-2-ink: light-dark(#ffffff, #ede9fe);
+  --color-tone-3: light-dark(#0f766e, #134e4a);
+  --color-tone-3-ink: light-dark(#ffffff, #ccfbf1);
+  --color-tone-4: light-dark(#b45309, #78350f);
+  --color-tone-4-ink: light-dark(#ffffff, #fef3c7);
+  --color-tone-5: light-dark(#be123c, #881337);
+  --color-tone-5-ink: light-dark(#ffffff, #ffe4e6);
+  --color-tone-6: light-dark(#3f6212, #365314);
+  --color-tone-6-ink: light-dark(#ffffff, #ecfccb);
 }
 
 @layer base {

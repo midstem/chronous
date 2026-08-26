@@ -7,10 +7,9 @@ import type { TabId } from './types'
 type SidebarProps = {
   spec: ReactNode
   events: ReactNode
-  code: ReactNode
 }
 
-export const Sidebar = ({ spec, events, code }: SidebarProps): ReactElement => {
+export const Sidebar = ({ spec, events }: SidebarProps): ReactElement => {
   const [tab, setTab] = useState<TabId>(DEFAULT_TAB)
 
   return (
@@ -32,7 +31,6 @@ export const Sidebar = ({ spec, events, code }: SidebarProps): ReactElement => {
       <div className="flex min-h-0 flex-1 flex-col p-3">
         {tab === 'spec' && spec}
         {tab === 'events' && events}
-        {tab === 'code' && code}
       </div>
     </aside>
   )

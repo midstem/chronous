@@ -4,7 +4,13 @@ import type { ReactElement } from 'react'
 
 import type { EventData } from '../types'
 
-import { COPIED_LABEL, COPIED_MS, COPY_LABEL, SNIPPET_HINT } from './constants'
+import {
+  COPIED_LABEL,
+  COPIED_MS,
+  COPY_LABEL,
+  FILE_NAME,
+  SNIPPET_HINT
+} from './constants'
 import { snippetOf } from './helpers'
 
 type SnippetProps = {
@@ -31,16 +37,25 @@ export const Snippet = ({
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-2">
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-[11px] leading-4 text-muted">{SNIPPET_HINT}</p>
-        <button type="button" className="ghost-button shrink-0" onClick={copy}>
+    <div className="flex min-h-0 flex-1 flex-col p-4">
+      <header className="flex flex-wrap items-center gap-3 pb-3">
+        <h2 className="font-mono text-lg font-semibold">{FILE_NAME}</h2>
+        <span className="font-mono text-[11px] text-faint">
+          {spec.view} · {hourHeight}px per hour · {locale} · {events.length}{' '}
+          events
+        </span>
+        <button type="button" className="ghost-button ml-auto" onClick={copy}>
           {copied ? COPIED_LABEL : COPY_LABEL}
         </button>
-      </div>
-      <pre className="min-h-0 flex-1 overflow-auto rounded-md border border-line bg-sunken p-3 font-mono text-[11px] leading-5">
-        {source}
-      </pre>
+      </header>
+
+      <section className="flex min-h-0 flex-1 overflow-hidden rounded-xl border border-line bg-surface shadow-sm">
+        <pre className="min-h-0 flex-1 overflow-auto p-4 font-mono text-xs leading-5">
+          {source}
+        </pre>
+      </section>
+
+      <p className="pt-2 text-[11px] leading-4 text-muted">{SNIPPET_HINT}</p>
     </div>
   )
 }

@@ -1,1 +1,1 @@
-export type TabId = 'spec' | 'events' | 'code'
+export type TabId = 'spec' | 'events'

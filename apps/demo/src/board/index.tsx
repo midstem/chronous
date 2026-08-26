@@ -102,3 +102,5 @@ export const Board = ({
     </div>
   )
 }
+
+export { MONTH_VIEW, SLOTTED_VIEWS } from './constants'
