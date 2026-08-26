@@ -1,9 +1,11 @@
 import {
   ABSOLUTE_INSTANT_PATTERN,
   DAYS_IN_WEEK,
+  DURATION_CACHE_LIMIT,
   FIRST_MONTH_INDEX,
   FORMAT_CACHE_LIMIT,
   ISO_SUNDAY,
+  MILLISECONDS_IN_DAY,
   OFFSET_HOUR_END,
   OFFSET_SEPARATOR,
   SUNDAY_WEEK_START,
@@ -11,18 +13,23 @@ import {
   UTC_TIME_ZONE,
   ZONE_ANNOTATION_PATTERN
 } from './constants'
+import { requireTemporal } from './temporal'
 import type {
-  CalendarDate,
+  CompareResult,
+  DateFields,
   FormatOptions,
   IsoDateTime,
   LocaleId,
   Moment,
   TimePoint,
+  TimeSpan,
   TimeZoneId,
   WeekStartsOn
 } from './types'
 
 const formatterCache = new Map<string, Intl.DateTimeFormat>()
+
+const durationCache = new Map<string, TimeSpan>()
 
 export const isMoment = (value: TimePoint): value is Moment =>
   'epochMilliseconds' in value
@@ -82,7 +89,20 @@ export const getFormatter = (
   return formatter
 }
 
-const calendarDateToUtcDate = (value: CalendarDate): Date => {
+export const parsedDuration = (input: string): TimeSpan => {
+  const cached = durationCache.get(input)
+
+  if (cached) return cached
+
+  const parsed = requireTemporal().Duration.from(input)
+
+  if (durationCache.size >= DURATION_CACHE_LIMIT) durationCache.clear()
+  durationCache.set(input, parsed)
+
+  return parsed
+}
+
+const utcDateOf = (value: DateFields): Date => {
   const date = new Date(0)
 
   date.setUTCFullYear(value.year, value.month - FIRST_MONTH_INDEX, value.day)
@@ -90,7 +110,26 @@ const calendarDateToUtcDate = (value: CalendarDate): Date => {
   return date
 }
 
+export const wallDay = (value: DateFields): number =>
+  utcDateOf(value).getTime() / MILLISECONDS_IN_DAY
+
+const orderOf = (difference: number): CompareResult => {
+  if (difference < 0) return -1
+
+  return difference > 0 ? 1 : 0
+}
+
+export const compareMoments = (a: Moment, b: Moment): CompareResult => {
+  const left = a.epochNanoseconds
+  const right = b.epochNanoseconds
+
+  if (left < right) return -1
+
+  return left > right ? 1 : 0
+}
+
+export const compareDates = (a: DateFields, b: DateFields): CompareResult =>
+  orderOf(wallDay(a) - wallDay(b))
+
 export const toFormattable = (value: TimePoint): Date =>
-  isMoment(value)
-    ? new Date(value.epochMilliseconds)
-    : calendarDateToUtcDate(value)
+  isMoment(value) ? new Date(value.epochMilliseconds) : utcDateOf(value)

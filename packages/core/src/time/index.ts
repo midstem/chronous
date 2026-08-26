@@ -13,12 +13,16 @@ import {
   UTC_TIME_ZONE
 } from './constants'
 import {
+  compareDates,
+  compareMoments,
   daysSinceWeekStart,
   getFormatter,
   isMoment,
   isoZoneOf,
+  parsedDuration,
   timeZoneOf,
-  toFormattable
+  toFormattable,
+  wallDay
 } from './helpers'
 import { requireTemporal } from './temporal'
 import type {
@@ -75,14 +79,8 @@ export const subtract = <T extends TimePoint>(
   span: TimeSpanLike | TimeSpan
 ): T => value.subtract(span) as T
 
-export const compare = <T extends TimePoint>(a: T, b: T): CompareResult => {
-  const temporal = requireTemporal()
-
-  if (isMoment(a) && isMoment(b))
-    return temporal.ZonedDateTime.compare(a, b) as CompareResult
-
-  return temporal.PlainDate.compare(a, b) as CompareResult
-}
+export const compare = <T extends TimePoint>(a: T, b: T): CompareResult =>
+  isMoment(a) && isMoment(b) ? compareMoments(a, b) : compareDates(a, b)
 
 export const startOfDay = (moment: Moment): Moment => moment.startOfDay()
 
@@ -118,7 +116,7 @@ export const atWallTime = (
     .toZonedDateTime(timeZone, { disambiguation })
 
 export const daysBetween = (from: CalendarDate, to: CalendarDate): number =>
-  from.until(to, { largestUnit: DAY_UNIT }).days
+  wallDay(to) - wallDay(from)
 
 export const dayOfWeek = (date: CalendarDate): number => date.dayOfWeek
 
@@ -166,10 +164,12 @@ export const wallSpanBetween = (from: Moment, to: Moment): TimeSpan =>
 export const spanToIso = (span: TimeSpan): string => span.toString()
 
 export const withTimeZone = (moment: Moment, timeZone: TimeZoneId): Moment =>
-  moment.withTimeZone(timeZone)
+  timeZoneOf(moment) === timeZone ? moment : moment.withTimeZone(timeZone)
 
 export const duration = (input: TimeSpanLike | string): TimeSpan =>
-  requireTemporal().Duration.from(input)
+  typeof input === 'string'
+    ? parsedDuration(input)
+    : requireTemporal().Duration.from(input)
 
 export const format = (value: TimePoint, spec: FormatSpec): string => {
   const timeZone = isMoment(value)
@@ -213,7 +213,7 @@ export const minuteOfDay = (moment: Moment): number =>
   moment.minute +
   moment.second / SECONDS_IN_MINUTE
 
-export { timeZoneOf } from './helpers'
+export { timeZoneOf, wallDay } from './helpers'
 
 export { DAYS_IN_WEEK, MINUTES_IN_DAY } from './constants'
 

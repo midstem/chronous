@@ -225,6 +225,49 @@ describe('day boundaries', () => {
   })
 })
 
+describe('a range of several days', () => {
+  const spec = { ...base, view: 'days', dayCount: 4 } as const
+
+  it('clips an event that starts before the range', () => {
+    const days = layoutOf(
+      [{ id: 'a', start: '2026-03-17T22:00', end: '2026-03-18T02:00' }],
+      spec
+    )
+
+    expect(idsOf(days[0])).toEqual(['a'])
+    expect(days[0][0]).toMatchObject({ continuesBefore: true })
+    expect(days[1]).toHaveLength(0)
+  })
+
+  it('leaves out events that fall outside it', () => {
+    const days = layoutOf(
+      [
+        { id: 'before', start: '2026-03-16T09:00', end: '2026-03-16T10:00' },
+        { id: 'after', start: '2026-03-25T09:00', end: '2026-03-25T10:00' }
+      ],
+      spec
+    )
+
+    expect(days.flat()).toEqual([])
+  })
+
+  it('carries an event over midnight and stops where it ends', () => {
+    const days = layoutOf(
+      [{ id: 'a', start: '2026-03-19T23:00', end: '2026-03-20T01:00' }],
+      spec
+    )
+
+    expect(days[0]).toHaveLength(0)
+    expect(idsOf(days[1])).toEqual(['a'])
+    expect(idsOf(days[2])).toEqual(['a'])
+    expect(days[2][0]).toMatchObject({
+      continuesBefore: true,
+      continuesAfter: false
+    })
+    expect(days[3]).toHaveLength(0)
+  })
+})
+
 describe('views without a time grid', () => {
   it('still places timed events on the month cells', () => {
     const days = layoutOf([timed('a', '09:00', '10:00')], {

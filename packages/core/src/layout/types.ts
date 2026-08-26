@@ -1,4 +1,4 @@
-import type { TimedEvent } from '#src/event'
+import type { CalendarEvent, TimedEvent } from '#src/event'
 import type { LaneRow } from '#src/lanes'
 import type { CalendarDate, Moment } from '#src/time'
 
@@ -33,4 +33,14 @@ export type DayLayout<TData = unknown> = {
 export type RangeLayout<TData = unknown> = {
   days: DayLayout<TData>[]
   rows: LaneRow<TData>[]
+}
+
+export type Packing<TData> = {
+  columns: Segment<TData>[][]
+  indexes: number[]
+}
+
+export type Partition<TData> = {
+  grid: TimedEvent<TData>[]
+  lane: CalendarEvent<TData>[]
 }
