@@ -1,21 +1,29 @@
-import type { LocaleId, RangeSpec } from '@midstem/chronous'
+import type { EventInput, LocaleId, RangeSpec } from '@midstem/chronous'
 import type { ReactElement } from 'react'
 
-import { SNIPPET_HINT } from './constants'
+import { Code } from '../code'
+import type { EventData } from '../types'
+
+import { FILE_NAME, SNIPPET_HINT, badgeOf } from './constants'
 import { snippetOf } from './helpers'
 
 type SnippetProps = {
   spec: RangeSpec
+  events: readonly EventInput<EventData>[]
   locale: LocaleId
+  hourHeight: number
 }
 
-export const Snippet = ({ spec, locale }: SnippetProps): ReactElement => (
-  <section className="card">
-    <h2 className="card-title">
-      Code
-      <span className="panel-badge">what this board runs</span>
-    </h2>
-    <p className="field-hint">{SNIPPET_HINT}</p>
-    <pre className="code">{snippetOf(spec, locale)}</pre>
-  </section>
+export const Snippet = ({
+  spec,
+  events,
+  locale,
+  hourHeight
+}: SnippetProps): ReactElement => (
+  <Code
+    fileName={FILE_NAME}
+    badge={badgeOf(spec.view, hourHeight, locale, events.length)}
+    hint={SNIPPET_HINT}
+    source={snippetOf(spec, events, locale, hourHeight)}
+  />
 )

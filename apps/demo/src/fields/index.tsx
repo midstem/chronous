@@ -9,12 +9,15 @@ import type {
 } from './types'
 
 const Frame = ({ id, label, hint, children }: FrameProps): ReactElement => (
-  <div className="field">
-    <label className="field-label" htmlFor={id}>
+  <div className="flex flex-col gap-1">
+    <label
+      className="font-mono text-xs font-semibold tracking-tight text-ink"
+      htmlFor={id}
+    >
       {label}
     </label>
     {children}
-    {hint && <span className="field-hint">{hint}</span>}
+    {hint && <span className="text-[11px] leading-4 text-muted">{hint}</span>}
   </div>
 )
 
@@ -31,6 +34,7 @@ export const SelectField = ({
     <Frame id={id} label={label} hint={hint}>
       <select
         id={id}
+        className="field-control"
         value={value}
         onChange={(event) => onChange(event.target.value)}
       >
@@ -57,6 +61,7 @@ export const NumberField = ({
     <Frame id={id} label={label} hint={hint}>
       <input
         id={id}
+        className="field-control"
         type="number"
         value={value}
         placeholder={placeholder}
@@ -82,6 +87,7 @@ export const TextField = ({
     <Frame id={id} label={label} hint={hint}>
       <input
         id={id}
+        className="field-control"
         type={type}
         value={value}
         list={suggestions ? listId : undefined}

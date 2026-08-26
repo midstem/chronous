@@ -18,3 +18,24 @@ export const rowsWithDays = <TData>(
     return { row, days }
   })
 }
+
+export const barsOnDay = <TData>(
+  calendar: Calendar<TData>,
+  index: number
+): CalendarRow<TData>['bars'] => {
+  let taken = 0
+
+  for (const row of calendar.rows) {
+    if (index < taken + row.days) {
+      const offset = index - taken
+
+      return row.bars.filter(
+        (bar) => bar.startDay <= offset && offset < bar.endDay
+      )
+    }
+
+    taken += row.days
+  }
+
+  return []
+}

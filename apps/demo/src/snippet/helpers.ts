@@ -1,39 +1,43 @@
-import type { LocaleId, RangeSpec } from '@midstem/chronous'
+import type { EventInput, LocaleId, RangeSpec } from '@midstem/chronous'
 
-import { SPEC_INDENT } from './constants'
+import { SLOTTED_VIEWS, MONTH_VIEW } from '../board'
+import type { EventData } from '../types'
 
-const literal = (value: unknown): string =>
-  typeof value === 'number' ? String(value) : `'${String(value)}'`
+import { AGENDA_BODY, AGENDA_HELPERS } from './agenda'
+import { MONTH_BODY, MONTH_HELPERS } from './month'
+import { preambleOf } from './preamble'
+import { CLOSING, openingOf } from './shell'
+import { SLOTTED_BODY, slottedHelpers } from './slotted'
 
-const lines = (spec: RangeSpec): string =>
-  Object.entries(spec)
-    .map(([key, value]) => `${SPEC_INDENT}${key}: ${literal(value)}`)
-    .join(',\n')
+type Template = {
+  helpers: readonly string[]
+  body: readonly string[]
+}
 
-export const snippetOf = (spec: RangeSpec, locale: LocaleId): string =>
-  [
-    "import { formatIso } from '@midstem/chronous'",
-    "import { useCalendar, useCalendarNavigation } from '@midstem/chronous-react'",
-    '',
-    'const spec = {',
-    lines(spec),
-    '}',
-    '',
-    'const Board = ({ events }) => {',
-    '  const { calendar, error } = useCalendar(spec, events)',
-    '  const navigation = useCalendarNavigation(calendar, spec)',
-    '',
-    '  if (error) return <p>{error.message}</p>',
-    '',
-    '  return calendar.days.map((day) => (',
-    '    <section key={day.date}>',
-    `      <h2>{formatIso(day.date, { locale: '${locale}' })}</h2>`,
-    '      {day.boxes.map((box) => (',
-    '        <article key={box.event.id} style={{ top: box.top, height: box.height }}>',
-    '          {box.event.data.title}',
-    '        </article>',
-    '      ))}',
-    '    </section>',
-    '  ))',
-    '}'
+const templateOf = (spec: RangeSpec, hourHeight: number): Template => {
+  if (SLOTTED_VIEWS.includes(spec.view))
+    return { helpers: slottedHelpers(hourHeight), body: SLOTTED_BODY }
+
+  if (spec.view === MONTH_VIEW)
+    return { helpers: MONTH_HELPERS, body: MONTH_BODY }
+
+  return { helpers: AGENDA_HELPERS, body: AGENDA_BODY }
+}
+
+export const snippetOf = (
+  spec: RangeSpec,
+  events: readonly EventInput<EventData>[],
+  locale: LocaleId,
+  hourHeight: number
+): string => {
+  const slotted = SLOTTED_VIEWS.includes(spec.view)
+  const { helpers, body } = templateOf(spec, hourHeight)
+
+  return [
+    ...preambleOf(spec, events, locale, slotted),
+    ...helpers,
+    ...openingOf(slotted),
+    ...body,
+    ...CLOSING
   ].join('\n')
+}

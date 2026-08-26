@@ -1,3 +1,4 @@
+import { DEFAULT_DENSITY } from '../density'
 import { DEFAULT_PRESET } from '../fixtures'
 import { UNSET } from '../constants'
 
@@ -12,7 +13,8 @@ export const INITIAL_STATE: PlaygroundState = {
   slotMinutes: UNSET,
   disambiguation: UNSET,
   locale: 'en-GB',
-  preset: DEFAULT_PRESET.id
+  preset: DEFAULT_PRESET.id,
+  density: DEFAULT_DENSITY
 }
 
 export const EVENTS_NOT_AN_ARRAY = 'The events must be a JSON array.'

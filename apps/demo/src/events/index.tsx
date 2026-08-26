@@ -17,14 +17,13 @@ export const Events = ({
   count,
   onChange
 }: EventsProps): ReactElement => (
-  <section className="card">
-    <h2 className="card-title">
-      Events
-      <span className="panel-badge">EventInput[] · {count} on the board</span>
-    </h2>
-    <p className="field-hint">{hint}</p>
+  <div className="flex min-h-0 flex-1 flex-col gap-2">
+    <p className="text-[11px] leading-4 text-muted">{hint}</p>
+    <p className="font-mono text-[10px] text-faint">
+      EventInput[] · {count} on the board
+    </p>
     <textarea
-      className={problem ? 'source source-broken' : 'source'}
+      className={`field-control min-h-0 flex-1 resize-none font-mono text-[11px] leading-5 ${problem ? 'border-danger' : ''}`}
       aria-label="Events JSON"
       spellCheck={false}
       rows={ROWS}
@@ -32,9 +31,11 @@ export const Events = ({
       onChange={(event) => onChange(event.target.value)}
     />
     {problem ? (
-      <p className="error">{problem}</p>
+      <p role="alert" className="text-[11px] leading-4 text-danger">
+        {problem}
+      </p>
     ) : (
-      <p className="field-hint">{EVENTS_HINT}</p>
+      <p className="text-[11px] leading-4 text-muted">{EVENTS_HINT}</p>
     )}
-  </section>
+  </div>
 )

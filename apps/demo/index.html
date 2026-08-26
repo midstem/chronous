@@ -3,6 +3,17 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <script>
+      {
+        const pinned = localStorage.getItem('chronous-color-scheme')
+
+        if (pinned === 'light' || pinned === 'dark') {
+          document.querySelector('meta[name="color-scheme"]').content = pinned
+          document.documentElement.style.colorScheme = pinned
+        }
+      }
+    </script>
     <title>Chronous playground</title>
     <meta
       name="description"
