@@ -4,26 +4,26 @@ import type { ReactElement } from 'react'
 import { Code } from '../code'
 import type { EventData } from '../types'
 
-import { FILE_NAME, SNIPPET_HINT, badgeOf } from './constants'
-import { snippetOf } from './helpers'
+import { FILE_NAME, SIMPLE_HINT, badgeOf } from './constants'
+import { simpleOf } from './helpers'
 
-type SnippetProps = {
+type SimpleProps = {
   spec: RangeSpec
   events: readonly EventInput<EventData>[]
   locale: LocaleId
   hourHeight: number
 }
 
-export const Snippet = ({
+export const Simple = ({
   spec,
   events,
   locale,
   hourHeight
-}: SnippetProps): ReactElement => (
+}: SimpleProps): ReactElement => (
   <Code
     fileName={FILE_NAME}
-    badge={badgeOf(spec.view, hourHeight, locale, events.length)}
-    hint={SNIPPET_HINT}
-    source={snippetOf(spec, events, locale, hourHeight)}
+    badge={badgeOf(spec.view, events.length)}
+    hint={SIMPLE_HINT}
+    source={simpleOf(spec, events, locale, hourHeight)}
   />
 )

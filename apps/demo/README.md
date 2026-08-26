@@ -16,6 +16,11 @@ line. The three shapes the engine draws each get their own version, so the file
 follows the view you were looking at. The dark half of every colour pair is a
 `dark:` variant, so it follows the system in a stock Tailwind v4 project.
 
+**Simple** is the short way to the same picture: no toolbar, no navigation, no
+colour palette, no helper functions — the spec, the events, and one component
+that walks the `Calendar` and lays it out. Under half the lines of the full
+version, and the place to start reading.
+
 The board is styled with Tailwind CSS v4. Colours are design tokens resolved
 with `light-dark()`, so the page follows the operating system and the toggle in
 the masthead pins the opposite theme — the choice is kept in `localStorage` and

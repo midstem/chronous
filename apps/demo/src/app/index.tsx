@@ -12,6 +12,7 @@ import { DEFAULT_MODE } from '../mode'
 import type { Mode } from '../mode'
 import { usePlayground } from '../playground'
 import { Sidebar } from '../sidebar'
+import { Simple } from '../simple'
 import { Snippet } from '../snippet'
 import { useColorScheme } from '../theme'
 
@@ -51,7 +52,7 @@ export const App = (): ReactElement => {
         />
 
         <main className="flex min-h-0 min-w-0 flex-col">
-          {mode === 'calendar' ? (
+          {mode === 'calendar' && (
             <Boundary key={JSON.stringify(spec)}>
               <Board
                 spec={spec}
@@ -62,8 +63,19 @@ export const App = (): ReactElement => {
                 onDensity={(density) => playground.update({ density })}
               />
             </Boundary>
-          ) : (
+          )}
+
+          {mode === 'code' && (
             <Snippet
+              spec={spec}
+              events={events}
+              locale={state.locale}
+              hourHeight={hourHeightOf(state.density)}
+            />
+          )}
+
+          {mode === 'simple' && (
+            <Simple
               spec={spec}
               events={events}
               locale={state.locale}
