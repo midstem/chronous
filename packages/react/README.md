@@ -35,21 +35,28 @@ when `error` is set. Anything else is a bug and is left to propagate.
 
 ## `useCalendarNavigation`
 
-`useCalendarNavigation(calendar, spec)` returns the specs to move to, and never
-sets state itself.
+`useCalendarNavigation(spec)` returns the specs to move to, and never sets state
+itself. It is a thin wrapper over `calendarReducer` from `@midstem/chronous` —
+the same steps are available without React, and without a rendered calendar.
 
 ```tsx
-const { next, prev, today, withView } = useCalendarNavigation(calendar, spec)
+const { next, prev, today, withView } = useCalendarNavigation(spec)
 
 <button disabled={!prev} onClick={() => prev && setSpec(prev)}>Back</button>
 <button disabled={!today} onClick={() => today && setSpec(today())}>Today</button>
 <button disabled={!next} onClick={() => next && setSpec(next)}>Forward</button>
 ```
 
-`next` and `prev` are read off the calendar on screen, so `month` lands on the
-neighbouring month and a span moves by its own length. They are null while
-there is no calendar to step from — and `today` still works there, which is the
-way out of an anchor date that cannot be read.
+A step moves by the period the spec asks for: a day by one day, a week by seven,
+a span by its own length, and a month by one month anchored on the first — so a
+long month never drags the anchor backwards. The weekday of the anchor survives
+a week step, which is what makes switching to `day` afterwards land where the
+reader was looking.
+
+`next` and `prev` are null when the spec itself cannot be stepped: an anchor
+date that cannot be read, or a `dayCount` that is not a whole number of days.
+An unreadable time zone does not stop a step — it stops the calendar, not the
+arithmetic — so the buttons keep working while the zone is being fixed.
 
 `today` is a function rather than a value because it depends on the wall clock
 and not on the inputs: it is read at the click, in the calendar's own zone. It

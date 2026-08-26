@@ -33,7 +33,7 @@ const resolveSpec = (spec: RangeSpec): ResolvedSpec => ({
   slotted: SLOTTED_VIEWS.includes(spec.view)
 })
 
-const spanLength = (spec: RangeSpec): number => {
+export const spanLength = (spec: RangeSpec): number => {
   const fallback =
     spec.view === 'agenda' ? DEFAULT_AGENDA_DAYS : DEFAULT_SPAN_DAYS
 
@@ -92,6 +92,8 @@ export const buildRange = (spec: RangeSpec): DateRange => {
     days
   }
 }
+
+export { readAnchor } from './helpers'
 
 export { InvalidRangeError } from './errors'
 
