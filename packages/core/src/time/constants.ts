@@ -17,6 +17,8 @@ export const ISO_SUNDAY = 7
 
 export const MILLISECONDS_IN_MINUTE = 60_000
 
+export const MILLISECONDS_IN_DAY = 86_400_000
+
 export const MINUTES_IN_HOUR = 60
 
 export const SECONDS_IN_MINUTE = 60
@@ -24,6 +26,8 @@ export const SECONDS_IN_MINUTE = 60
 export const UTC_TIME_ZONE = 'UTC'
 
 export const FORMAT_CACHE_LIMIT = 64
+
+export const DURATION_CACHE_LIMIT = 128
 
 export const ZONE_ANNOTATION_PATTERN = /\[([^\]=!]+)\]$/
 

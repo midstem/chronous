@@ -6,36 +6,47 @@ import {
   add,
   compare,
   dayStart,
-  daysBetween,
   minuteOfDay,
-  toCalendarDate
+  wallDay
 } from '#src/time'
-import type { TimeZoneId } from '#src/time'
+import type { CalendarDate, Moment, TimeZoneId } from '#src/time'
 
 import { MIN_LANE_MINUTES, NOT_FOUND } from './constants'
-import type { EventBounds, LaneSpan, LaneStack } from './types'
+import type { DayStarts, EventBounds, LaneSpan, LaneStack } from './types'
 
 const last = <TItem>(items: readonly TItem[]): TItem => items[items.length - 1]
 
 const wallMinutes = <TData>(event: TimedEvent<TData>): number =>
-  daysBetween(toCalendarDate(event.start), toCalendarDate(event.end)) *
-    MINUTES_IN_DAY +
+  (wallDay(event.end) - wallDay(event.start)) * MINUTES_IN_DAY +
   minuteOfDay(event.end) -
   minuteOfDay(event.start)
 
 export const isLaneEvent = <TData>(event: CalendarEvent<TData>): boolean =>
   isAllDayEvent(event) || wallMinutes(event) >= MIN_LANE_MINUTES
 
+export const dayStarts = (timeZone: TimeZoneId): DayStarts => {
+  const cache = new Map<number, Moment>()
+
+  return (date: CalendarDate): Moment => {
+    const key = wallDay(date)
+    const cached = cache.get(key)
+
+    if (cached) return cached
+
+    const start = dayStart(date, timeZone)
+
+    cache.set(key, start)
+
+    return start
+  }
+}
+
 export const boundsOf = <TData>(
   event: CalendarEvent<TData>,
-  timeZone: TimeZoneId
+  startOf: DayStarts
 ): EventBounds<TData> =>
   isAllDayEvent(event)
-    ? {
-        event,
-        start: dayStart(event.start, timeZone),
-        end: dayStart(event.end, timeZone)
-      }
+    ? { event, start: startOf(event.start), end: startOf(event.end) }
     : { event, start: event.start, end: event.end }
 
 const coversDay = <TData>(bounds: EventBounds<TData>, day: RangeDay): boolean =>
@@ -49,9 +60,14 @@ export const span = <TData>(
 
   if (startDay === NOT_FOUND) return undefined
 
-  const covered = days
-    .slice(startDay)
-    .filter((day) => coversDay(bounds, day)).length
+  let covered = 0
+
+  for (
+    let index = startDay;
+    index < days.length && coversDay(bounds, days[index]);
+    index += 1
+  )
+    covered += 1
 
   return {
     event: bounds.event,

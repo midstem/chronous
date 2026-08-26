@@ -39,3 +39,5 @@ export type LaneRow<TData = unknown> = {
   lanes: number
   spans: PlacedSpan<TData>[]
 }
+
+export type DayStarts = (date: CalendarDate) => Moment

@@ -3,7 +3,7 @@ import type { DateRange, RangeDay } from '#src/range'
 import { add, timeZoneOf } from '#src/time'
 
 import { WEEK_ROW_DAYS, WEEK_ROW_VIEWS } from './constants'
-import { boundsOf, isLaneEvent, order, span, stack } from './helpers'
+import { boundsOf, dayStarts, isLaneEvent, order, span, stack } from './helpers'
 import type { EventBounds, LaneRow, LaneStack } from './types'
 
 const chunk = (days: readonly RangeDay[], size: number): RangeDay[][] =>
@@ -49,10 +49,10 @@ export const buildLanes = <TData>(
   range: DateRange,
   events: readonly CalendarEvent<TData>[]
 ): LaneRow<TData>[] => {
-  const timeZone = timeZoneOf(range.start)
+  const startOf = dayStarts(timeZoneOf(range.start))
   const bounds = events
     .filter(isLaneEvent)
-    .map((event) => boundsOf(event, timeZone))
+    .map((event) => boundsOf(event, startOf))
 
   return rowsOf(range).map((days) => buildRow(bounds, days))
 }

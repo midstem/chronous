@@ -31,6 +31,12 @@ export type TimeSpanLike = {
 
 export type TimePoint = Moment | CalendarDate
 
+export type DateFields = {
+  year: number
+  month: number
+  day: number
+}
+
 export type FormatOptions = Intl.DateTimeFormatOptions
 
 export type FormatSpec = {

@@ -6,13 +6,19 @@ import {
   compare,
   minuteOfDay,
   minutesBetween,
-  toCalendarDate
+  wallDay
 } from '#src/time'
 import type { Moment } from '#src/time'
 import type { RangeDay } from '#src/range'
 
-import { NO_REACH, SINGLE_COLUMN } from './constants'
-import type { PlacedEvent, Segment } from './types'
+import {
+  HALF,
+  NO_COLUMN,
+  NO_REACH,
+  SINGLE_COLUMN,
+  SINGLE_DAY
+} from './constants'
+import type { Packing, PlacedEvent, Segment } from './types'
 
 export const isGridEvent = <TData>(
   event: CalendarEvent<TData>
@@ -27,9 +33,21 @@ const touchesDay = <TData>(event: TimedEvent<TData>, day: RangeDay): boolean =>
   (compare(event.start, day.start) >= 0 || compare(event.end, day.start) > 0)
 
 const gridMinute = (moment: Moment, day: RangeDay): number =>
-  compare(toCalendarDate(moment), day.date) > 0
-    ? MINUTES_IN_DAY
-    : minuteOfDay(moment)
+  wallDay(moment) > wallDay(day.date) ? MINUTES_IN_DAY : minuteOfDay(moment)
+
+export const firstDay = (days: readonly RangeDay[], start: Moment): number => {
+  let low = 0
+  let high = days.length - SINGLE_DAY
+
+  while (low < high) {
+    const middle = Math.ceil((low + high) / HALF)
+
+    if (compare(days[middle].start, start) > 0) high = middle - SINGLE_DAY
+    else low = middle
+  }
+
+  return low
+}
 
 export const clip = <TData>(
   event: TimedEvent<TData>,
@@ -104,17 +122,23 @@ export const cluster = <TData>(
 
 const columnsOf = <TData>(
   segments: readonly Segment<TData>[]
-): Segment<TData>[][] => {
+): Packing<TData> => {
   const columns: Segment<TData>[][] = []
+  const indexes: number[] = []
 
   for (const segment of segments) {
-    const free = columns.find((items) => !overlaps(last(items), segment))
+    const free = columns.findIndex((items) => !overlaps(last(items), segment))
 
-    if (free) free.push(segment)
-    else columns.push([segment])
+    if (free === NO_COLUMN) {
+      indexes.push(columns.length)
+      columns.push([segment])
+    } else {
+      indexes.push(free)
+      columns[free].push(segment)
+    }
   }
 
-  return columns
+  return { columns, indexes }
 }
 
 const spanOf = <TData>(
@@ -136,11 +160,11 @@ const spanOf = <TData>(
 export const place = <TData>(
   segments: readonly Segment<TData>[]
 ): PlacedEvent<TData>[] => {
-  const columns = columnsOf(segments)
+  const { columns, indexes } = columnsOf(segments)
   const total = columns.length
 
-  return segments.map((segment) => {
-    const column = columns.findIndex((items) => items.includes(segment))
+  return segments.map((segment, index) => {
+    const column = indexes[index]
     const span = spanOf(columns, column, segment)
 
     return {

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { MISSING_TEMPORAL_MESSAGE } from '../constants'
+import { DURATION_CACHE_LIMIT, MISSING_TEMPORAL_MESSAGE } from '../constants'
 import {
   add,
   compare,
@@ -139,6 +139,17 @@ describe('duration', () => {
     expect(duration({ hours: 1, minutes: 30 }).total({ unit: 'minute' })).toBe(
       90
     )
+  })
+
+  it('hands the same instance back for a repeated string', () => {
+    expect(duration('PT45M')).toBe(duration('PT45M'))
+  })
+
+  it('keeps parsing once the cache is full', () => {
+    for (let minutes = 1; minutes <= DURATION_CACHE_LIMIT + 1; minutes += 1)
+      duration(`PT${minutes}M`)
+
+    expect(duration('PT45M').total({ unit: 'minute' })).toBe(45)
   })
 })
 
