@@ -1,18 +1,27 @@
 import { add, compare } from '#src/time'
 import type { CalendarDate } from '#src/time'
 
-import { candidatesOf, periodStartOf, periodStepOf } from './candidates'
+import {
+  candidatesOf,
+  periodStartOf,
+  periodStepOf,
+  seekPeriodOf
+} from './candidates'
 import { MAX_EMPTY_PERIODS } from './constants'
 import type { RecurrenceRule } from './types'
 
 export function* ruleDates(
   rule: RecurrenceRule,
   base: CalendarDate,
-  until: CalendarDate | undefined
+  until: CalendarDate | undefined,
+  from: CalendarDate
 ): Generator<CalendarDate> {
   const step = periodStepOf(rule)
 
-  let period = periodStartOf(rule, base)
+  let period =
+    rule.count === undefined
+      ? seekPeriodOf(rule, base, from)
+      : periodStartOf(rule, base)
   let produced = 0
   let empty = 0
 

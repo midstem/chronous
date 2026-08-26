@@ -4,6 +4,7 @@ import {
   compare,
   dayOfMonth,
   dayOfWeek,
+  daysBetween,
   daysInMonth,
   monthOfYear,
   startOfMonth,
@@ -11,7 +12,8 @@ import {
   startOfYear,
   toIso,
   withDayOfMonth,
-  withMonthOfYear
+  withMonthOfYear,
+  yearOf
 } from '#src/time'
 import type { CalendarDate, TimeSpanLike } from '#src/time'
 
@@ -172,14 +174,53 @@ export const periodStartOf = (
   return base
 }
 
-export const periodStepOf = (rule: RecurrenceRule): TimeSpanLike => {
-  if (rule.frequency === 'WEEKLY') return { weeks: rule.interval }
+const periodSpan = (rule: RecurrenceRule, periods: number): TimeSpanLike => {
+  if (rule.frequency === 'WEEKLY') return { weeks: periods }
 
-  if (rule.frequency === 'MONTHLY') return { months: rule.interval }
+  if (rule.frequency === 'MONTHLY') return { months: periods }
 
-  if (rule.frequency === 'YEARLY') return { years: rule.interval }
+  if (rule.frequency === 'YEARLY') return { years: periods }
 
-  return { days: rule.interval }
+  return { days: periods }
+}
+
+export const periodStepOf = (rule: RecurrenceRule): TimeSpanLike =>
+  periodSpan(rule, rule.interval)
+
+const monthsBetween = (from: CalendarDate, to: CalendarDate): number =>
+  (yearOf(to) - yearOf(from)) * MONTHS_IN_YEAR +
+  monthOfYear(to) -
+  monthOfYear(from)
+
+const periodsBetween = (
+  rule: RecurrenceRule,
+  start: CalendarDate,
+  from: CalendarDate
+): number => {
+  if (rule.frequency === 'WEEKLY')
+    return Math.floor(
+      daysBetween(start, startOfWeekDate(from, rule.weekStartsOn)) /
+        DAYS_IN_WEEK
+    )
+
+  if (rule.frequency === 'MONTHLY') return monthsBetween(start, from)
+
+  if (rule.frequency === 'YEARLY') return yearOf(from) - yearOf(start)
+
+  return daysBetween(start, from)
+}
+
+export const seekPeriodOf = (
+  rule: RecurrenceRule,
+  base: CalendarDate,
+  from: CalendarDate
+): CalendarDate => {
+  const start = periodStartOf(rule, base)
+  const distance = periodsBetween(rule, start, from)
+
+  if (distance < rule.interval) return start
+
+  return add(start, periodSpan(rule, distance - (distance % rule.interval)))
 }
 
 export const candidatesOf = (

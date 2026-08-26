@@ -23,6 +23,7 @@ import {
   keyOf,
   overlaps,
   overrideInstance,
+  seekDateOf,
   spanOf,
   startAt,
   startFromIso
@@ -74,8 +75,11 @@ const collectRule = <TData>(
 ): void => {
   const span = spanOf(event)
   const until = resolveUntil(event, rule, context)
+  const from = seekDateOf(window, span)
 
-  for (const date of ruleDates(rule, baseDateOf(event), until?.date)) {
+  for (const date of ruleDates(rule, baseDateOf(event), until?.date, from)) {
+    if (compare(date, from) < 0) continue
+
     const instance = instanceAt(
       event,
       startAt(event, date, context),

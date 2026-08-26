@@ -18,6 +18,7 @@ import {
   isDateOnly,
   plainDate,
   spanToIso,
+  subtract,
   toCalendarDate,
   toIso,
   wallSpanBetween,
@@ -32,7 +33,11 @@ import type {
   TimeZoneId
 } from '#src/time'
 
-import { INSTANCE_SEPARATOR, unreadableDateReason } from './constants'
+import {
+  INSTANCE_SEPARATOR,
+  WINDOW_BACKOFF_DAYS,
+  unreadableDateReason
+} from './constants'
 import { InvalidRecurrenceError } from './errors'
 
 export type RecurrenceWindow = {
@@ -50,6 +55,14 @@ export const spanOf = <TData>(event: CalendarEvent<TData>): TimeSpan =>
   isAllDayEvent(event)
     ? duration({ days: daysBetween(event.start, event.end) })
     : wallSpanBetween(event.start, event.end)
+
+export const seekDateOf = (
+  window: RecurrenceWindow,
+  span: TimeSpan
+): CalendarDate =>
+  subtract(toCalendarDate(window.start), {
+    days: span.days + WINDOW_BACKOFF_DAYS
+  })
 
 export const startAt = <TData>(
   event: CalendarEvent<TData>,

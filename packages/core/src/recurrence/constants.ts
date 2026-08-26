@@ -18,6 +18,8 @@ export const DEFAULT_WEEK_STARTS_ON: WeekStartsOn = 1
 
 export const MAX_EMPTY_PERIODS = 500
 
+export const WINDOW_BACKOFF_DAYS = 2
+
 export const FREQUENCIES: readonly Frequency[] = [
   'DAILY',
   'WEEKLY',

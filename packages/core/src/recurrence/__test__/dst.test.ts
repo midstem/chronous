@@ -220,6 +220,31 @@ describe('a monthly rule over a transition', () => {
   })
 })
 
+describe('a series anchored years before a transition', () => {
+  const zones = [
+    ['Europe/Kyiv', '2026-03-28', '2026-03-31'],
+    ['Australia/Lord_Howe', '2026-04-04', '2026-04-07'],
+    ['America/Santiago', '2026-09-05', '2026-09-08'],
+    ['Asia/Kolkata', '2026-03-28', '2026-03-31']
+  ] as const
+
+  const unbounded = (start: string): EventInput => ({
+    id: 'a',
+    start,
+    duration: 'PT1H',
+    recurrence: { rule: 'FREQ=DAILY' }
+  })
+
+  it.each(zones)('lands where a near anchor lands in %s', (zone, from, to) => {
+    const seeked = expand(unbounded('2010-01-01T09:00:00'), zone, from, to)
+
+    expect(seeked).toEqual(
+      expand(unbounded(`${from}T09:00:00`), zone, from, to)
+    )
+    expect(seeked).toHaveLength(3)
+  })
+})
+
 describe('an all-day series over a transition', () => {
   it('never leaves the calendar date', () => {
     expect(
