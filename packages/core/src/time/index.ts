@@ -124,6 +124,8 @@ export const dayOfMonth = (date: CalendarDate): number => date.day
 
 export const monthOfYear = (date: CalendarDate): number => date.month
 
+export const yearOf = (date: CalendarDate): number => date.year
+
 export const daysInMonth = (date: CalendarDate): number => date.daysInMonth
 
 export const startOfYear = (date: CalendarDate): CalendarDate =>
