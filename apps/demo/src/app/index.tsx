@@ -2,64 +2,64 @@ import type { ReactElement } from 'react'
 
 import { Board } from '../board'
 import { Boundary } from '../boundary'
-import { REPOSITORY_URL } from '../constants'
 import { Controls } from '../controls'
+import { hourHeightOf } from '../density'
 import { Events } from '../events'
 import { presetOf } from '../fixtures'
+import { Masthead } from '../masthead'
 import { usePlayground } from '../playground'
-import { Runtime } from '../runtime'
+import { Sidebar } from '../sidebar'
 import { Snippet } from '../snippet'
-
-import { HEADLINE, MASTHEAD_HINT } from './constants'
+import { useColorScheme } from '../theme'
 
 export const App = (): ReactElement => {
   const playground = usePlayground()
+  const scheme = useColorScheme()
   const { state, spec, source, events, problem } = playground
 
   return (
-    <div className="page">
-      <header className="masthead">
-        <div>
-          <h1 className="masthead-title">{HEADLINE}</h1>
-          <p className="masthead-hint">{MASTHEAD_HINT}</p>
-        </div>
-        <div className="masthead-actions">
-          <Runtime />
-          <button type="button" onClick={playground.reset}>
-            Reset
-          </button>
-          <a className="masthead-link" href={REPOSITORY_URL}>
-            Documentation
-          </a>
-        </div>
-      </header>
+    <div className="flex h-dvh flex-col bg-canvas text-ink">
+      <Masthead scheme={scheme} onReset={playground.reset} />
 
-      <div className="layout">
-        <Controls
-          state={state}
-          update={playground.update}
-          choosePreset={playground.choosePreset}
+      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(0,16rem)_minmax(0,1fr)] lg:grid-cols-[minmax(300px,23vw)_minmax(0,1fr)] lg:grid-rows-1">
+        <Sidebar
+          spec={
+            <Controls
+              state={state}
+              update={playground.update}
+              choosePreset={playground.choosePreset}
+            />
+          }
+          events={
+            <Events
+              source={source}
+              problem={problem}
+              hint={presetOf(state.preset).hint}
+              count={events.length}
+              onChange={playground.changeSource}
+            />
+          }
+          code={
+            <Snippet
+              spec={spec}
+              events={events}
+              locale={state.locale}
+              hourHeight={hourHeightOf(state.density)}
+            />
+          }
         />
 
-        <main className="stage">
+        <main className="flex min-h-0 min-w-0 flex-col">
           <Boundary key={JSON.stringify(spec)}>
             <Board
               spec={spec}
               events={events}
               locale={state.locale}
+              density={state.density}
               onNavigate={playground.applySpec}
+              onDensity={(density) => playground.update({ density })}
             />
           </Boundary>
-
-          <Events
-            source={source}
-            problem={problem}
-            hint={presetOf(state.preset).hint}
-            count={events.length}
-            onChange={playground.changeSource}
-          />
-
-          <Snippet spec={spec} locale={state.locale} />
         </main>
       </div>
     </div>

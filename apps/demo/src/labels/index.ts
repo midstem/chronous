@@ -12,6 +12,8 @@ const TIME_OPTIONS: FormatOptions = {
   minute: '2-digit'
 }
 
+const WEEKDAY_OPTIONS: FormatOptions = { weekday: 'short' }
+
 const NUMBER_OPTIONS: FormatOptions = { day: 'numeric' }
 
 const TITLE_OPTIONS: FormatOptions = {
@@ -19,6 +21,10 @@ const TITLE_OPTIONS: FormatOptions = {
   month: 'long',
   year: 'numeric'
 }
+
+const MONTH_OPTIONS: FormatOptions = { month: 'long', year: 'numeric' }
+
+const SHORT_OPTIONS: FormatOptions = { day: 'numeric', month: 'short' }
 
 const labelWith =
   (options: FormatOptions): ((at: IsoDateTime, locale: LocaleId) => string) =>
@@ -34,6 +40,12 @@ export const dayLabel = labelWith(DAY_OPTIONS)
 
 export const timeLabel = labelWith(TIME_OPTIONS)
 
+export const weekdayLabel = labelWith(WEEKDAY_OPTIONS)
+
 export const numberLabel = labelWith(NUMBER_OPTIONS)
 
 export const titleLabel = labelWith(TITLE_OPTIONS)
+
+export const monthLabel = labelWith(MONTH_OPTIONS)
+
+export const shortLabel = labelWith(SHORT_OPTIONS)

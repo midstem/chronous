@@ -23,9 +23,10 @@ the git tag [`1.0.2`](https://github.com/midstem/chronous/tree/1.0.2).
 ## Playground
 
 [`apps/demo`](apps/demo) is an interactive playground: every field of
-`RangeSpec` on one side, the events as editable JSON on the other, and between
-them nothing but what `buildCalendar` returned — plus the raw result and the
-call your settings describe.
+`RangeSpec` in the left rail, next to the events as editable JSON and a
+copy-ready component, and beside them a full-width board that is nothing but
+what `buildCalendar` returned — plus the raw result under it. It carries a
+light and a dark theme.
 
 ```bash
 npm run start

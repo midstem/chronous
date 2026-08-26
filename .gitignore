@@ -28,3 +28,5 @@ bench.json
 
 # copied from the repository root by the prepack step
 packages/*/LICENSE
+
+.claude

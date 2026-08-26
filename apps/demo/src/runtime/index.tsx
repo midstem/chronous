@@ -11,7 +11,9 @@ const label = (): string => {
 }
 
 export const Runtime = (): ReactElement => (
-  <span className="badge">{label()}</span>
+  <span className="rounded-full border border-line bg-raised px-2.5 py-1 font-mono text-[11px] text-muted">
+    {label()}
+  </span>
 )
 
 export { installTemporal } from './helpers'

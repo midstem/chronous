@@ -4,6 +4,7 @@ import type { ReactElement } from 'react'
 import { NumberField, SelectField, TextField } from '../fields'
 import { PRESETS } from '../fixtures'
 import type { PresetId } from '../fixtures'
+import { Panel } from '../panel'
 import type { PlaygroundState } from '../playground'
 
 import {
@@ -36,12 +37,18 @@ export const Controls = ({
   update,
   choosePreset
 }: ControlsProps): ReactElement => (
-  <aside className="controls">
-    <section className="panel">
-      <h2 className="panel-title">
-        RangeSpec
-        <span className="panel-badge">buildCalendar argument</span>
-      </h2>
+  <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-auto">
+    <Panel title="Fixture" badge="playground only">
+      <SelectField
+        label="preset"
+        hint={PRESET_HINT}
+        value={state.preset}
+        options={PRESET_OPTIONS}
+        onChange={(value) => choosePreset(value as PresetId)}
+      />
+    </Panel>
+
+    <Panel title="RangeSpec" badge="buildCalendar argument">
       <SelectField
         label="view"
         hint={VIEW_HINT}
@@ -91,13 +98,9 @@ export const Controls = ({
         options={DISAMBIGUATION_OPTIONS}
         onChange={(disambiguation) => update({ disambiguation })}
       />
-    </section>
+    </Panel>
 
-    <section className="panel">
-      <h2 className="panel-title">
-        Labels
-        <span className="panel-badge">playground only</span>
-      </h2>
+    <Panel title="Labels" badge="playground only">
       <TextField
         label="locale"
         hint={LOCALE_HINT}
@@ -105,20 +108,6 @@ export const Controls = ({
         suggestions={LOCALES}
         onChange={(locale) => update({ locale })}
       />
-    </section>
-
-    <section className="panel">
-      <h2 className="panel-title">
-        Fixture
-        <span className="panel-badge">playground only</span>
-      </h2>
-      <SelectField
-        label="preset"
-        hint={PRESET_HINT}
-        value={state.preset}
-        options={PRESET_OPTIONS}
-        onChange={(value) => choosePreset(value as PresetId)}
-      />
-    </section>
-  </aside>
+    </Panel>
+  </div>
 )

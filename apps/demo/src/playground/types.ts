@@ -7,6 +7,7 @@ import type {
   ViewKind
 } from '@midstem/chronous'
 
+import type { Density } from '../density'
 import type { PresetId } from '../fixtures'
 import type { EventData } from '../types'
 
@@ -20,6 +21,7 @@ export type PlaygroundState = {
   disambiguation: string
   locale: LocaleId
   preset: PresetId
+  density: Density
 }
 
 export type ParseResult =

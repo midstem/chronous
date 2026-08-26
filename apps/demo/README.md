@@ -1,12 +1,19 @@
 # `@midstem/chronous-demo`
 
-The Chronous playground: every field of `RangeSpec` is a control, the events are
-editable JSON, and the board between them is a real render of what
-`buildCalendar` returned — a time grid with packed columns, lanes of all-day and
-multi-day bars, and a month grid.
+The Chronous playground. The left rail carries the props — every field of
+`RangeSpec` as a control, the events as editable JSON, and the component the
+current settings describe, ready to copy. The rest of the window is the board:
+a full-width time grid with packed columns, a sticky header, an all-day strip,
+a month grid and an agenda list, all drawn from nothing but what
+`buildCalendar` returned.
 
-Beside the board it prints the raw `Calendar`, a summary of what the engine
-produced, and the call the current settings describe.
+Under the board a status strip prints the summary of the `Calendar`, and opens
+onto its raw JSON.
+
+The board is styled with Tailwind CSS v4. Colours are design tokens resolved
+with `light-dark()`, so the page follows the operating system and the toggle in
+the masthead pins the opposite theme — the choice is kept in `localStorage` and
+replayed from `index.html` before the first paint.
 
 It consumes `@midstem/chronous` and `@midstem/chronous-react` by name, so it
 resolves their built output and their exports map the way an outside consumer
