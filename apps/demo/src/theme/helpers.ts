@@ -23,10 +23,22 @@ export const storedScheme = (): Scheme | null => {
 
 export const applyScheme = (pinned: Scheme | null): void => {
   const meta = document.querySelector<HTMLMetaElement>(META_SELECTOR)
+  const root = document.documentElement
 
   if (meta) meta.content = pinned ?? SYSTEM_CONTENT
 
-  document.documentElement.style.colorScheme = pinned ?? SYSTEM_CONTENT
+  root.style.colorScheme = pinned ?? SYSTEM_CONTENT
+
+  if (pinned === 'light') {
+    root.style.setProperty('--lightningcss-light', 'initial')
+    root.style.setProperty('--lightningcss-dark', ' ')
+  } else if (pinned === 'dark') {
+    root.style.setProperty('--lightningcss-light', ' ')
+    root.style.setProperty('--lightningcss-dark', 'initial')
+  } else {
+    root.style.removeProperty('--lightningcss-light')
+    root.style.removeProperty('--lightningcss-dark')
+  }
 
   if (pinned) localStorage.setItem(STORAGE_KEY, pinned)
   else localStorage.removeItem(STORAGE_KEY)
