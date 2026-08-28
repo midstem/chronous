@@ -7,3 +7,5 @@ export type { CalendarError, CalendarResult } from '#src/calendar'
 export { useCalendarNavigation } from '#src/navigation'
 
 export type { CalendarNavigation } from '#src/navigation'
+
+export { Calendar } from './components'
