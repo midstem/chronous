@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
-import { Calendar, createCalendar } from '../../index'
+import { Calendar, createCalendarComponents } from '../../index'
 import type { EventData } from './fixtures'
 import { EVENTS, LOCALE, WEEK } from './fixtures'
 
@@ -11,13 +11,18 @@ const styleOf = (element: HTMLElement): string =>
 
 const textOf = (element: HTMLElement): string => element.textContent ?? ''
 
-const Week = ({ gutter }: { gutter?: string }): ReactNode => (
-  <Calendar.Root range={WEEK} events={EVENTS} locale={LOCALE} gutter={gutter}>
+const Week = ({ gutterWidth }: { gutterWidth?: string }): ReactNode => (
+  <Calendar.Root
+    range={WEEK}
+    events={EVENTS}
+    locale={LOCALE}
+    gutterWidth={gutterWidth}
+  >
     <Calendar.Header data-testid="header">
       <Calendar.DayHeadings data-testid="heading" />
     </Calendar.Header>
 
-    <Calendar.AllDayRow data-testid="all-day" label="all-day">
+    <Calendar.AllDayRow data-testid="all-day" gutterCell="all-day">
       <Calendar.AllDayEvents data-testid="bar" />
     </Calendar.AllDayRow>
 
@@ -216,7 +221,7 @@ describe('state a stylesheet can reach', () => {
 
 describe('the gutter', () => {
   it('is read from the root so the three grids stay in step', () => {
-    const { container } = render(<Week gutter="5rem" />)
+    const { container } = render(<Week gutterWidth="5rem" />)
 
     const grids = Array.from(
       container.querySelectorAll<HTMLElement>(
@@ -240,9 +245,9 @@ describe('a scope', () => {
   })
 })
 
-describe('createCalendar', () => {
+describe('createCalendarComponents', () => {
   it('carries the event data type into every render prop', () => {
-    const Typed = createCalendar<EventData>()
+    const Typed = createCalendarComponents<EventData>()
 
     render(
       <Typed.Root range={WEEK} events={EVENTS}>

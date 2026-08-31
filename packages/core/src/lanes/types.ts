@@ -7,7 +7,7 @@ export type PlacedSpan<TData = unknown> = {
   end: CalendarDate
   startDay: number
   endDay: number
-  days: number
+  dayCount: number
   lane: number
   lanes: number
   left: number
@@ -35,7 +35,7 @@ export type EventBounds<TData = unknown> = {
 export type LaneRow<TData = unknown> = {
   start: CalendarDate
   end: CalendarDate
-  days: number
+  dayCount: number
   lanes: number
   spans: PlacedSpan<TData>[]
 }

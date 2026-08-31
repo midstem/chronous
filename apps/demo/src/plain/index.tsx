@@ -17,7 +17,9 @@ export const PlainSlotted = ({ hourHeight }: SlottedProps): ReactElement => (
 
       <Calendar.AllDayRow
         className="border-b border-line"
-        label={<span className="pl-2 text-[10px] text-faint">all-day</span>}
+        gutterCell={
+          <span className="pl-2 text-[10px] text-faint">all-day</span>
+        }
       >
         <Calendar.AllDayEvents className="truncate rounded bg-tone-2 px-2 text-[11px] leading-6 text-tone-2-ink">
           {({ event }) => event.data?.title}

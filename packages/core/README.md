@@ -310,7 +310,7 @@ Long events are drawn as bars above the grid instead of inside it.
 type CalendarRow<TData = unknown> = {
   start: IsoDate
   end: IsoDate
-  days: number
+  dayCount: number
   lanes: number
   bars: CalendarBar<TData>[]
 }
@@ -321,7 +321,7 @@ type CalendarBar<TData = unknown> = {
   end: IsoDate
   startDay: number
   endDay: number
-  days: number
+  dayCount: number
   lane: number
   lanes: number
   left: number
@@ -341,8 +341,9 @@ type CalendarBar<TData = unknown> = {
 - A bar is clipped to its row and placed once per row, with `continuesBefore`
   and `continuesAfter` saying where it carries on.
 - `startDay` and `endDay` are day indices inside the row, `endDay` exclusive.
-  `days` is the length in days, and `left` / `width` are the same span as
-  fractions of the row.
+  `dayCount` is the length in days, and `left` / `width` are the same span as
+  fractions of the row. A count is never called `days` — that name is an array
+  everywhere else.
 - `start` and `end` are the dates the bar covers, `end` exclusive as everywhere
   else. For a promoted timed event the original moments stay on `event`.
 - Bars read across the row, longest first, and each takes the lowest free lane.

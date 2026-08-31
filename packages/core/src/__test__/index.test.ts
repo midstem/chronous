@@ -1,11 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import {
-  PACKAGE_NAME,
-  buildCalendar,
-  formatIso,
-  isTemporalAvailable
-} from '../index'
+import { buildCalendar, formatIso, isTemporalAvailable } from '../index'
 import type { DateTimeFormatOptions } from '../index'
 
 const CLOCK_OPTIONS: DateTimeFormatOptions = {
@@ -20,10 +15,6 @@ afterEach(() => {
 })
 
 describe('@midstem/chronous', () => {
-  it('is published under the midstem scope', () => {
-    expect(PACKAGE_NAME).toBe('@midstem/chronous')
-  })
-
   it('reports Temporal as available in a prepared runtime', () => {
     expect(isTemporalAvailable()).toBe(true)
   })

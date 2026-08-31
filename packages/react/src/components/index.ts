@@ -146,9 +146,10 @@ export type CalendarComponents<TData> = {
   ) => ReactNode
 }
 
-export const createCalendar = <TData>(): CalendarComponents<TData> => Calendar
+export const createCalendarComponents = <TData>(): CalendarComponents<TData> =>
+  Calendar
 
-export type * from './types'
+export type { ScopedChildren } from './types'
 
 export type {
   AgendaAllDayEventScope,

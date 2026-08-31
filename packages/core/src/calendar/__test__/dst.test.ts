@@ -160,7 +160,7 @@ describe('the range reaches event normalization', () => {
       [{ id: 'a', start: '2026-03-28T09:00', end: '2026-03-29T09:00' }]
     )
 
-    expect(calendar.rows[0].bars[0]).toMatchObject({ days: 2 })
+    expect(calendar.rows[0].bars[0]).toMatchObject({ dayCount: 2 })
     expect(calendar.days.every((day) => day.boxes.length === 0)).toBe(true)
   })
 })

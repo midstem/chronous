@@ -200,7 +200,7 @@ describe('events of a whole day or longer', () => {
     ).rows[0].spans
 
     expect(span.event.id).toBe('a')
-    expect(span).toMatchObject({ startDay: 0, days: 3 })
+    expect(span).toMatchObject({ startDay: 0, dayCount: 3 })
   })
 })
 

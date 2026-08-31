@@ -2,7 +2,7 @@ import type { CalendarBox, TimedEntry } from '@midstem/chronous'
 import type { ElementType, ReactNode } from 'react'
 
 import { useAgendaDayContext, useCalendarContext } from '../context'
-import { rangeOf, renderSlot, tagOf } from '../helpers'
+import { rangeOf, renderChildren, tagOf } from '../helpers'
 import type { OwnProps, PolymorphicProps } from '../types'
 
 export type AgendaTimedEventScope<TData> = {
@@ -40,7 +40,7 @@ export const AgendaTimedEvents = <TData, TTag extends ElementType = 'div'>({
             {...rest}
             style={style}
           >
-            {renderSlot(
+            {renderChildren(
               children,
               { event: box.event, box, timeRange },
               timeRange

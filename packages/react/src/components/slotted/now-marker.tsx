@@ -1,7 +1,7 @@
 import type { ElementType, ReactNode } from 'react'
 
 import { useCalendarContext, useDayColumnContext } from '../context'
-import { minutePercentOf, renderSlot, styleOf, tagOf } from '../helpers'
+import { minutePercentOf, renderChildren, styleOf, tagOf } from '../helpers'
 import type { OwnProps, PolymorphicProps } from '../types'
 import { useNow } from './use-now'
 
@@ -43,7 +43,7 @@ export const NowMarker = <TTag extends ElementType = 'div'>({
         style
       )}
     >
-      {renderSlot(children, { minuteOfDay: now.minuteOfDay }, null)}
+      {renderChildren(children, { minuteOfDay: now.minuteOfDay }, null)}
     </Tag>
   )
 }

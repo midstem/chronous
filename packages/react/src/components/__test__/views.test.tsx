@@ -191,7 +191,7 @@ describe('the root', () => {
       <Calendar.Root
         range={BAD}
         events={EVENTS}
-        fallback={(error) => <p data-testid="failed">{error.name}</p>}
+        renderError={(error) => <p data-testid="failed">{error.name}</p>}
       >
         <Calendar.Header />
       </Calendar.Root>
@@ -206,7 +206,7 @@ describe('the root', () => {
         range={BAD}
         events={EVENTS}
         className="shell"
-        fallback={() => <p>failed</p>}
+        renderError={() => <p>failed</p>}
       >
         <Calendar.Header />
       </Calendar.Root>

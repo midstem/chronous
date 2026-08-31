@@ -12,7 +12,7 @@ export type CalendarContextValue<TData = unknown> = {
   calendar: CalendarLayout<TData>
   range: CalendarRange
   locale: LocaleId
-  gutter: string
+  gutterWidth: string
 }
 
 export type TimeGridContextValue = {

@@ -170,7 +170,7 @@ describe('bars', () => {
     expect(row).toMatchObject({
       start: '2026-03-16',
       end: '2026-03-23',
-      days: 7,
+      dayCount: 7,
       lanes: 1
     })
     expect(row.bars[0]).toMatchObject({
@@ -178,7 +178,7 @@ describe('bars', () => {
       end: '2026-03-20',
       startDay: WEDNESDAY_INDEX,
       endDay: 4,
-      days: 2,
+      dayCount: 2,
       lane: 0,
       lanes: 1
     })
@@ -202,7 +202,7 @@ describe('bars', () => {
       start: '2026-03-18T09:00:00+02:00',
       end: '2026-03-19T09:00:00+02:00'
     })
-    expect(calendar.rows[0].bars[0]).toMatchObject({ startDay: 2, days: 2 })
+    expect(calendar.rows[0].bars[0]).toMatchObject({ startDay: 2, dayCount: 2 })
   })
 
   it('cuts a month into week rows', () => {
@@ -217,7 +217,7 @@ describe('bars', () => {
       '2026-03-23',
       '2026-03-30'
     ])
-    expect(rows.every((row) => row.days === 7)).toBe(true)
+    expect(rows.every((row) => row.dayCount === 7)).toBe(true)
   })
 
   it('gives every other view a single row', () => {

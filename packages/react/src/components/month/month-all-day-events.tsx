@@ -2,7 +2,7 @@ import type { CalendarBar, CalendarEntry } from '@midstem/chronous'
 import type { ElementType, ReactNode } from 'react'
 
 import { useMonthRowContext } from '../context'
-import { percentOf, renderSlot, styleOf, tagOf } from '../helpers'
+import { percentOf, renderChildren, styleOf, tagOf } from '../helpers'
 import type { OwnProps, PolymorphicProps } from '../types'
 
 const LANE_HEIGHT = 20
@@ -64,7 +64,7 @@ export const MonthAllDayEvents = <TData, TTag extends ElementType = 'div'>({
             style
           )}
         >
-          {renderSlot(children, { event: bar.event, bar }, bar.event.id)}
+          {renderChildren(children, { event: bar.event, bar }, bar.event.id)}
         </Tag>
       ))}
     </>

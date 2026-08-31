@@ -30,8 +30,8 @@ const eventLines = (events: readonly EventInput<EventData>[]): string =>
 
 const importsOf = (needs: Needs): readonly string[] => [
   needs.clock
-    ? "import { createCalendar, formatIso } from '@midstem/chronous-react'"
-    : "import { createCalendar } from '@midstem/chronous-react'",
+    ? "import { createCalendarComponents, formatIso } from '@midstem/chronous-react'"
+    : "import { createCalendarComponents } from '@midstem/chronous-react'",
   needs.clock
     ? "import type { CalendarRange, EventInput, IsoDateTime, ViewKind } from '@midstem/chronous-react'"
     : "import type { CalendarRange, EventInput, ViewKind } from '@midstem/chronous-react'",
@@ -83,7 +83,7 @@ export const preambleOf = (
   '',
   'type EventData = { title: string }',
   '',
-  'const Calendar = createCalendar<EventData>()',
+  'const Calendar = createCalendarComponents<EventData>()',
   '',
   `const LOCALE = '${locale}'`,
   '',

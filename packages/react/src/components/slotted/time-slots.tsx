@@ -2,7 +2,7 @@ import type { CalendarSlot } from '@midstem/chronous'
 import type { ElementType, ReactNode } from 'react'
 
 import { useDayColumnContext } from '../context'
-import { minutePercentOf, renderSlot, styleOf, tagOf } from '../helpers'
+import { minutePercentOf, renderChildren, styleOf, tagOf } from '../helpers'
 import type { OwnProps, PolymorphicProps } from '../types'
 
 export type TimeSlotScope = {
@@ -38,7 +38,11 @@ export const TimeSlots = <TTag extends ElementType = 'span'>({
             style
           )}
         >
-          {renderSlot(children, { slot, minuteOfDay: slot.minuteOfDay }, null)}
+          {renderChildren(
+            children,
+            { slot, minuteOfDay: slot.minuteOfDay },
+            null
+          )}
         </Tag>
       ))}
     </>

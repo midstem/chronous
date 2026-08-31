@@ -28,12 +28,12 @@ export const preambleOf = (
   events: readonly EventInput<EventData>[],
   locale: LocaleId
 ): readonly string[] => [
-  "import { createCalendar } from '@midstem/chronous-react'",
+  "import { createCalendarComponents } from '@midstem/chronous-react'",
   "import type { CalendarRange, EventInput } from '@midstem/chronous-react'",
   '',
   'type EventData = { title: string }',
   '',
-  'const Calendar = createCalendar<EventData>()',
+  'const Calendar = createCalendarComponents<EventData>()',
   '',
   `const LOCALE = '${locale}'`,
   '',

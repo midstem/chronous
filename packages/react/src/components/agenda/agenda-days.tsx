@@ -8,7 +8,7 @@ import {
   WEEKDAY,
   barsByDay,
   labelOf,
-  renderSlot,
+  renderChildren,
   tagOf
 } from '../helpers'
 import type { OwnProps, PolymorphicProps } from '../types'
@@ -69,7 +69,7 @@ export const AgendaDays = <TData, TTag extends ElementType = 'div'>({
               {...rest}
               style={style}
             >
-              {renderSlot(children, scope, scope.dayNumber)}
+              {renderChildren(children, scope, scope.dayNumber)}
             </Tag>
           </AgendaDayProvider>
         )

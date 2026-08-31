@@ -97,7 +97,7 @@ import { Calendar } from '@midstem/chronous-react'
     </Calendar.DayHeadings>
   </Calendar.Header>
 
-  <Calendar.AllDayRow label="all-day">
+  <Calendar.AllDayRow gutterCell="all-day">
     <Calendar.AllDayEvents className="bar">
       {({ event }) => event.data?.title}
     </Calendar.AllDayEvents>
@@ -172,28 +172,29 @@ prop you pass wins over the attribute, so you can pin one when you need to:
 <Calendar.MonthDays className="data-[in-period=false]:bg-zinc-50" />
 ```
 
-**The gutter lives on `Root`.** `Header`, `AllDayRow` and `TimeGrid` lay out the
-same CSS grid, so the width of the leading column is one prop on the root rather
-than three that can drift apart. Month and agenda ignore it.
+**The gutter lives on `Root`.** `Header`, `AllDayRow` and `TimeGrid` lay out
+the same CSS grid, so `gutterWidth` is one prop on the root rather than three
+that can drift apart. Month and agenda ignore it. What goes _in_ that leading
+column is `gutterCell`, on `Header` and on `AllDayRow`.
 
 `TimeGrid` scrolls to `scrollToHour` on mount by finding the nearest element
 that actually scrolls — itself when nothing else does, the ancestor when your
 layout puts a sticky header above it. Pass `null` to leave the scroll alone.
 
-`Root` renders `fallback(error)` inside its own element when the range or the
-events cannot be read, so the layout does not collapse, and rethrows when no
-fallback is given: an invalid range is a bug in the input, and swallowing it
-into a blank grid hides it. Reach for `useCalendar` directly when
+`Root` renders `renderError(error)` inside its own element when the range or
+the events cannot be read, so the layout does not collapse, and rethrows when
+no `renderError` is given: an invalid range is a bug in the input, and
+swallowing it into a blank grid hides it. Reach for `useCalendar` directly when
 you want to handle it as state instead.
 
 ## Typed event data
 
 Context cannot infer a type argument, so `Calendar` on its own hands render
-props `data?: unknown`. `createCalendar` binds the namespace once and the type
-flows to every slot:
+props `data?: unknown`. `createCalendarComponents` binds the namespace once and
+the type flows to every render prop:
 
 ```tsx
-const Calendar = createCalendar<{ title: string; owner: string }>()
+const Calendar = createCalendarComponents<{ title: string; owner: string }>()
 
 <Calendar.TimedEvents>
   {({ event }) => event.data?.title}
@@ -201,7 +202,9 @@ const Calendar = createCalendar<{ title: string; owner: string }>()
 ```
 
 It is the same object at runtime — a cast, not a factory — so it costs nothing
-and can be created at module scope.
+and can be created at module scope. It is named for what it returns, and not
+`createCalendar`, because `buildCalendar` arrives from the same import and
+builds something else entirely.
 
 ## Labels
 

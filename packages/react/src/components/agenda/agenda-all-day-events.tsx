@@ -2,7 +2,7 @@ import type { CalendarBar, CalendarEntry } from '@midstem/chronous'
 import type { ElementType, ReactNode } from 'react'
 
 import { useAgendaDayContext } from '../context'
-import { renderSlot, tagOf } from '../helpers'
+import { renderChildren, tagOf } from '../helpers'
 import type { OwnProps, PolymorphicProps } from '../types'
 
 export type AgendaAllDayEventScope<TData> = {
@@ -35,7 +35,7 @@ export const AgendaAllDayEvents = <TData, TTag extends ElementType = 'div'>({
           {...rest}
           style={style}
         >
-          {renderSlot(children, { event: bar.event, bar }, bar.event.id)}
+          {renderChildren(children, { event: bar.event, bar }, bar.event.id)}
         </Tag>
       ))}
     </>

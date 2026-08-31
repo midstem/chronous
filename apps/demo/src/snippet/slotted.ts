@@ -30,7 +30,7 @@ export const SLOTTED_BODY: readonly string[] = [
   '            <Calendar.AllDayRow',
   '              laneHeight={LANE_HEIGHT}',
   '              className="border-b border-zinc-200 pt-0.5 pb-1.5 dark:border-zinc-700"',
-  '              label={',
+  '              gutterCell={',
   '                <span className="block pt-1 pr-2 text-right text-[10px] text-zinc-400 dark:text-zinc-500">',
   '                  all-day',
   '                </span>',

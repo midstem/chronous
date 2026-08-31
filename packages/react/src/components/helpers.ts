@@ -9,7 +9,7 @@ import type {
 import { formatIso } from '@midstem/chronous'
 import type { CSSProperties, ElementType, ReactNode } from 'react'
 
-import type { Slot } from './types'
+import type { ScopedChildren } from './types'
 
 export const PERCENT = 100
 
@@ -17,7 +17,7 @@ export const MINUTES_IN_DAY = 1440
 
 export const HOURS_IN_DAY = 24
 
-export const GUTTER = '3.25rem'
+export const GUTTER_WIDTH = '3.25rem'
 
 export const WEEKDAY: DateTimeFormatOptions = { weekday: 'short' }
 
@@ -35,8 +35,8 @@ export const percentOf = (fraction: number): string => `${fraction * PERCENT}%`
 export const minutePercentOf = (minuteOfDay: number): string =>
   percentOf(minuteOfDay / MINUTES_IN_DAY)
 
-export const templateOf = (gutter: string, columns: number): string =>
-  `${gutter} repeat(${columns}, minmax(0, 1fr))`
+export const templateOf = (gutterWidth: string, columns: number): string =>
+  `${gutterWidth} repeat(${columns}, minmax(0, 1fr))`
 
 export const columnsOf = (columns: number): string =>
   `repeat(${columns}, minmax(0, 1fr))`
@@ -51,8 +51,8 @@ export const styleOf = (
   style?: CSSProperties
 ): CSSProperties => (style ? { ...layout, ...style } : layout)
 
-export const renderSlot = <TScope>(
-  slot: Slot<TScope> | undefined,
+export const renderChildren = <TScope>(
+  slot: ScopedChildren<TScope> | undefined,
   scope: TScope,
   fallback: ReactNode
 ): ReactNode => {
@@ -87,9 +87,9 @@ export const rowsWithDays = <TData>(
   let taken = 0
 
   return calendar.rows.map((row) => {
-    const days = calendar.days.slice(taken, taken + row.days)
+    const days = calendar.days.slice(taken, taken + row.dayCount)
 
-    taken += row.days
+    taken += row.dayCount
 
     return { row, days }
   })
@@ -108,7 +108,7 @@ export const barsByDay = <TData>(
       }
     }
 
-    taken += row.days
+    taken += row.dayCount
   }
 
   return byDay

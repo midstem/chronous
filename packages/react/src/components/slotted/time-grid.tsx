@@ -5,7 +5,7 @@ import { TimeGridProvider, useCalendarContext } from '../context'
 import type { TimeGridContextValue } from '../context'
 import {
   HOURS_IN_DAY,
-  renderSlot,
+  renderChildren,
   styleOf,
   tagOf,
   templateOf
@@ -35,7 +35,7 @@ export const TimeGrid = <TTag extends ElementType = 'div'>({
   scrollToHour = SCROLL_TO_HOUR,
   ...rest
 }: TimeGridProps<TTag>): ReactNode => {
-  const { calendar, gutter } = useCalendarContext()
+  const { calendar, gutterWidth } = useCalendarContext()
   const held = useRef<HTMLElement>(null)
   const Tag = tagOf(as, 'div')
 
@@ -58,10 +58,10 @@ export const TimeGrid = <TTag extends ElementType = 'div'>({
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: templateOf(gutter, calendar.days.length)
+            gridTemplateColumns: templateOf(gutterWidth, calendar.days.length)
           }}
         >
-          {renderSlot(children, scope, null)}
+          {renderChildren(children, scope, null)}
         </div>
       </Tag>
     </TimeGridProvider>

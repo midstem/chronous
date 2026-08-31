@@ -2,7 +2,7 @@ import type { CalendarDay, IsoDate } from '@midstem/chronous'
 import type { ElementType, ReactNode } from 'react'
 
 import { useCalendarContext } from '../context'
-import { DAY_NUMBER, WEEKDAY, labelOf, renderSlot, tagOf } from '../helpers'
+import { DAY_NUMBER, WEEKDAY, labelOf, renderChildren, tagOf } from '../helpers'
 import type { OwnProps, PolymorphicProps } from '../types'
 
 export type DayHeadingScope<TData> = {
@@ -41,7 +41,7 @@ export const DayHeadings = <TData, TTag extends ElementType = 'div'>({
             {...rest}
             style={style}
           >
-            {renderSlot(
+            {renderChildren(
               children,
               {
                 day,

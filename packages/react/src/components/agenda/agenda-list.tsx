@@ -2,7 +2,7 @@ import type { ElementType, ReactNode } from 'react'
 
 import { useCalendarContext } from '../context'
 import type { CalendarContextValue } from '../context'
-import { renderSlot, tagOf } from '../helpers'
+import { renderChildren, tagOf } from '../helpers'
 import type { OwnProps, PolymorphicProps } from '../types'
 
 export type AgendaListProps<
@@ -21,7 +21,7 @@ export const AgendaList = <TData, TTag extends ElementType = 'div'>({
 
   return (
     <Tag {...rest} style={style}>
-      {renderSlot(children, scope, null)}
+      {renderChildren(children, scope, null)}
     </Tag>
   )
 }

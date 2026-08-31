@@ -39,7 +39,7 @@ describe('all-day bars ignore the clock', () => {
 
     expect(span).toMatchObject({
       startDay: 0,
-      days: 1,
+      dayCount: 1,
       left: 0,
       width: 1,
       continuesBefore: false,
@@ -59,7 +59,7 @@ describe('all-day bars ignore the clock', () => {
     ])
 
     expect(span).toMatchObject({
-      days: DAYS_IN_WEEK,
+      dayCount: DAYS_IN_WEEK,
       width: 1,
       continuesBefore: false,
       continuesAfter: false
@@ -75,7 +75,7 @@ describe('all-day bars ignore the clock', () => {
     }
     const [span] = spansOn(range, [{ id: 'a', start: '2026-09-06' }])
 
-    expect(span).toMatchObject({ startDay: 1, days: 1 })
+    expect(span).toMatchObject({ startDay: 1, dayCount: 1 })
   })
 })
 
@@ -91,7 +91,7 @@ describe('a day is measured by the wall clock', () => {
       { id: 'a', start: '2026-03-28T09:00', end: '2026-03-29T09:00' }
     ])
 
-    expect(span).toMatchObject({ days: 2 })
+    expect(span).toMatchObject({ dayCount: 2 })
   })
 
   it('lifts the same wall span on a week without a transition', () => {
@@ -99,7 +99,7 @@ describe('a day is measured by the wall clock', () => {
       { id: 'a', start: '2026-03-18T09:00', end: '2026-03-19T09:00' }
     ])
 
-    expect(span).toMatchObject({ days: 2 })
+    expect(span).toMatchObject({ dayCount: 2 })
   })
 
   it('lifts twenty-five elapsed hours that fill a long day', () => {
@@ -107,7 +107,7 @@ describe('a day is measured by the wall clock', () => {
       { id: 'a', start: '2026-10-24T09:00', end: '2026-10-25T09:00' }
     ])
 
-    expect(span).toMatchObject({ days: 2 })
+    expect(span).toMatchObject({ dayCount: 2 })
   })
 
   it('leaves twenty-three elapsed hours inside a long day in the grid', () => {

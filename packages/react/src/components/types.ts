@@ -5,10 +5,10 @@ import type {
 } from 'react'
 import type { ReactNode } from 'react'
 
-export type Slot<TScope> = ReactNode | ((scope: TScope) => ReactNode)
+export type ScopedChildren<TScope> = ReactNode | ((scope: TScope) => ReactNode)
 
 export type OwnProps<TScope> = {
-  children?: Slot<TScope>
+  children?: ScopedChildren<TScope>
   style?: CSSProperties
 }
 

@@ -75,7 +75,7 @@ export const span = <TData>(
     end: add(days[startDay].date, { days: covered }),
     startDay,
     endDay: startDay + covered,
-    days: covered,
+    dayCount: covered,
     left: startDay / days.length,
     width: covered / days.length,
     continuesBefore: compare(bounds.start, days[0].start) < 0,

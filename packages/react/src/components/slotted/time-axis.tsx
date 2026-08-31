@@ -2,7 +2,7 @@ import type { ElementType, ReactNode } from 'react'
 
 import { useTimeGridContext } from '../context'
 import type { TimeGridContextValue } from '../context'
-import { renderSlot, styleOf, tagOf } from '../helpers'
+import { renderChildren, styleOf, tagOf } from '../helpers'
 import type { OwnProps, PolymorphicProps } from '../types'
 
 export type TimeAxisProps<TTag extends ElementType = 'div'> = PolymorphicProps<
@@ -24,7 +24,7 @@ export const TimeAxis = <TTag extends ElementType = 'div'>({
       {...rest}
       style={styleOf({ position: 'relative', height: scope.dayHeight }, style)}
     >
-      {renderSlot(children, scope, null)}
+      {renderChildren(children, scope, null)}
     </Tag>
   )
 }

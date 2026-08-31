@@ -39,7 +39,7 @@ const buildRow = <TData>(
   return {
     start: days[0].date,
     end: add(days[0].date, { days: days.length }),
-    days: days.length,
+    dayCount: days.length,
     lanes,
     spans
   }

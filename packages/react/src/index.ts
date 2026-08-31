@@ -1,5 +1,3 @@
-export { CORE_PACKAGE, PACKAGE_NAME } from '#src/constants'
-
 export {
   InvalidEventError,
   InvalidRangeError,
@@ -32,7 +30,6 @@ export type {
   IsoDate,
   IsoDateTime,
   LocaleId,
-  NormalizeContext,
   RecurrenceInput,
   RecurrenceOverride,
   TimeZoneId,
@@ -49,7 +46,7 @@ export { useCalendarNavigation } from '#src/navigation'
 
 export type { CalendarNavigation } from '#src/navigation'
 
-export { Calendar, createCalendar } from '#src/components'
+export { Calendar, createCalendarComponents } from '#src/components'
 
 export { useNow } from './components/slotted/use-now'
 

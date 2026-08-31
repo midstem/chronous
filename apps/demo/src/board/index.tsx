@@ -93,9 +93,9 @@ export const Board = ({
       range={range}
       events={events}
       locale={locale}
-      gutter={GUTTER}
+      gutterWidth={GUTTER}
       className="flex min-h-0 flex-1 flex-col p-4"
-      fallback={(error) => (
+      renderError={(error) => (
         <>
           {bar(range.date)}
           <p

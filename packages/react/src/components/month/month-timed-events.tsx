@@ -2,7 +2,7 @@ import type { CalendarBox, TimedEntry } from '@midstem/chronous'
 import type { ElementType, ReactNode } from 'react'
 
 import { useMonthDayContext } from '../context'
-import { renderSlot, tagOf } from '../helpers'
+import { renderChildren, tagOf } from '../helpers'
 import type { OwnProps, PolymorphicProps } from '../types'
 
 export type MonthTimedEventScope<TData> = {
@@ -33,7 +33,7 @@ export const MonthTimedEvents = <TData, TTag extends ElementType = 'div'>({
           {...rest}
           style={style}
         >
-          {renderSlot(children, { event: box.event, box }, box.event.id)}
+          {renderChildren(children, { event: box.event, box }, box.event.id)}
         </Tag>
       ))}
     </>

@@ -6,7 +6,7 @@ import {
   useCalendarContext,
   useMonthRowContext
 } from '../context'
-import { DAY_NUMBER, labelOf, renderSlot, tagOf } from '../helpers'
+import { DAY_NUMBER, labelOf, renderChildren, tagOf } from '../helpers'
 import type { OwnProps, PolymorphicProps } from '../types'
 
 export type MonthDayScope<TData> = {
@@ -45,7 +45,7 @@ export const MonthDays = <TData, TTag extends ElementType = 'div'>({
               {...rest}
               style={style}
             >
-              {renderSlot(
+              {renderChildren(
                 children,
                 {
                   day,

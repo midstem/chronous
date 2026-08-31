@@ -5,7 +5,7 @@ import { useCalendarNavigation } from '#src/navigation'
 import type { CalendarNavigation } from '#src/navigation'
 
 import { useCalendarContext } from '../context'
-import { renderSlot, tagOf } from '../helpers'
+import { renderChildren, tagOf } from '../helpers'
 import type { OwnProps, PolymorphicProps } from '../types'
 import { titleOf } from './helpers'
 
@@ -45,7 +45,7 @@ export const Toolbar = <TTag extends ElementType = 'div'>({
   if (children !== undefined) {
     return (
       <Tag {...rest} style={style}>
-        {renderSlot(
+        {renderChildren(
           children,
           { navigation, range, title, goTo: onNavigate },
           null

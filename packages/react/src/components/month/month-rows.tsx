@@ -2,7 +2,13 @@ import type { ElementType, ReactNode } from 'react'
 
 import { MonthRowProvider, useCalendarContext } from '../context'
 import type { MonthRowContextValue } from '../context'
-import { columnsOf, renderSlot, rowsWithDays, styleOf, tagOf } from '../helpers'
+import {
+  columnsOf,
+  renderChildren,
+  rowsWithDays,
+  styleOf,
+  tagOf
+} from '../helpers'
 import type { OwnProps, PolymorphicProps } from '../types'
 
 export type MonthRowsProps<
@@ -35,7 +41,7 @@ export const MonthRows = <TData, TTag extends ElementType = 'div'>({
               style
             )}
           >
-            {renderSlot(children, scope, null)}
+            {renderChildren(children, scope, null)}
           </Tag>
         </MonthRowProvider>
       ))}

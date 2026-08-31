@@ -1,5 +1,3 @@
-export { PACKAGE_NAME } from '#src/constants'
-
 export { isTemporalAvailable } from '#src/runtime'
 
 export { buildCalendar } from '#src/calendar'
@@ -29,7 +27,6 @@ export { InvalidEventError } from '#src/event'
 export type {
   EventId,
   EventInput,
-  NormalizeContext,
   RecurrenceInput,
   RecurrenceOverride
 } from '#src/event'

@@ -11,7 +11,7 @@ export const SLOTTED_BODY: readonly string[] = [
   '',
   '      <Calendar.AllDayRow',
   '        className="border-b border-zinc-200 dark:border-zinc-700"',
-  '        label={<span className="pl-2 text-[10px] text-zinc-400">all-day</span>}',
+  '        gutterCell={<span className="pl-2 text-[10px] text-zinc-400">all-day</span>}',
   '      >',
   '        <Calendar.AllDayEvents className="truncate rounded bg-violet-700 px-2 text-[11px] leading-6 text-white">',
   '          {({ event }) => event.data?.title}',

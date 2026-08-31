@@ -2,7 +2,13 @@ import type { CalendarDay } from '@midstem/chronous'
 import type { ElementType, ReactNode } from 'react'
 
 import { useCalendarContext } from '../context'
-import { WEEKDAY, labelOf, renderSlot, rowsWithDays, tagOf } from '../helpers'
+import {
+  WEEKDAY,
+  labelOf,
+  renderChildren,
+  rowsWithDays,
+  tagOf
+} from '../helpers'
 import type { OwnProps, PolymorphicProps } from '../types'
 
 export type MonthWeekdayScope<TData> = {
@@ -32,7 +38,7 @@ export const MonthWeekdays = <TData, TTag extends ElementType = 'div'>({
 
         return (
           <Tag key={day.date} {...rest} style={style}>
-            {renderSlot(children, { day, weekday }, weekday)}
+            {renderChildren(children, { day, weekday }, weekday)}
           </Tag>
         )
       })}

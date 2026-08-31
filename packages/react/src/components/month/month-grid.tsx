@@ -2,7 +2,7 @@ import type { ElementType, ReactNode } from 'react'
 
 import { useCalendarContext } from '../context'
 import type { CalendarContextValue } from '../context'
-import { renderSlot, styleOf, tagOf } from '../helpers'
+import { renderChildren, styleOf, tagOf } from '../helpers'
 import type { OwnProps, PolymorphicProps } from '../types'
 
 export type MonthGridProps<
@@ -27,7 +27,7 @@ export const MonthGrid = <TData, TTag extends ElementType = 'div'>({
         style
       )}
     >
-      {renderSlot(children, scope, null)}
+      {renderChildren(children, scope, null)}
     </Tag>
   )
 }
