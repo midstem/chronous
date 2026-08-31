@@ -1,4 +1,4 @@
-import { isTemporalAvailable } from '@midstem/chronous'
+import { isTemporalAvailable } from '@midstem/chronous-react'
 
 import type { RuntimeState } from './types'
 

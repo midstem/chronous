@@ -6,14 +6,14 @@ import {
   formatIso,
   isTemporalAvailable
 } from '../index'
-import type { FormatOptions } from '../index'
+import type { DateTimeFormatOptions } from '../index'
 
-const CLOCK_OPTIONS: FormatOptions = {
+const CLOCK_OPTIONS: DateTimeFormatOptions = {
   hour: '2-digit',
   minute: '2-digit',
   hour12: false
 }
-const DAY_OPTIONS: FormatOptions = { day: 'numeric', month: 'long' }
+const DAY_OPTIONS: DateTimeFormatOptions = { day: 'numeric', month: 'long' }
 
 afterEach(() => {
   vi.unstubAllGlobals()

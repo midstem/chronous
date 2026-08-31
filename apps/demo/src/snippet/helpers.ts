@@ -1,4 +1,8 @@
-import type { EventInput, LocaleId, RangeSpec } from '@midstem/chronous'
+import type {
+  CalendarRange,
+  EventInput,
+  LocaleId
+} from '@midstem/chronous-react'
 
 import { MONTH_VIEW, SLOTTED_VIEWS } from '../board'
 import type { EventData } from '../types'
@@ -16,15 +20,15 @@ type Template = {
   body: readonly string[]
 }
 
-const templateOf = (spec: RangeSpec, hourHeight: number): Template => {
-  if (SLOTTED_VIEWS.includes(spec.view))
+const templateOf = (range: CalendarRange, hourHeight: number): Template => {
+  if (SLOTTED_VIEWS.includes(range.view))
     return {
       needs: { tones: true, clock: true },
       helpers: slottedHelpers(hourHeight),
       body: SLOTTED_BODY
     }
 
-  if (spec.view === MONTH_VIEW)
+  if (range.view === MONTH_VIEW)
     return {
       needs: { tones: true, clock: false },
       helpers: MONTH_HELPERS,
@@ -39,15 +43,15 @@ const templateOf = (spec: RangeSpec, hourHeight: number): Template => {
 }
 
 export const snippetOf = (
-  spec: RangeSpec,
+  range: CalendarRange,
   events: readonly EventInput<EventData>[],
   locale: LocaleId,
   hourHeight: number
 ): string => {
-  const { needs, helpers, body } = templateOf(spec, hourHeight)
+  const { needs, helpers, body } = templateOf(range, hourHeight)
 
   return [
-    ...preambleOf(spec, events, locale, needs),
+    ...preambleOf(range, events, locale, needs),
     ...helpers,
     ...OPENING,
     ...body,

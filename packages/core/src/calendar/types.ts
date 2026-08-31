@@ -83,7 +83,7 @@ export type CalendarRow<TData = unknown> = {
   bars: CalendarBar<TData>[]
 }
 
-export type Calendar<TData = unknown> = {
+export type CalendarLayout<TData = unknown> = {
   view: ViewKind
   start: IsoDateTime
   end: IsoDateTime

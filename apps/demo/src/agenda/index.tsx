@@ -1,4 +1,4 @@
-import type { IsoDate, LocaleId } from '@midstem/chronous'
+import type { IsoDate, LocaleId } from '@midstem/chronous-react'
 import type { ReactElement } from 'react'
 
 import { Calendar } from '../calendar'
@@ -41,7 +41,7 @@ export const Agenda = ({ locale, today }: AgendaProps): ReactElement => (
               <span className="text-[13px] text-faint">{EMPTY_LABEL}</span>
             )}
 
-            <Calendar.AgendaBars
+            <Calendar.AgendaAllDayEvents
               as="span"
               className="flex items-center gap-2 text-[13px]"
             >
@@ -58,9 +58,9 @@ export const Agenda = ({ locale, today }: AgendaProps): ReactElement => (
                   </span>
                 </>
               )}
-            </Calendar.AgendaBars>
+            </Calendar.AgendaAllDayEvents>
 
-            <Calendar.AgendaBoxes
+            <Calendar.AgendaTimedEvents
               as="span"
               className="flex items-center gap-2 text-[13px]"
             >
@@ -77,7 +77,7 @@ export const Agenda = ({ locale, today }: AgendaProps): ReactElement => (
                   </span>
                 </>
               )}
-            </Calendar.AgendaBoxes>
+            </Calendar.AgendaTimedEvents>
           </div>
         </>
       )}

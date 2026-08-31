@@ -12,7 +12,7 @@ const styleOf = (element: HTMLElement): string =>
 const textOf = (element: HTMLElement): string => element.textContent ?? ''
 
 const Week = ({ gutter }: { gutter?: string }): ReactNode => (
-  <Calendar.Root spec={WEEK} events={EVENTS} locale={LOCALE} gutter={gutter}>
+  <Calendar.Root range={WEEK} events={EVENTS} locale={LOCALE} gutter={gutter}>
     <Calendar.Header data-testid="header">
       <Calendar.DayHeadings data-testid="heading" />
     </Calendar.Header>
@@ -87,7 +87,7 @@ describe('the slotted view', () => {
 
   it('drops the all-day row when the range holds no all-day event', () => {
     render(
-      <Calendar.Root spec={WEEK} events={[]}>
+      <Calendar.Root range={WEEK} events={[]}>
         <Calendar.AllDayRow data-testid="all-day">
           <Calendar.AllDayEvents />
         </Calendar.AllDayRow>
@@ -101,7 +101,7 @@ describe('the slotted view', () => {
 describe('a component slot', () => {
   it('hands the scope to a render prop', () => {
     render(
-      <Calendar.Root spec={WEEK} events={EVENTS} locale={LOCALE}>
+      <Calendar.Root range={WEEK} events={EVENTS} locale={LOCALE}>
         <Calendar.Header>
           <Calendar.DayHeadings data-testid="heading">
             {({ weekday, dayNumber, inPeriod }) =>
@@ -117,7 +117,7 @@ describe('a component slot', () => {
 
   it('accepts a plain node in place of a render prop', () => {
     render(
-      <Calendar.Root spec={WEEK} events={EVENTS}>
+      <Calendar.Root range={WEEK} events={EVENTS}>
         <Calendar.Header>
           <Calendar.DayHeadings data-testid="heading">
             <span>fixed</span>
@@ -135,7 +135,7 @@ describe('the polymorphic surface', () => {
     const onClick = vi.fn()
 
     render(
-      <Calendar.Root spec={WEEK} events={EVENTS}>
+      <Calendar.Root range={WEEK} events={EVENTS}>
         <Calendar.TimeGrid>
           <Calendar.DayColumns>
             <Calendar.TimedEvents
@@ -160,7 +160,7 @@ describe('the polymorphic surface', () => {
 
   it('lets a consumer style win over the layout it computed', () => {
     render(
-      <Calendar.Root spec={WEEK} events={EVENTS}>
+      <Calendar.Root range={WEEK} events={EVENTS}>
         <Calendar.TimeGrid>
           <Calendar.DayColumns>
             <Calendar.TimedEvents
@@ -201,7 +201,7 @@ describe('state a stylesheet can reach', () => {
 
   it('lets a consumer prop win over the attribute it sets', () => {
     render(
-      <Calendar.Root spec={WEEK} events={EVENTS}>
+      <Calendar.Root range={WEEK} events={EVENTS}>
         <Calendar.Header>
           <Calendar.DayHeadings data-testid="heading" data-date="pinned" />
         </Calendar.Header>
@@ -245,7 +245,7 @@ describe('createCalendar', () => {
     const Typed = createCalendar<EventData>()
 
     render(
-      <Typed.Root spec={WEEK} events={EVENTS}>
+      <Typed.Root range={WEEK} events={EVENTS}>
         <Typed.TimeGrid>
           <Typed.DayColumns>
             <Typed.TimedEvents data-testid="event">

@@ -2,8 +2,8 @@ import type {
   EventInput,
   IsoDate,
   LocaleId,
-  RangeSpec
-} from '@midstem/chronous'
+  CalendarRange
+} from '@midstem/chronous-react'
 import { useCalendarNavigation, useNow } from '@midstem/chronous-react'
 import type { ReactElement } from 'react'
 
@@ -24,17 +24,17 @@ import { MONTH_VIEW } from './constants'
 import { isSlotted, titleOf } from './helpers'
 
 type BoardProps = {
-  spec: RangeSpec
+  range: CalendarRange
   events: readonly EventInput<EventData>[]
   locale: LocaleId
   density: Density
   style: Style
-  onNavigate: (spec: RangeSpec) => void
+  onNavigate: (range: CalendarRange) => void
   onDensity: (density: Density) => void
 }
 
 type ViewProps = {
-  spec: RangeSpec
+  range: CalendarRange
   locale: LocaleId
   today: IsoDate | null
   hourHeight: number
@@ -42,7 +42,7 @@ type ViewProps = {
 }
 
 const View = ({
-  spec,
+  range,
   locale,
   today,
   hourHeight,
@@ -50,21 +50,21 @@ const View = ({
 }: ViewProps): ReactElement => {
   const plain = isSimple(style)
 
-  if (isSlotted(spec.view))
+  if (isSlotted(range.view))
     return plain ? (
       <PlainSlotted hourHeight={hourHeight} />
     ) : (
       <Slotted locale={locale} hourHeight={hourHeight} today={today} />
     )
 
-  if (spec.view === MONTH_VIEW)
+  if (range.view === MONTH_VIEW)
     return plain ? <PlainMonth /> : <Month today={today} />
 
   return plain ? <PlainAgenda /> : <Agenda locale={locale} today={today} />
 }
 
 export const Board = ({
-  spec,
+  range,
   events,
   locale,
   density,
@@ -72,17 +72,17 @@ export const Board = ({
   onNavigate,
   onDensity
 }: BoardProps): ReactElement => {
-  const navigation = useCalendarNavigation(spec)
-  const now = useNow(spec.timeZone)
+  const navigation = useCalendarNavigation(range)
+  const now = useNow(range.timeZone)
   const today = now?.date ?? null
 
   const bar = (title: string): ReactElement => (
     <Toolbar
       navigation={navigation}
       title={title}
-      view={spec.view}
+      view={range.view}
       density={density}
-      slotted={isSlotted(spec.view)}
+      slotted={isSlotted(range.view)}
       onChange={onNavigate}
       onDensity={onDensity}
     />
@@ -90,14 +90,14 @@ export const Board = ({
 
   return (
     <Calendar.Root
-      spec={spec}
+      range={range}
       events={events}
       locale={locale}
       gutter={GUTTER}
       className="flex min-h-0 flex-1 flex-col p-4"
       fallback={(error) => (
         <>
-          {bar(spec.date)}
+          {bar(range.date)}
           <p
             role="alert"
             className="rounded-lg border border-danger/40 bg-danger-soft px-4 py-3 text-sm text-danger"
@@ -114,7 +114,7 @@ export const Board = ({
           <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-line bg-surface shadow-sm">
             <div data-scroller className="min-h-0 flex-1 overflow-auto">
               <View
-                spec={spec}
+                range={range}
                 locale={locale}
                 today={today}
                 hourHeight={hourHeightOf(density)}

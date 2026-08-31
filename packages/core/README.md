@@ -131,7 +131,7 @@ A range turns an anchor date into the days a calendar draws, and the rows it
 draws them on.
 
 ```ts
-type RangeSpec = {
+type CalendarRange = {
   view: 'day' | 'week' | 'days' | 'month' | 'agenda'
   date: string
   timeZone: string
@@ -161,13 +161,13 @@ type RangeSpec = {
   zero-length row instead of becoming an error.
 - An anchor date or a time zone that cannot be read, a `slotMinutes` outside 1
   to 1440 or a `dayCount` below one throws `InvalidRangeError`. The zone is
-  checked once, where the spec is resolved, so a mistyped one never reaches the
+  checked once, where the range is resolved, so a mistyped one never reaches the
   engine as a bare `RangeError`.
 
 ## Navigation
 
-Moving around a calendar is a reducer over the spec, so next and previous can be
-tested without rendering anything.
+Moving around a calendar is a reducer over the range, so next and previous can
+be tested without rendering anything.
 
 ```ts
 import { calendarReducer, initialCalendarState } from '@midstem/chronous'
@@ -178,18 +178,18 @@ const state = initialCalendarState({
   timeZone: 'Europe/Kyiv'
 })
 
-calendarReducer(state, { type: 'next' }).spec.date
-calendarReducer(state, { type: 'view', view: 'month' }).spec.view
+calendarReducer(state, { type: 'next' }).range.date
+calendarReducer(state, { type: 'view', view: 'month' }).range.view
 calendarReducer(state, {
   type: 'select',
   selection: { kind: 'event', id: 'standup' }
 })
 ```
 
-- The state is `{ spec, selection }` and nothing else. Every action returns a
+- The state is `{ range, selection }` and nothing else. Every action returns a
   new state, or the state it was handed when the move changes nothing, so a
   consumer can compare by identity.
-- `next` and `prev` move by the period the spec asks for: `day` by one day,
+- `next` and `prev` move by the period the range asks for: `day` by one day,
   `week` by seven, `days` and `agenda` by their own length, `month` by one
   month anchored on the first. Anchoring the month is what keeps 31 January
   from stepping to 28 February and staying there. Every other view keeps the
@@ -197,9 +197,9 @@ calendarReducer(state, {
 - The step is computed from the same resolved span the range is built from, so
   one period ends exactly where the next begins — no repeated day, no gap.
 - `today` carries the moment: `{ type: 'today', now }`, where `now` is any ISO
-  string. The reducer reads it in `spec.timeZone` and never looks at the clock
+  string. The reducer reads it in `range.timeZone` and never looks at the clock
   itself, which is what keeps it pure and testable. An absolute instant is read
-  as one; a bare wall-clock string is read as local to the spec.
+  as one; a bare wall-clock string is read as local to the range.
 - `goto` sets the anchor, `view` swaps the view, `select` and `clear` hold and
   drop a selection — an event, a slot or a date. Moving does not clear the
   selection; drop it yourself if that is what the interface wants.
@@ -208,7 +208,7 @@ calendarReducer(state, {
 
 ## Calendars
 
-`buildCalendar` is the front door: a spec and a list of events in, one
+`buildCalendar` is the front door: a range and a list of events in, one
 plain object out.
 
 ```ts
@@ -219,7 +219,7 @@ const calendar = buildCalendar(
 ```
 
 ```ts
-type Calendar<TData = unknown> = {
+type CalendarLayout<TData = unknown> = {
   view: ViewKind
   start: IsoDateTime
   end: IsoDateTime
@@ -254,7 +254,7 @@ type CalendarSlot = {
 - `days` are the days the grid draws, `rows` the bands of bars above it.
 - Every box and bar carries the normalized event as `event`, discriminated by
   `allDay`: a timed entry holds date-times, an all-day entry plain dates.
-- The spec's `timeZone` and `disambiguation` are the ones the events are read
+- The range's `timeZone` and `disambiguation` are the ones the events are read
   with, so a calendar is built from one consistent point of view.
 - Input that cannot be read throws `InvalidEventError`, `InvalidRangeError` or
   `InvalidRecurrenceError`. One unusable event fails the whole call.
@@ -372,14 +372,14 @@ formatIso(box.start, {
 ```
 
 ```ts
-type FormatSpec = {
+type FormatOptions = {
   locale: LocaleId
   timeZone?: TimeZoneId
-  options?: FormatOptions
+  options?: DateTimeFormatOptions
 }
 ```
 
-- The spec is scalars only, so it crosses the boundary with everything else:
+- The range is scalars only, so it crosses the boundary with everything else:
   `locale`, an optional `timeZone` and `Intl.DateTimeFormatOptions`.
 - A date — `2026-03-18` — is formatted as the floating date it is and is never
   moved into a zone, so a day heading cannot slip a day. `timeZone` is ignored

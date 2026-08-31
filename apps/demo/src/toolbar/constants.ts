@@ -1,4 +1,4 @@
-import type { ViewKind } from '@midstem/chronous'
+import type { ViewKind } from '@midstem/chronous-react'
 
 export const VIEWS: readonly ViewKind[] = [
   'day',

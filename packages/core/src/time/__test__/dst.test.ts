@@ -10,7 +10,7 @@ import {
   withTimeZone,
   zoned
 } from '../index'
-import type { FormatOptions } from '../types'
+import type { DateTimeFormatOptions } from '../types'
 
 const MINUTES_IN_HOUR = 60
 
@@ -147,13 +147,13 @@ describe('rendering the same instant in another zone', () => {
 })
 
 describe('labels across DST transitions', () => {
-  const CLOCK: FormatOptions = {
+  const CLOCK: DateTimeFormatOptions = {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
     timeZoneName: 'short'
   }
-  const DAY: FormatOptions = { day: 'numeric', month: 'long' }
+  const DAY: DateTimeFormatOptions = { day: 'numeric', month: 'long' }
 
   it.each([
     ['2026-10-25T03:00:00+03:00', '03:00 GMT+3'],

@@ -1,5 +1,5 @@
 import { InvalidRangeError, readAnchor, spanLength } from '#src/range'
-import type { RangeSpec } from '#src/range'
+import type { CalendarRange } from '#src/range'
 import { add, startOfMonth, toCalendarDate, toIso, zoned } from '#src/time'
 import type { IsoDate, IsoDateTime, TimeZoneId } from '#src/time'
 
@@ -9,16 +9,19 @@ import {
   UNREADABLE_MOMENT_REASON
 } from './constants'
 
-const stepDays = (spec: RangeSpec): number =>
-  STEP_DAYS_BY_VIEW[spec.view] ?? spanLength(spec)
+const stepDays = (range: CalendarRange): number =>
+  STEP_DAYS_BY_VIEW[range.view] ?? spanLength(range)
 
-export const shiftedDate = (spec: RangeSpec, direction: number): IsoDate => {
-  const anchor = readAnchor(spec.date)
+export const shiftedDate = (
+  range: CalendarRange,
+  direction: number
+): IsoDate => {
+  const anchor = readAnchor(range.date)
 
-  if (spec.view === MONTH_VIEW)
+  if (range.view === MONTH_VIEW)
     return toIso(add(startOfMonth(anchor), { months: direction }))
 
-  return toIso(add(anchor, { days: direction * stepDays(spec) }))
+  return toIso(add(anchor, { days: direction * stepDays(range) }))
 }
 
 export const dateAt = (now: IsoDateTime, timeZone: TimeZoneId): IsoDate => {

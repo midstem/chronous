@@ -1,4 +1,4 @@
-import type { RangeSpec } from '@midstem/chronous'
+import type { CalendarRange } from '@midstem/chronous'
 import { render, renderHook, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
@@ -14,7 +14,7 @@ const BROKEN_LOCALE = 'not a locale'
 describe('a label the runtime cannot format', () => {
   it('falls back to the ISO value it was handed', () => {
     render(
-      <Calendar.Root spec={WEEK} events={EVENTS} locale={BROKEN_LOCALE}>
+      <Calendar.Root range={WEEK} events={EVENTS} locale={BROKEN_LOCALE}>
         <Calendar.Header>
           <Calendar.DayHeadings data-testid="heading" />
         </Calendar.Header>
@@ -32,10 +32,10 @@ describe('the toolbar', () => {
     onNavigate,
     children
   }: {
-    onNavigate: (spec: RangeSpec) => void
+    onNavigate: (range: CalendarRange) => void
     children?: ReactNode
   }): ReactNode => (
-    <Calendar.Root spec={WEEK} events={EVENTS}>
+    <Calendar.Root range={WEEK} events={EVENTS}>
       <Calendar.Toolbar onNavigate={onNavigate} data-testid="toolbar">
         {children}
       </Calendar.Toolbar>
@@ -70,7 +70,7 @@ describe('the toolbar', () => {
     const onNavigate = vi.fn()
 
     render(
-      <Calendar.Root spec={WEEK} events={EVENTS}>
+      <Calendar.Root range={WEEK} events={EVENTS}>
         <Calendar.Toolbar onNavigate={onNavigate} data-testid="toolbar">
           {({ title, navigation, goTo }) => (
             <button
@@ -97,7 +97,7 @@ describe('the toolbar', () => {
 describe('the time grid', () => {
   it('leaves the scroll position alone when asked to', () => {
     render(
-      <Calendar.Root spec={WEEK} events={EVENTS}>
+      <Calendar.Root range={WEEK} events={EVENTS}>
         <Calendar.TimeGrid scrollToHour={null} data-testid="grid">
           <Calendar.DayColumns />
         </Calendar.TimeGrid>

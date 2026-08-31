@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { InvalidEventError } from '#src/event'
 import type { EventInput } from '#src/event'
-import type { RangeSpec } from '#src/range'
+import type { CalendarRange } from '#src/range'
 
 import { buildCalendar } from '../index'
 import type { CalendarDay } from '../types'
@@ -118,19 +118,23 @@ describe('boxes are drawn by the wall clock', () => {
   })
 })
 
-describe('the spec reaches event normalization', () => {
-  const spec: RangeSpec = { view: 'day', date: '2026-03-29', timeZone: KYIV }
+describe('the range reaches event normalization', () => {
+  const range: CalendarRange = {
+    view: 'day',
+    date: '2026-03-29',
+    timeZone: KYIV
+  }
 
   it('resolves a skipped wall time forwards by default', () => {
-    const [box] = buildCalendar(spec, [
+    const [box] = buildCalendar(range, [
       { id: 'a', start: '2026-03-29T03:30', duration: 'PT30M' }
     ]).days[0].boxes
 
     expect(box.event.start).toBe('2026-03-29T04:30:00+03:00')
   })
 
-  it('honours the disambiguation the spec asks for', () => {
-    const [box] = buildCalendar({ ...spec, disambiguation: 'earlier' }, [
+  it('honours the disambiguation the range asks for', () => {
+    const [box] = buildCalendar({ ...range, disambiguation: 'earlier' }, [
       { id: 'a', start: '2026-03-29T03:30', duration: 'PT30M' }
     ]).days[0].boxes
 
@@ -138,7 +142,7 @@ describe('the spec reaches event normalization', () => {
   })
 
   it('refuses a skipped wall time without touching the grid', () => {
-    const refusing: RangeSpec = { ...spec, disambiguation: 'reject' }
+    const refusing: CalendarRange = { ...range, disambiguation: 'reject' }
 
     expect(buildCalendar(refusing, []).days[0].slots).toHaveLength(
       SLOTS_PER_DAY

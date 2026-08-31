@@ -22,9 +22,9 @@ export const NowMarker = <TTag extends ElementType = 'div'>({
   style,
   ...rest
 }: NowMarkerProps<TTag>): ReactNode => {
-  const { spec } = useCalendarContext()
+  const { range } = useCalendarContext()
   const { day } = useDayColumnContext()
-  const now = useNow(spec.timeZone)
+  const now = useNow(range.timeZone)
   const Tag = tagOf(as, 'div')
 
   if (!now || now.date !== day.date) return null

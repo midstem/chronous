@@ -1,7 +1,7 @@
 import { bench, describe } from 'vitest'
 
 import { buildCalendar } from '#src/calendar'
-import type { RangeSpec } from '#src/range'
+import type { CalendarRange } from '#src/range'
 
 import { HEAVY, timedEvents } from './helpers'
 
@@ -9,11 +9,11 @@ const KYIV = 'Europe/Kyiv'
 
 const ANCHOR = '2026-03-23'
 
-const day: RangeSpec = { view: 'day', date: ANCHOR, timeZone: KYIV }
+const day: CalendarRange = { view: 'day', date: ANCHOR, timeZone: KYIV }
 
-const week: RangeSpec = { view: 'week', date: ANCHOR, timeZone: KYIV }
+const week: CalendarRange = { view: 'week', date: ANCHOR, timeZone: KYIV }
 
-const month: RangeSpec = { view: 'month', date: ANCHOR, timeZone: KYIV }
+const month: CalendarRange = { view: 'month', date: ANCHOR, timeZone: KYIV }
 
 const thousand = timedEvents(1_000, 1, ANCHOR)
 

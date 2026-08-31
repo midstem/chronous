@@ -1,8 +1,8 @@
-import type { RangeSpec, ViewKind } from '@midstem/chronous'
+import type { CalendarRange, ViewKind } from '@midstem/chronous'
 
 export type CalendarNavigation = {
-  next: RangeSpec | null
-  prev: RangeSpec | null
-  today: (() => RangeSpec) | null
-  withView: (view: ViewKind) => RangeSpec
+  next: CalendarRange | null
+  prev: CalendarRange | null
+  today: (() => CalendarRange) | null
+  withView: (view: ViewKind) => CalendarRange
 }

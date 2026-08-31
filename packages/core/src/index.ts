@@ -6,11 +6,11 @@ export { buildCalendar } from '#src/calendar'
 
 export type {
   AllDayEntry,
-  Calendar,
   CalendarBar,
   CalendarBox,
   CalendarDay,
   CalendarEntry,
+  CalendarLayout,
   CalendarRow,
   CalendarSlot,
   TimedEntry
@@ -38,14 +38,14 @@ export { InvalidRangeError } from '#src/range'
 
 export { InvalidRecurrenceError } from '#src/recurrence'
 
-export type { RangeSpec, ViewKind } from '#src/range'
+export type { CalendarRange, ViewKind } from '#src/range'
 
 export { formatIso } from '#src/time'
 
 export type {
+  DateTimeFormatOptions,
   Disambiguation,
   FormatOptions,
-  FormatSpec,
   IsoDate,
   IsoDateTime,
   LocaleId,

@@ -2,10 +2,10 @@ import type {
   EventInput,
   IsoDate,
   LocaleId,
-  RangeSpec,
+  CalendarRange,
   TimeZoneId,
   ViewKind
-} from '@midstem/chronous'
+} from '@midstem/chronous-react'
 
 import type { Density } from '../density'
 import type { Style } from '../style'
@@ -32,13 +32,13 @@ export type ParseResult =
 
 export type Playground = {
   state: PlaygroundState
-  spec: RangeSpec
+  range: CalendarRange
   source: string
   events: readonly EventInput<EventData>[]
   problem: string | null
   update: (patch: Partial<PlaygroundState>) => void
   changeSource: (source: string) => void
   choosePreset: (id: PresetId) => void
-  applySpec: (spec: RangeSpec) => void
+  applyRange: (range: CalendarRange) => void
   reset: () => void
 }

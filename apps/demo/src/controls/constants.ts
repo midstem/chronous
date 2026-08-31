@@ -1,4 +1,4 @@
-import type { LocaleId, TimeZoneId, ViewKind } from '@midstem/chronous'
+import type { LocaleId, TimeZoneId, ViewKind } from '@midstem/chronous-react'
 
 import type { Option } from '../fields'
 import { UNSET } from '../constants'

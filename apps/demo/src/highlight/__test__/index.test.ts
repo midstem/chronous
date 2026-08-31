@@ -9,7 +9,7 @@ const Calendar = createCalendar<EventData>()
 
 // the board
 export const Board = () => (
-  <Calendar.Root spec={SPEC} events={EVENTS} gutter="66px">
+  <Calendar.Root range={RANGE} events={EVENTS} gutter="66px">
     <Calendar.TimeGrid hourHeight={60}>
       {({ dayHeight }) => \`\${dayHeight}px\`}
     </Calendar.TimeGrid>
@@ -51,7 +51,7 @@ describe('highlight', () => {
     const tokens = highlight(SOURCE)
 
     expect(kindOf(tokens, 'Calendar.Root')).toBe('tag')
-    expect(kindOf(tokens, 'spec')).toBe('attribute')
+    expect(kindOf(tokens, 'range')).toBe('attribute')
     expect(kindOf(tokens, 'gutter')).toBe('attribute')
     expect(kindOf(tokens, '"66px"')).toBe('string')
   })

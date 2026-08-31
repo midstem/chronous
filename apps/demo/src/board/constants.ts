@@ -1,4 +1,4 @@
-import type { ViewKind } from '@midstem/chronous'
+import type { ViewKind } from '@midstem/chronous-react'
 
 export const SLOTTED_VIEWS: readonly ViewKind[] = ['day', 'week', 'days']
 

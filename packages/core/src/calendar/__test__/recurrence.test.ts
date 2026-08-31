@@ -2,14 +2,14 @@ import { describe, expect, it } from 'vitest'
 
 import { InvalidRecurrenceError } from '#src/recurrence'
 import type { EventInput } from '#src/event'
-import type { RangeSpec } from '#src/range'
+import type { CalendarRange } from '#src/range'
 
 import { buildCalendar } from '../index'
-import type { Calendar } from '../types'
+import type { CalendarLayout } from '../types'
 
 const KYIV = 'Europe/Kyiv'
 
-const week: RangeSpec = { view: 'week', date: '2026-03-18', timeZone: KYIV }
+const week: CalendarRange = { view: 'week', date: '2026-03-18', timeZone: KYIV }
 
 const daily: EventInput = {
   id: 'stand-up',
@@ -18,7 +18,9 @@ const daily: EventInput = {
   recurrence: { rule: 'FREQ=DAILY' }
 }
 
-const boxesOf = (calendar: Calendar): Calendar['days'][number]['boxes'] =>
+const boxesOf = (
+  calendar: CalendarLayout
+): CalendarLayout['days'][number]['boxes'] =>
   calendar.days.flatMap((day) => day.boxes)
 
 describe('a recurring event on the grid', () => {

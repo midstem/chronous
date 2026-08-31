@@ -2,34 +2,34 @@ import { normalizeEvents } from '#src/event'
 import type { EventInput, NormalizeContext } from '#src/event'
 import { buildLayout } from '#src/layout'
 import { buildRange } from '#src/range'
-import type { RangeSpec } from '#src/range'
+import type { CalendarRange } from '#src/range'
 import { expandEvents } from '#src/recurrence'
 import { toIso } from '#src/time'
 
 import { dayOf, rowOf } from './helpers'
-import type { Calendar } from './types'
+import type { CalendarLayout } from './types'
 
-const contextOf = (spec: RangeSpec): NormalizeContext => ({
-  timeZone: spec.timeZone,
-  disambiguation: spec.disambiguation
+const contextOf = (range: CalendarRange): NormalizeContext => ({
+  timeZone: range.timeZone,
+  disambiguation: range.disambiguation
 })
 
 export const buildCalendar = <TData>(
-  spec: RangeSpec,
+  range: CalendarRange,
   events: readonly EventInput<TData>[]
-): Calendar<TData> => {
-  const range = buildRange(spec)
-  const context = contextOf(spec)
+): CalendarLayout<TData> => {
+  const built = buildRange(range)
+  const context = contextOf(range)
   const layout = buildLayout(
-    range,
-    expandEvents(normalizeEvents(events, context), range, context)
+    built,
+    expandEvents(normalizeEvents(events, context), built, context)
   )
 
   return {
-    view: range.view,
-    start: toIso(range.start),
-    end: toIso(range.end),
-    days: range.days.map((day, index) => dayOf(day, layout.days[index])),
+    view: built.view,
+    start: toIso(built.start),
+    end: toIso(built.end),
+    days: built.days.map((day, index) => dayOf(day, layout.days[index])),
     rows: layout.rows.map((row) => rowOf(row))
   }
 }

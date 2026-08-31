@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { InvalidRangeError, buildRange } from '#src/range'
-import type { RangeSpec, ViewKind } from '#src/range'
+import type { CalendarRange, ViewKind } from '#src/range'
 import { toIso } from '#src/time'
 
 import { calendarReducer, initialCalendarState } from '../index'
@@ -13,17 +13,17 @@ const ANCHOR = '2026-08-25'
 
 const ISO_DATE_LENGTH = 10
 
-const specOf = (patch: Partial<RangeSpec> = {}): RangeSpec => ({
+const rangeOf = (patch: Partial<CalendarRange> = {}): CalendarRange => ({
   view: 'week',
   date: ANCHOR,
   timeZone: TIME_ZONE,
   ...patch
 })
 
-const stateOf = (patch: Partial<RangeSpec> = {}): CalendarState =>
-  initialCalendarState(specOf(patch))
+const stateOf = (patch: Partial<CalendarRange> = {}): CalendarState =>
+  initialCalendarState(rangeOf(patch))
 
-const STEPS: [ViewKind, Partial<RangeSpec>, string, string][] = [
+const STEPS: [ViewKind, Partial<CalendarRange>, string, string][] = [
   ['day', {}, '2026-08-26', '2026-08-24'],
   ['week', {}, '2026-09-01', '2026-08-18'],
   ['days', {}, '2026-09-01', '2026-08-18'],
@@ -39,8 +39,8 @@ describe('the reducer steps a period at a time', () => {
     (view, patch, forward, backward) => {
       const state = stateOf({ view, ...patch })
 
-      expect(calendarReducer(state, { type: 'next' }).spec.date).toBe(forward)
-      expect(calendarReducer(state, { type: 'prev' }).spec.date).toBe(backward)
+      expect(calendarReducer(state, { type: 'next' }).range.date).toBe(forward)
+      expect(calendarReducer(state, { type: 'prev' }).range.date).toBe(backward)
     }
   )
 
@@ -49,22 +49,22 @@ describe('the reducer steps a period at a time', () => {
     const february = calendarReducer(january, { type: 'next' })
     const march = calendarReducer(february, { type: 'next' })
 
-    expect(february.spec.date).toBe('2026-02-01')
-    expect(march.spec.date).toBe('2026-03-01')
+    expect(february.range.date).toBe('2026-02-01')
+    expect(march.range.date).toBe('2026-03-01')
   })
 
   it('steps over a DST transition without losing a day', () => {
     const state = stateOf({ view: 'day', date: '2026-03-28' })
     const across = calendarReducer(state, { type: 'next' })
 
-    expect(across.spec.date).toBe('2026-03-29')
-    expect(calendarReducer(across, { type: 'next' }).spec.date).toBe(
+    expect(across.range.date).toBe('2026-03-29')
+    expect(calendarReducer(across, { type: 'next' }).range.date).toBe(
       '2026-03-30'
     )
   })
 })
 
-const CONTIGUOUS: [ViewKind, Partial<RangeSpec>][] = [
+const CONTIGUOUS: [ViewKind, Partial<CalendarRange>][] = [
   ['day', {}],
   ['week', {}],
   ['days', {}],
@@ -86,8 +86,8 @@ const isRun = (dates: readonly string[]): boolean =>
     (date, index) => index === 0 || dayAfter(dates[index - 1]) === date
   )
 
-const periodDates = (spec: RangeSpec): string[] =>
-  buildRange(spec)
+const periodDates = (range: CalendarRange): string[] =>
+  buildRange(range)
     .days.filter((day) => day.inPeriod)
     .map((day) => toIso(day.date))
 
@@ -96,8 +96,8 @@ describe('the step agrees with the range it will build', () => {
     '%s leaves no gap and no overlap going forward',
     (view, patch) => {
       const state = stateOf({ view, ...patch })
-      const here = periodDates(state.spec)
-      const there = periodDates(calendarReducer(state, { type: 'next' }).spec)
+      const here = periodDates(state.range)
+      const there = periodDates(calendarReducer(state, { type: 'next' }).range)
 
       expect(isRun(here)).toBe(true)
       expect(isRun(there)).toBe(true)
@@ -109,8 +109,8 @@ describe('the step agrees with the range it will build', () => {
     const state = stateOf({ view, ...patch })
     const there = calendarReducer(state, { type: 'next' })
 
-    expect(periodDates(calendarReducer(there, { type: 'prev' }).spec)).toEqual(
-      periodDates(state.spec)
+    expect(periodDates(calendarReducer(there, { type: 'prev' }).range)).toEqual(
+      periodDates(state.range)
     )
   })
 })
@@ -123,38 +123,38 @@ const TODAY_READINGS: [string, string, string][] = [
   ['UTC', '2026-08-25T00:00:00Z', '2026-08-25']
 ]
 
-describe('today reads the given moment in the spec time zone', () => {
+describe('today reads the given moment in the range time zone', () => {
   it.each(TODAY_READINGS)('%s at %s is %s', (timeZone, now, date) => {
     const state = stateOf({ timeZone })
 
-    expect(calendarReducer(state, { type: 'today', now }).spec.date).toBe(date)
+    expect(calendarReducer(state, { type: 'today', now }).range.date).toBe(date)
   })
 
-  it('takes a wall-clock string as local to the spec time zone', () => {
+  it('takes a wall-clock string as local to the range time zone', () => {
     const state = stateOf({ timeZone: 'Asia/Kolkata' })
     const moved = calendarReducer(state, {
       type: 'today',
       now: '2026-08-26T00:30:00'
     })
 
-    expect(moved.spec.date).toBe('2026-08-26')
+    expect(moved.range.date).toBe('2026-08-26')
   })
 })
 
 describe('the reducer moves the view, the date and the selection', () => {
-  it('goes to a date without touching the rest of the spec', () => {
+  it('goes to a date without touching the rest of the range', () => {
     const state = stateOf({ dayCount: 3, slotMinutes: 15 })
     const moved = calendarReducer(state, { type: 'goto', date: '2027-01-04' })
 
-    expect(moved.spec).toEqual({ ...state.spec, date: '2027-01-04' })
+    expect(moved.range).toEqual({ ...state.range, date: '2027-01-04' })
     expect(moved.selection).toBeNull()
   })
 
   it('changes the view and keeps the anchor', () => {
     const moved = calendarReducer(stateOf(), { type: 'view', view: 'month' })
 
-    expect(moved.spec.view).toBe('month')
-    expect(moved.spec.date).toBe(ANCHOR)
+    expect(moved.range.view).toBe('month')
+    expect(moved.range.date).toBe(ANCHOR)
   })
 
   const SELECTIONS: CalendarSelection[] = [

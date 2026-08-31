@@ -37,10 +37,10 @@ export type DateFields = {
   day: number
 }
 
-export type FormatOptions = Intl.DateTimeFormatOptions
+export type DateTimeFormatOptions = Intl.DateTimeFormatOptions
 
-export type FormatSpec = {
+export type FormatOptions = {
   locale: LocaleId
   timeZone?: TimeZoneId
-  options?: FormatOptions
+  options?: DateTimeFormatOptions
 }

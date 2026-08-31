@@ -1,9 +1,9 @@
 import type {
-  Calendar,
   CalendarBar,
   CalendarDay,
+  CalendarLayout,
   CalendarRow,
-  FormatOptions,
+  DateTimeFormatOptions,
   LocaleId
 } from '@midstem/chronous'
 import { formatIso } from '@midstem/chronous'
@@ -19,13 +19,16 @@ export const HOURS_IN_DAY = 24
 
 export const GUTTER = '3.25rem'
 
-export const WEEKDAY: FormatOptions = { weekday: 'short' }
+export const WEEKDAY: DateTimeFormatOptions = { weekday: 'short' }
 
-export const DAY_NUMBER: FormatOptions = { day: 'numeric' }
+export const DAY_NUMBER: DateTimeFormatOptions = { day: 'numeric' }
 
-export const MONTH: FormatOptions = { month: 'short' }
+export const MONTH: DateTimeFormatOptions = { month: 'short' }
 
-export const CLOCK: FormatOptions = { hour: '2-digit', minute: '2-digit' }
+export const CLOCK: DateTimeFormatOptions = {
+  hour: '2-digit',
+  minute: '2-digit'
+}
 
 export const percentOf = (fraction: number): string => `${fraction * PERCENT}%`
 
@@ -61,7 +64,7 @@ export const renderSlot = <TScope>(
 export const labelOf = (
   value: string,
   locale: LocaleId,
-  options: FormatOptions
+  options: DateTimeFormatOptions
 ): string => {
   try {
     return formatIso(value, { locale, options })
@@ -79,7 +82,7 @@ export type RowWithDays<TData> = {
 }
 
 export const rowsWithDays = <TData>(
-  calendar: Calendar<TData>
+  calendar: CalendarLayout<TData>
 ): RowWithDays<TData>[] => {
   let taken = 0
 
@@ -93,7 +96,7 @@ export const rowsWithDays = <TData>(
 }
 
 export const barsByDay = <TData>(
-  calendar: Calendar<TData>
+  calendar: CalendarLayout<TData>
 ): CalendarBar<TData>[][] => {
   const byDay: CalendarBar<TData>[][] = calendar.days.map(() => [])
   let taken = 0

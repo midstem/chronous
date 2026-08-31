@@ -1,4 +1,4 @@
-import type { EventInput, RangeSpec } from '@midstem/chronous'
+import type { EventInput, CalendarRange } from '@midstem/chronous-react'
 import { useMemo, useState } from 'react'
 
 import { DEFAULT_PRESET, presetOf } from '../fixtures'
@@ -6,7 +6,7 @@ import type { PresetId } from '../fixtures'
 import type { EventData } from '../types'
 
 import { INITIAL_STATE } from './constants'
-import { parseEvents, sourceOf, specOf } from './helpers'
+import { parseEvents, sourceOf, rangeOf } from './helpers'
 import type { Playground, PlaygroundState } from './types'
 
 export const usePlayground = (): Playground => {
@@ -17,7 +17,7 @@ export const usePlayground = (): Playground => {
   )
   const [problem, setProblem] = useState<string | null>(null)
 
-  const spec = useMemo(() => specOf(state), [state])
+  const range = useMemo(() => rangeOf(state), [state])
 
   const update = (patch: Partial<PlaygroundState>): void =>
     setState((held) => ({ ...held, ...patch }))
@@ -47,7 +47,7 @@ export const usePlayground = (): Playground => {
     setProblem(null)
   }
 
-  const applySpec = (next: RangeSpec): void =>
+  const applyRange = (next: CalendarRange): void =>
     update({ view: next.view, date: next.date, timeZone: next.timeZone })
 
   const reset = (): void => {
@@ -59,14 +59,14 @@ export const usePlayground = (): Playground => {
 
   return {
     state,
-    spec,
+    range,
     source,
     events,
     problem,
     update,
     changeSource,
     choosePreset,
-    applySpec,
+    applyRange,
     reset
   }
 }

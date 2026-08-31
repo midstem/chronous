@@ -3,11 +3,11 @@ import { describe, expect, it } from 'vitest'
 import { InvalidEventError } from '#src/event'
 import type { EventInput } from '#src/event'
 import { InvalidRangeError } from '#src/range'
-import type { RangeSpec } from '#src/range'
+import type { CalendarRange } from '#src/range'
 import { MINUTES_IN_DAY } from '#src/time'
 
 import { buildCalendar } from '../index'
-import type { Calendar } from '../types'
+import type { CalendarLayout } from '../types'
 
 const KYIV = 'Europe/Kyiv'
 const ANCHOR = '2026-03-18'
@@ -20,12 +20,12 @@ const MONTH_GRID_ROWS = 6
 const AGENDA_DAYS = 30
 const HALF = 0.5
 
-const week: RangeSpec = { view: 'week', date: ANCHOR, timeZone: KYIV }
+const week: CalendarRange = { view: 'week', date: ANCHOR, timeZone: KYIV }
 
 const calendarOf = (
   inputs: readonly EventInput[] = [],
-  spec: RangeSpec = week
-): Calendar => buildCalendar(spec, inputs)
+  range: CalendarRange = week
+): CalendarLayout => buildCalendar(range, inputs)
 
 const timed = (id: string, start: string, end: string): EventInput => ({
   id,

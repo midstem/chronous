@@ -13,23 +13,25 @@ const TOP_OFFSET = 28
 
 const Z_INDEX = 1
 
-export type MonthBarScope<TData> = {
+export type MonthAllDayEventScope<TData> = {
   event: CalendarEntry<TData>
   bar: CalendarBar<TData>
 }
 
-export type MonthBarsOwnProps<TData> = OwnProps<MonthBarScope<TData>> & {
+export type MonthAllDayEventsOwnProps<TData> = OwnProps<
+  MonthAllDayEventScope<TData>
+> & {
   laneHeight?: number
   gap?: number
   topOffset?: number
 }
 
-export type MonthBarsProps<
+export type MonthAllDayEventsProps<
   TData,
   TTag extends ElementType = 'div'
-> = PolymorphicProps<TTag, MonthBarsOwnProps<TData>>
+> = PolymorphicProps<TTag, MonthAllDayEventsOwnProps<TData>>
 
-export const MonthBars = <TData, TTag extends ElementType = 'div'>({
+export const MonthAllDayEvents = <TData, TTag extends ElementType = 'div'>({
   as,
   children,
   style,
@@ -37,7 +39,7 @@ export const MonthBars = <TData, TTag extends ElementType = 'div'>({
   gap = GAP,
   topOffset = TOP_OFFSET,
   ...rest
-}: MonthBarsProps<TData, TTag>): ReactNode => {
+}: MonthAllDayEventsProps<TData, TTag>): ReactNode => {
   const { row } = useMonthRowContext<TData>()
   const Tag = tagOf(as, 'div')
 

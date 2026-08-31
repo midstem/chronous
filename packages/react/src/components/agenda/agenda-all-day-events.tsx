@@ -5,22 +5,22 @@ import { useAgendaDayContext } from '../context'
 import { renderSlot, tagOf } from '../helpers'
 import type { OwnProps, PolymorphicProps } from '../types'
 
-export type AgendaBarScope<TData> = {
+export type AgendaAllDayEventScope<TData> = {
   event: CalendarEntry<TData>
   bar: CalendarBar<TData>
 }
 
-export type AgendaBarsProps<
+export type AgendaAllDayEventsProps<
   TData,
   TTag extends ElementType = 'div'
-> = PolymorphicProps<TTag, OwnProps<AgendaBarScope<TData>>>
+> = PolymorphicProps<TTag, OwnProps<AgendaAllDayEventScope<TData>>>
 
-export const AgendaBars = <TData, TTag extends ElementType = 'div'>({
+export const AgendaAllDayEvents = <TData, TTag extends ElementType = 'div'>({
   as,
   children,
   style,
   ...rest
-}: AgendaBarsProps<TData, TTag>): ReactNode => {
+}: AgendaAllDayEventsProps<TData, TTag>): ReactNode => {
   const { bars } = useAgendaDayContext<TData>()
   const Tag = tagOf(as, 'div')
 

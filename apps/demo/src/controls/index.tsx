@@ -1,4 +1,4 @@
-import type { ViewKind } from '@midstem/chronous'
+import type { ViewKind } from '@midstem/chronous-react'
 import type { ReactElement } from 'react'
 
 import { NumberField, SelectField, TextField } from '../fields'
@@ -62,7 +62,7 @@ export const Controls = ({
       />
     </Panel>
 
-    <Panel title="RangeSpec" badge="buildCalendar argument">
+    <Panel title="CalendarRange" badge="buildCalendar argument">
       <SelectField
         label="view"
         hint={VIEW_HINT}

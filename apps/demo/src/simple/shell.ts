@@ -1,7 +1,7 @@
 export const OPENING: readonly string[] = [
   'export const Board = () => (',
   '  <Calendar.Root',
-  '    spec={SPEC}',
+  '    range={RANGE}',
   '    events={EVENTS}',
   '    locale={LOCALE}',
   '    className="h-full overflow-auto rounded-xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900"',

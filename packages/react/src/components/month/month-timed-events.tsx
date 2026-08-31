@@ -5,22 +5,22 @@ import { useMonthDayContext } from '../context'
 import { renderSlot, tagOf } from '../helpers'
 import type { OwnProps, PolymorphicProps } from '../types'
 
-export type MonthEntryScope<TData> = {
+export type MonthTimedEventScope<TData> = {
   event: TimedEntry<TData>
   box: CalendarBox<TData>
 }
 
-export type MonthEntriesProps<
+export type MonthTimedEventsProps<
   TData,
   TTag extends ElementType = 'div'
-> = PolymorphicProps<TTag, OwnProps<MonthEntryScope<TData>>>
+> = PolymorphicProps<TTag, OwnProps<MonthTimedEventScope<TData>>>
 
-export const MonthEntries = <TData, TTag extends ElementType = 'div'>({
+export const MonthTimedEvents = <TData, TTag extends ElementType = 'div'>({
   as,
   children,
   style,
   ...rest
-}: MonthEntriesProps<TData, TTag>): ReactNode => {
+}: MonthTimedEventsProps<TData, TTag>): ReactNode => {
   const { boxes } = useMonthDayContext<TData>()
   const Tag = tagOf(as, 'div')
 

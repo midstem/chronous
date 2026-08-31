@@ -130,7 +130,7 @@ describe('slots', () => {
   })
 })
 
-describe('rejected specs', () => {
+describe('rejected ranges', () => {
   it.each([
     ['a slot step of zero', { slotMinutes: 0 }],
     ['a fractional slot step', { slotMinutes: 7.5 }],

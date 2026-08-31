@@ -1,4 +1,4 @@
-import type { EventInput, LocaleId, RangeSpec } from '@midstem/chronous'
+import type { EventInput, LocaleId, CalendarRange } from '@midstem/chronous'
 import type { ElementType, ReactNode } from 'react'
 
 import { useCalendar } from '#src/calendar'
@@ -12,7 +12,7 @@ import type { OwnProps, PolymorphicProps } from '../types'
 const LOCALE: LocaleId = 'en-US'
 
 export type RootOwnProps<TData> = OwnProps<CalendarContextValue<TData>> & {
-  spec: RangeSpec
+  range: CalendarRange
   events: readonly EventInput<TData>[]
   locale?: LocaleId
   gutter?: string
@@ -26,7 +26,7 @@ export type RootProps<
 
 export const Root = <TData, TTag extends ElementType = 'div'>({
   as,
-  spec,
+  range,
   events,
   locale = LOCALE,
   gutter = GUTTER,
@@ -35,7 +35,7 @@ export const Root = <TData, TTag extends ElementType = 'div'>({
   fallback,
   ...rest
 }: RootProps<TData, TTag>): ReactNode => {
-  const { calendar, error } = useCalendar(spec, events)
+  const { calendar, error } = useCalendar(range, events)
   const Tag = tagOf(as, 'div')
 
   if (error) {
@@ -48,7 +48,7 @@ export const Root = <TData, TTag extends ElementType = 'div'>({
     )
   }
 
-  const scope: CalendarContextValue<TData> = { calendar, spec, locale, gutter }
+  const scope: CalendarContextValue<TData> = { calendar, range, locale, gutter }
 
   return (
     <Tag {...rest} style={style}>

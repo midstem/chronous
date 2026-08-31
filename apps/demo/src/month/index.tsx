@@ -1,4 +1,4 @@
-import type { IsoDate } from '@midstem/chronous'
+import type { IsoDate } from '@midstem/chronous-react'
 import type { ReactElement } from 'react'
 
 import { Calendar } from '../calendar'
@@ -55,7 +55,7 @@ export const Month = ({ today }: MonthProps): ReactElement => (
             <span className="block" style={{ height: lanes * LANE_HEIGHT }} />
 
             <span className="flex flex-col gap-0.5">
-              <Calendar.MonthEntries
+              <Calendar.MonthTimedEvents
                 as="span"
                 className="flex items-center gap-1 truncate rounded px-1 text-[11px] leading-5 hover:bg-raised"
               >
@@ -72,13 +72,13 @@ export const Month = ({ today }: MonthProps): ReactElement => (
                     </span>
                   </>
                 )}
-              </Calendar.MonthEntries>
+              </Calendar.MonthTimedEvents>
             </span>
           </>
         )}
       </Calendar.MonthDays>
 
-      <Calendar.MonthBars
+      <Calendar.MonthAllDayEvents
         laneHeight={LANE_HEIGHT}
         gap={BAR_GAP}
         topOffset={NUMBER_HEIGHT}
@@ -93,7 +93,7 @@ export const Month = ({ today }: MonthProps): ReactElement => (
             {edge(bar.continuesAfter)}
           </span>
         )}
-      </Calendar.MonthBars>
+      </Calendar.MonthAllDayEvents>
     </Calendar.MonthRows>
   </Calendar.MonthGrid>
 )

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { normalizeEvents } from '#src/event'
 import type { EventInput } from '#src/event'
 import { buildRange } from '#src/range'
-import type { RangeSpec } from '#src/range'
+import type { CalendarRange } from '#src/range'
 import { DAYS_IN_WEEK } from '#src/time'
 
 import { buildLanes } from '../index'
@@ -15,21 +15,21 @@ const WEEK_STARTS = [0, 1, 2, 3, 4, 5, 6] as const
 const AGENDA_DAYS = 30
 const WEDNESDAY_INDEX = 2
 
-const base: RangeSpec = { date: ANCHOR, timeZone: KYIV, view: 'week' }
+const base: CalendarRange = { date: ANCHOR, timeZone: KYIV, view: 'week' }
 
 const rowsOf = (
   inputs: readonly EventInput[],
-  spec: RangeSpec = base
+  range: CalendarRange = base
 ): LaneRow[] =>
   buildLanes(
-    buildRange(spec),
-    normalizeEvents(inputs, { timeZone: spec.timeZone })
+    buildRange(range),
+    normalizeEvents(inputs, { timeZone: range.timeZone })
   )
 
 const spansOf = (
   inputs: readonly EventInput[],
-  spec: RangeSpec = base
-): PlacedSpan[] => rowsOf(inputs, spec)[0].spans
+  range: CalendarRange = base
+): PlacedSpan[] => rowsOf(inputs, range)[0].spans
 
 const idsOf = (spans: readonly PlacedSpan[]): string[] =>
   spans.map((span) => span.event.id)
@@ -175,10 +175,10 @@ describe('timed events', () => {
 })
 
 describe('a month grid', () => {
-  const spec: RangeSpec = { ...base, view: 'month' }
+  const range: CalendarRange = { ...base, view: 'month' }
 
   it('breaks a bar at the week boundary', () => {
-    const rows = rowsOf([allDay('a', ANCHOR, '2026-03-25')], spec)
+    const rows = rowsOf([allDay('a', ANCHOR, '2026-03-25')], range)
     const [before] = rows[3].spans
     const [after] = rows[4].spans
 
@@ -197,17 +197,17 @@ describe('a month grid', () => {
   })
 
   it('carries bars on the days around the month', () => {
-    const rows = rowsOf([allDay('a', '2026-02-24')], spec)
+    const rows = rowsOf([allDay('a', '2026-02-24')], range)
 
     expect(idsOf(rows[0].spans)).toEqual(['a'])
   })
 
   it.each(WEEK_STARTS)('cuts into whole weeks from day %d', (weekStartsOn) => {
-    const weekly: RangeSpec = { ...spec, weekStartsOn }
+    const weekly: CalendarRange = { ...range, weekStartsOn }
     const rows = rowsOf([allDay('a', '2026-03-10', '2026-04-02')], weekly)
-    const range = buildRange(weekly)
+    const built = buildRange(weekly)
 
-    expect(rows.length * DAYS_IN_WEEK).toBe(range.days.length)
+    expect(rows.length * DAYS_IN_WEEK).toBe(built.days.length)
     expect(rows.every((row) => row.days === DAYS_IN_WEEK)).toBe(true)
     expect(
       rows.every((row) => row.spans.every((span) => span.days <= DAYS_IN_WEEK))
