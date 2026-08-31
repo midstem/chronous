@@ -65,9 +65,11 @@ today to read and no move that would help — fix the zone instead.
 
 ## Components
 
-`Calendar` is a compound component built on the same two hooks. It owns
-geometry, scoping and keys — the parts every consumer would otherwise rewrite —
-and nothing else: no class names, no colours, no markup you cannot replace.
+`Calendar` is a compound component built on the same two hooks. The tedious half
+comes already wired — geometry, scoping, keys — and everything you can see is
+yours to write: every part renders the tag you name, takes your class names and
+your markup, and hands you the event behind it. Nothing here is closed off; the
+pieces arrive pre-wired, not locked down, so styling is the part left for you.
 
 ```tsx
 import { Calendar } from '@midstem/chronous-react'
@@ -106,11 +108,14 @@ import { Calendar } from '@midstem/chronous-react'
 ```
 
 `MonthGrid` / `MonthWeekdays` / `MonthRows` / `MonthDays` / `MonthBars` /
-`MonthDots` cover the month view, and `AgendaList` / `AgendaDays` /
+`MonthEntries` cover the month view, and `AgendaList` / `AgendaDays` /
 `AgendaBars` / `AgendaBoxes` the agenda. `Toolbar` wraps
-`useCalendarNavigation` and reports the spec to move to through `onSpec`.
+`useCalendarNavigation` and reports where to move to through `onNavigate` — the
+same function reaches its render prop as `goTo`, so a toolbar of your own reads
+`goTo(navigation.next)`. `useNow` reads the wall clock in the calendar's own
+zone when you want to mark today yourself.
 
-Four rules cover the whole surface.
+Five rules cover the whole surface.
 
 **A plural name iterates.** `DayColumns` renders one element per day,
 `TimedEvents` one per box, `TimeSlots` one per slot. This is the one place the
@@ -143,11 +148,26 @@ outside its parent throws and names the parent it wants.
 the layout it computed underneath the `style` you pass — so an event can be a
 `<button>`, and a `top` of your own overrides the one the engine placed.
 
+**Per-item state arrives as data attributes**, because `className` is shared by
+every element a component renders. `data-date` and `data-in-period` land on
+`DayHeadings`, `DayColumns`, `MonthDays` and `AgendaDays`; `data-event-id` and
+`data-continues-before` / `data-continues-after` land on the event components. A
+prop you pass wins over the attribute, so you can pin one when you need to:
+
+```tsx
+<Calendar.MonthDays className="data-[in-period=false]:bg-zinc-50" />
+```
+
 **The gutter lives on `Root`.** `Header`, `AllDayRow` and `TimeGrid` lay out the
 same CSS grid, so the width of the leading column is one prop on the root rather
 than three that can drift apart. Month and agenda ignore it.
 
-`Root` renders `fallback(error)` when the spec or the events cannot be read, and
+`TimeGrid` scrolls to `scrollToHour` on mount by finding the nearest element
+that actually scrolls — itself when nothing else does, the ancestor when your
+layout puts a sticky header above it. Pass `null` to leave the scroll alone.
+
+`Root` renders `fallback(error)` inside its own element when the spec or the
+events cannot be read, so the layout does not collapse, and
 rethrows when no fallback is given: an invalid range is a bug in the input, and
 swallowing it into a blank grid hides it. Reach for `useCalendar` directly when
 you want to handle it as state instead.

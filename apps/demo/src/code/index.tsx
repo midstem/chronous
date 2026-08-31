@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { ReactElement } from 'react'
 
-import { COPIED_LABEL, COPIED_MS, COPY_LABEL } from './constants'
+import { highlight } from '../highlight'
+
+import { COPIED_LABEL, COPIED_MS, COPY_LABEL, TOKEN_STYLES } from './constants'
 
 type CodeProps = {
   fileName: string
@@ -17,6 +19,7 @@ export const Code = ({
   source
 }: CodeProps): ReactElement => {
   const [copied, setCopied] = useState(false)
+  const tokens = useMemo(() => highlight(source), [source])
 
   const copy = (): void => {
     void navigator.clipboard.writeText(source).then(() => {
@@ -36,8 +39,12 @@ export const Code = ({
       </header>
 
       <section className="flex min-h-0 flex-1 overflow-hidden rounded-xl border border-line bg-surface shadow-sm">
-        <pre className="min-h-0 flex-1 overflow-auto p-4 font-mono text-xs leading-5">
-          {source}
+        <pre className="min-h-0 flex-1 overflow-auto p-4 font-mono text-xs leading-5 text-code-plain">
+          {tokens.map((token, index) => (
+            <span key={index} className={TOKEN_STYLES[token.kind]}>
+              {token.text}
+            </span>
+          ))}
         </pre>
       </section>
 

@@ -36,6 +36,9 @@ export const AllDayEvents = <TData, TTag extends ElementType = 'div'>({
       {row.bars.map((bar) => (
         <Tag
           key={`${bar.event.id}-${bar.startDay}`}
+          data-event-id={bar.event.id}
+          data-continues-before={bar.continuesBefore}
+          data-continues-after={bar.continuesAfter}
           {...rest}
           style={styleOf(
             {

@@ -6,7 +6,7 @@ import { AgendaDays } from './agenda/agenda-days'
 import { AgendaList } from './agenda/agenda-list'
 import { MonthBars } from './month/month-bars'
 import { MonthDays } from './month/month-days'
-import { MonthDots } from './month/month-dots'
+import { MonthEntries } from './month/month-entries'
 import { MonthGrid } from './month/month-grid'
 import { MonthRows } from './month/month-rows'
 import { MonthWeekdays } from './month/month-weekdays'
@@ -30,7 +30,7 @@ import type { AgendaDaysProps } from './agenda/agenda-days'
 import type { AgendaListProps } from './agenda/agenda-list'
 import type { MonthBarsProps } from './month/month-bars'
 import type { MonthDaysProps } from './month/month-days'
-import type { MonthDotsProps } from './month/month-dots'
+import type { MonthEntriesProps } from './month/month-entries'
 import type { MonthGridProps } from './month/month-grid'
 import type { MonthRowsProps } from './month/month-rows'
 import type { MonthWeekdaysProps } from './month/month-weekdays'
@@ -67,7 +67,7 @@ export const Calendar = {
   MonthRows,
   MonthDays,
   MonthBars,
-  MonthDots,
+  MonthEntries,
   AgendaList,
   AgendaDays,
   AgendaBars,
@@ -129,8 +129,8 @@ export type CalendarComponents<TData> = {
   MonthBars: <TTag extends ElementType = 'div'>(
     props: MonthBarsProps<TData, TTag>
   ) => ReactNode
-  MonthDots: <TTag extends ElementType = 'span'>(
-    props: MonthDotsProps<TData, TTag>
+  MonthEntries: <TTag extends ElementType = 'div'>(
+    props: MonthEntriesProps<TData, TTag>
   ) => ReactNode
   AgendaList: <TTag extends ElementType = 'div'>(
     props: AgendaListProps<TData, TTag>
@@ -156,7 +156,7 @@ export type { AgendaDayScope, AgendaDaysProps } from './agenda/agenda-days'
 export type { AgendaListProps } from './agenda/agenda-list'
 export type { MonthBarScope, MonthBarsProps } from './month/month-bars'
 export type { MonthDayScope, MonthDaysProps } from './month/month-days'
-export type { MonthDotScope, MonthDotsProps } from './month/month-dots'
+export type { MonthEntriesProps, MonthEntryScope } from './month/month-entries'
 export type { MonthGridProps } from './month/month-grid'
 export type { MonthRowsProps } from './month/month-rows'
 export type {

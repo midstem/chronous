@@ -6,6 +6,8 @@ import { PRESETS } from '../fixtures'
 import type { PresetId } from '../fixtures'
 import { Panel } from '../panel'
 import type { PlaygroundState } from '../playground'
+import { STYLE_OPTIONS } from '../style'
+import type { Style } from '../style'
 
 import {
   DATE_HINT,
@@ -15,6 +17,7 @@ import {
   LOCALES,
   LOCALE_HINT,
   PRESET_HINT,
+  STYLE_HINT,
   SLOT_MINUTES_HINT,
   TIME_ZONE_HINT,
   VIEW_HINT,
@@ -38,6 +41,17 @@ export const Controls = ({
   choosePreset
 }: ControlsProps): ReactElement => (
   <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-auto">
+    <Panel title="Style" badge="playground only">
+      <SelectField
+        label="style"
+        labelHidden
+        hint={STYLE_HINT}
+        value={state.style}
+        options={STYLE_OPTIONS}
+        onChange={(value) => update({ style: value as Style })}
+      />
+    </Panel>
+
     <Panel title="Fixture" badge="playground only">
       <SelectField
         label="preset"

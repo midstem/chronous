@@ -5,6 +5,11 @@ import type { EventData } from '../types'
 
 import { KEY_PATTERN, KEY_REPLACEMENT, SPEC_INDENT } from './constants'
 
+export type Needs = {
+  tones: boolean
+  clock: boolean
+}
+
 const literal = (value: unknown): string =>
   typeof value === 'number' ? String(value) : `'${String(value)}'`
 
@@ -19,33 +24,16 @@ const eventLines = (events: readonly EventInput<EventData>[]): string =>
     KEY_REPLACEMENT
   )
 
-export const preambleOf = (
-  spec: RangeSpec,
-  events: readonly EventInput<EventData>[],
-  locale: LocaleId,
-  slotted: boolean
-): readonly string[] => [
-  "import { formatIso } from '@midstem/chronous'",
-  'import type {',
-  '  Calendar as CalendarData,',
-  '  EventInput,',
-  '  FormatOptions,',
-  '  IsoDate,',
-  '  IsoDateTime,',
-  '  RangeSpec,',
-  '  ViewKind',
-  "} from '@midstem/chronous'",
-  "import { useCalendar, useCalendarNavigation } from '@midstem/chronous-react'",
-  slotted
-    ? "import { useEffect, useRef, useState } from 'react'"
-    : "import { useState } from 'react'",
-  '',
-  'type EventData = { title: string }',
-  '',
-  `const LOCALE = '${locale}'`,
-  '',
-  "const VIEWS: ViewKind[] = ['day', 'week', 'days', 'month', 'agenda']",
-  '',
+const importsOf = (needs: Needs): readonly string[] => [
+  ...(needs.clock ? ["import { formatIso } from '@midstem/chronous'"] : []),
+  needs.clock
+    ? "import type { EventInput, IsoDateTime, RangeSpec, ViewKind } from '@midstem/chronous'"
+    : "import type { EventInput, RangeSpec, ViewKind } from '@midstem/chronous'",
+  "import { createCalendar } from '@midstem/chronous-react'",
+  "import { useState } from 'react'"
+]
+
+const TONES: readonly string[] = [
   'const TONES = [',
   "  'bg-blue-700 text-white dark:bg-blue-900 dark:text-blue-100',",
   "  'bg-violet-700 text-white dark:bg-violet-900 dark:text-violet-100',",
@@ -63,32 +51,45 @@ export const preambleOf = (
   '',
   '  return TONES[hash]',
   '}',
+  ''
+]
+
+const CLOCK: readonly string[] = [
+  'const clock = (at: IsoDateTime): string => {',
+  '  try {',
+  '    return formatIso(at, {',
+  '      locale: LOCALE,',
+  "      options: { hour: '2-digit', minute: '2-digit' }",
+  '    })',
+  '  } catch {',
+  '    return at',
+  '  }',
+  '}',
+  ''
+]
+
+export const preambleOf = (
+  spec: RangeSpec,
+  events: readonly EventInput<EventData>[],
+  locale: LocaleId,
+  needs: Needs
+): readonly string[] => [
+  ...importsOf(needs),
   '',
+  'type EventData = { title: string }',
+  '',
+  'const Calendar = createCalendar<EventData>()',
+  '',
+  `const LOCALE = '${locale}'`,
+  '',
+  "const VIEWS: ViewKind[] = ['day', 'week', 'days', 'month', 'agenda']",
+  '',
+  ...(needs.tones ? TONES : []),
+  ...(needs.clock ? CLOCK : []),
   'const INITIAL_SPEC: RangeSpec = {',
   specLines(spec),
   '}',
   '',
   `const EVENTS: EventInput<EventData>[] = ${eventLines(events)}`,
-  '',
-  'const label = (at: IsoDateTime | IsoDate, options: FormatOptions): string => {',
-  '  try {',
-  '    return formatIso(at, { locale: LOCALE, options })',
-  '  } catch {',
-  '    return at',
-  '  }',
-  '}',
-  '',
-  'const titleOf = (calendar: CalendarData<EventData>): string => {',
-  '  const days = calendar.days',
-  '  const anchor = (days.find((day) => day.inPeriod) ?? days[0]).date',
-  '',
-  "  if (calendar.view === 'day')",
-  "    return label(anchor, { day: 'numeric', month: 'long', year: 'numeric' })",
-  '',
-  "  if (calendar.view === 'month')",
-  "    return label(anchor, { month: 'long', year: 'numeric' })",
-  '',
-  "  return `${label(days[0].date, { day: 'numeric', month: 'short' })} – ${label(days[days.length - 1].date, { day: 'numeric', month: 'long', year: 'numeric' })}`",
-  '}',
   ''
 ]

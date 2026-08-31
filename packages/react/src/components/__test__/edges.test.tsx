@@ -18,7 +18,7 @@ describe('a label the runtime cannot format', () => {
         <Calendar.Header>
           <Calendar.DayHeadings data-testid="heading" />
         </Calendar.Header>
-        <Calendar.Toolbar onSpec={vi.fn()} data-testid="toolbar" />
+        <Calendar.Toolbar onNavigate={vi.fn()} data-testid="toolbar" />
       </Calendar.Root>
     )
 
@@ -29,54 +29,54 @@ describe('a label the runtime cannot format', () => {
 
 describe('the toolbar', () => {
   const Toolbar = ({
-    onSpec,
+    onNavigate,
     children
   }: {
-    onSpec: (spec: RangeSpec) => void
+    onNavigate: (spec: RangeSpec) => void
     children?: ReactNode
   }): ReactNode => (
     <Calendar.Root spec={WEEK} events={EVENTS}>
-      <Calendar.Toolbar onSpec={onSpec} data-testid="toolbar">
+      <Calendar.Toolbar onNavigate={onNavigate} data-testid="toolbar">
         {children}
       </Calendar.Toolbar>
     </Calendar.Root>
   )
 
   it('steps back a period', () => {
-    const onSpec = vi.fn()
+    const onNavigate = vi.fn()
 
-    render(<Toolbar onSpec={onSpec} />)
+    render(<Toolbar onNavigate={onNavigate} />)
 
     screen.getByLabelText('Previous period').click()
 
-    expect(onSpec).toHaveBeenCalledWith(
+    expect(onNavigate).toHaveBeenCalledWith(
       expect.objectContaining({ date: '2026-03-11' })
     )
   })
 
   it('reads today off the clock at the click', () => {
-    const onSpec = vi.fn()
+    const onNavigate = vi.fn()
 
-    render(<Toolbar onSpec={onSpec} />)
+    render(<Toolbar onNavigate={onNavigate} />)
 
     screen.getByText('Today').click()
 
-    expect(onSpec).toHaveBeenCalledWith(
+    expect(onNavigate).toHaveBeenCalledWith(
       expect.objectContaining({ view: 'week' })
     )
   })
 
   it('hands navigation over to a render prop', () => {
-    const onSpec = vi.fn()
+    const onNavigate = vi.fn()
 
     render(
       <Calendar.Root spec={WEEK} events={EVENTS}>
-        <Calendar.Toolbar onSpec={onSpec} data-testid="toolbar">
-          {({ title, navigation }) => (
+        <Calendar.Toolbar onNavigate={onNavigate} data-testid="toolbar">
+          {({ title, navigation, goTo }) => (
             <button
               type="button"
               onClick={() => {
-                onSpec(navigation.withView('day'))
+                goTo(navigation.withView('day'))
               }}
             >
               {title}
@@ -88,7 +88,7 @@ describe('the toolbar', () => {
 
     screen.getByRole('button').click()
 
-    expect(onSpec).toHaveBeenCalledWith(
+    expect(onNavigate).toHaveBeenCalledWith(
       expect.objectContaining({ view: 'day' })
     )
   })

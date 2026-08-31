@@ -1,8 +1,8 @@
-import type { TimeZoneId } from '@midstem/chronous'
+import type { IsoDate, TimeZoneId } from '@midstem/chronous'
 import { useEffect, useMemo, useState } from 'react'
 
 export type Now = {
-  date: string
+  date: IsoDate
   minuteOfDay: number
 }
 

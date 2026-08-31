@@ -11,6 +11,7 @@ import {
   templateOf
 } from '../helpers'
 import type { OwnProps, PolymorphicProps } from '../types'
+import { scrollerOf } from './helpers'
 
 const HOUR_HEIGHT = 60
 
@@ -35,13 +36,15 @@ export const TimeGrid = <TTag extends ElementType = 'div'>({
   ...rest
 }: TimeGridProps<TTag>): ReactNode => {
   const { calendar, gutter } = useCalendarContext()
-  const scroller = useRef<HTMLElement>(null)
+  const held = useRef<HTMLElement>(null)
   const Tag = tagOf(as, 'div')
 
   useEffect(() => {
-    if (scrollToHour === null || !scroller.current) return
+    if (scrollToHour === null) return
 
-    scroller.current.scrollTop = hourHeight * scrollToHour
+    const scroller = scrollerOf(held.current)
+
+    if (scroller) scroller.scrollTop = hourHeight * scrollToHour
   }, [hourHeight, scrollToHour])
 
   const scope: TimeGridContextValue = {
@@ -51,11 +54,7 @@ export const TimeGrid = <TTag extends ElementType = 'div'>({
 
   return (
     <TimeGridProvider value={scope}>
-      <Tag
-        {...rest}
-        ref={scroller}
-        style={styleOf({ overflowY: 'auto' }, style)}
-      >
+      <Tag {...rest} ref={held} style={styleOf({ overflowY: 'auto' }, style)}>
         <div
           style={{
             display: 'grid',

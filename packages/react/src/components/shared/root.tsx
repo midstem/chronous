@@ -41,16 +41,20 @@ export const Root = <TData, TTag extends ElementType = 'div'>({
   if (error) {
     if (!fallback) throw error
 
-    return fallback(error)
+    return (
+      <Tag {...rest} style={style}>
+        {fallback(error)}
+      </Tag>
+    )
   }
 
   const scope: CalendarContextValue<TData> = { calendar, spec, locale, gutter }
 
   return (
-    <CalendarProvider value={scope}>
-      <Tag {...rest} style={style}>
+    <Tag {...rest} style={style}>
+      <CalendarProvider value={scope}>
         {renderSlot(children, scope, null)}
-      </Tag>
-    </CalendarProvider>
+      </CalendarProvider>
+    </Tag>
   )
 }

@@ -1,27 +1,41 @@
 import type { EventInput, LocaleId, RangeSpec } from '@midstem/chronous'
 
-import { SLOTTED_VIEWS, MONTH_VIEW } from '../board'
+import { MONTH_VIEW, SLOTTED_VIEWS } from '../board'
 import type { EventData } from '../types'
 
-import { AGENDA_BODY, AGENDA_HELPERS } from './agenda'
+import { AGENDA_BODY } from './agenda'
 import { MONTH_BODY, MONTH_HELPERS } from './month'
 import { preambleOf } from './preamble'
-import { CLOSING, openingOf } from './shell'
+import type { Needs } from './preamble'
+import { CLOSING, OPENING } from './shell'
 import { SLOTTED_BODY, slottedHelpers } from './slotted'
 
 type Template = {
+  needs: Needs
   helpers: readonly string[]
   body: readonly string[]
 }
 
 const templateOf = (spec: RangeSpec, hourHeight: number): Template => {
   if (SLOTTED_VIEWS.includes(spec.view))
-    return { helpers: slottedHelpers(hourHeight), body: SLOTTED_BODY }
+    return {
+      needs: { tones: true, clock: true },
+      helpers: slottedHelpers(hourHeight),
+      body: SLOTTED_BODY
+    }
 
   if (spec.view === MONTH_VIEW)
-    return { helpers: MONTH_HELPERS, body: MONTH_BODY }
+    return {
+      needs: { tones: true, clock: false },
+      helpers: MONTH_HELPERS,
+      body: MONTH_BODY
+    }
 
-  return { helpers: AGENDA_HELPERS, body: AGENDA_BODY }
+  return {
+    needs: { tones: false, clock: false },
+    helpers: [],
+    body: AGENDA_BODY
+  }
 }
 
 export const snippetOf = (
@@ -30,13 +44,12 @@ export const snippetOf = (
   locale: LocaleId,
   hourHeight: number
 ): string => {
-  const slotted = SLOTTED_VIEWS.includes(spec.view)
-  const { helpers, body } = templateOf(spec, hourHeight)
+  const { needs, helpers, body } = templateOf(spec, hourHeight)
 
   return [
-    ...preambleOf(spec, events, locale, slotted),
+    ...preambleOf(spec, events, locale, needs),
     ...helpers,
-    ...openingOf(slotted),
+    ...OPENING,
     ...body,
     ...CLOSING
   ].join('\n')

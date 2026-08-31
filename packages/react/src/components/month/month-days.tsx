@@ -14,6 +14,7 @@ export type MonthDayScope<TData> = {
   boxes: CalendarBox<TData>[]
   dayNumber: string
   inPeriod: boolean
+  lanes: number
 }
 
 export type MonthDaysProps<
@@ -28,7 +29,7 @@ export const MonthDays = <TData, TTag extends ElementType = 'div'>({
   ...rest
 }: MonthDaysProps<TData, TTag>): ReactNode => {
   const { locale } = useCalendarContext<TData>()
-  const { days } = useMonthRowContext<TData>()
+  const { row, days } = useMonthRowContext<TData>()
   const Tag = tagOf(as, 'div')
 
   return (
@@ -38,10 +39,21 @@ export const MonthDays = <TData, TTag extends ElementType = 'div'>({
 
         return (
           <MonthDayProvider key={day.date} value={{ day, boxes: day.boxes }}>
-            <Tag {...rest} style={style}>
+            <Tag
+              data-date={day.date}
+              data-in-period={day.inPeriod}
+              {...rest}
+              style={style}
+            >
               {renderSlot(
                 children,
-                { day, boxes: day.boxes, dayNumber, inPeriod: day.inPeriod },
+                {
+                  day,
+                  boxes: day.boxes,
+                  dayNumber,
+                  inPeriod: day.inPeriod,
+                  lanes: row.lanes
+                },
                 dayNumber
               )}
             </Tag>

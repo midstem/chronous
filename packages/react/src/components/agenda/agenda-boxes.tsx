@@ -34,6 +34,9 @@ export const AgendaBoxes = <TData, TTag extends ElementType = 'div'>({
         return (
           <Tag
             key={`${box.event.id}-${box.startMinute}`}
+            data-event-id={box.event.id}
+            data-continues-before={box.continuesBefore}
+            data-continues-after={box.continuesAfter}
             {...rest}
             style={style}
           >

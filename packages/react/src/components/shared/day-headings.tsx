@@ -34,7 +34,13 @@ export const DayHeadings = <TData, TTag extends ElementType = 'div'>({
         const dayNumber = labelOf(day.date, locale, DAY_NUMBER)
 
         return (
-          <Tag key={day.date} {...rest} style={style}>
+          <Tag
+            key={day.date}
+            data-date={day.date}
+            data-in-period={day.inPeriod}
+            {...rest}
+            style={style}
+          >
             {renderSlot(
               children,
               {

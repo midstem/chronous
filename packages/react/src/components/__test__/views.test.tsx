@@ -20,10 +20,11 @@ describe('the month view', () => {
         <Calendar.MonthWeekdays data-testid="weekday" />
         <Calendar.MonthRows data-testid="row">
           <Calendar.MonthDays data-testid="day">
-            {({ dayNumber }) => (
+            {({ dayNumber, lanes }) => (
               <>
                 <span>{dayNumber}</span>
-                <Calendar.MonthDots data-testid="dot" />
+                <span data-testid="lanes">{lanes}</span>
+                <Calendar.MonthEntries data-testid="entry" />
               </>
             )}
           </Calendar.MonthDays>
@@ -54,10 +55,19 @@ describe('the month view', () => {
     expect(styleOf(bar)).not.toContain('pointer-events: none')
   })
 
-  it('marks every timed event of a day with a dot', () => {
+  it('tells a cell how many lanes the bars above it take', () => {
     render(<Month />)
 
-    expect(screen.getAllByTestId('dot')).toHaveLength(2)
+    const lanes = textsOf('lanes')
+
+    expect(new Set(lanes)).toEqual(new Set(['0', '1']))
+    expect(lanes.filter((count) => count === '1')).toHaveLength(7)
+  })
+
+  it('lists every timed event of a day in its cell', () => {
+    render(<Month />)
+
+    expect(textsOf('entry')).toEqual(['standup', 'review'])
   })
 })
 
@@ -144,29 +154,29 @@ describe('the now marker', () => {
 
 describe('the toolbar', () => {
   const Toolbar = ({
-    onSpec
+    onNavigate
   }: {
-    onSpec: (spec: RangeSpec) => void
+    onNavigate: (spec: RangeSpec) => void
   }): React.ReactNode => (
     <Calendar.Root spec={WEEK} events={EVENTS} locale={LOCALE}>
-      <Calendar.Toolbar onSpec={onSpec} views={['week', 'month']} />
+      <Calendar.Toolbar onNavigate={onNavigate} views={['week', 'month']} />
     </Calendar.Root>
   )
 
   it('steps the spec the engine handed it', () => {
-    const onSpec = vi.fn()
+    const onNavigate = vi.fn()
 
-    render(<Toolbar onSpec={onSpec} />)
+    render(<Toolbar onNavigate={onNavigate} />)
 
     screen.getByLabelText('Next period').click()
 
-    expect(onSpec).toHaveBeenCalledWith(
+    expect(onNavigate).toHaveBeenCalledWith(
       expect.objectContaining({ date: '2026-03-25', view: 'week' })
     )
   })
 
   it('marks the view the calendar is showing', () => {
-    render(<Toolbar onSpec={vi.fn()} />)
+    render(<Toolbar onNavigate={vi.fn()} />)
 
     expect(screen.getByText('week').getAttribute('aria-pressed')).toBe('true')
     expect(screen.getByText('month').getAttribute('aria-pressed')).toBe('false')
@@ -188,6 +198,21 @@ describe('the root', () => {
     )
 
     expect(textOf(screen.getByTestId('failed'))).toBe('InvalidRangeError')
+  })
+
+  it('keeps its own element around the fallback', () => {
+    const { container } = render(
+      <Calendar.Root
+        spec={BAD}
+        events={EVENTS}
+        className="shell"
+        fallback={() => <p>failed</p>}
+      >
+        <Calendar.Header />
+      </Calendar.Root>
+    )
+
+    expect(container.querySelector('.shell')?.textContent).toBe('failed')
   })
 
   it('lets the error through when no fallback is given', () => {
