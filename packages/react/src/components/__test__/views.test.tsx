@@ -154,29 +154,29 @@ describe('the now marker', () => {
 
 describe('the toolbar', () => {
   const Toolbar = ({
-    onSpec
+    onNavigate
   }: {
-    onSpec: (spec: RangeSpec) => void
+    onNavigate: (spec: RangeSpec) => void
   }): React.ReactNode => (
     <Calendar.Root spec={WEEK} events={EVENTS} locale={LOCALE}>
-      <Calendar.Toolbar onSpec={onSpec} views={['week', 'month']} />
+      <Calendar.Toolbar onNavigate={onNavigate} views={['week', 'month']} />
     </Calendar.Root>
   )
 
   it('steps the spec the engine handed it', () => {
-    const onSpec = vi.fn()
+    const onNavigate = vi.fn()
 
-    render(<Toolbar onSpec={onSpec} />)
+    render(<Toolbar onNavigate={onNavigate} />)
 
     screen.getByLabelText('Next period').click()
 
-    expect(onSpec).toHaveBeenCalledWith(
+    expect(onNavigate).toHaveBeenCalledWith(
       expect.objectContaining({ date: '2026-03-25', view: 'week' })
     )
   })
 
   it('marks the view the calendar is showing', () => {
-    render(<Toolbar onSpec={vi.fn()} />)
+    render(<Toolbar onNavigate={vi.fn()} />)
 
     expect(screen.getByText('week').getAttribute('aria-pressed')).toBe('true')
     expect(screen.getByText('month').getAttribute('aria-pressed')).toBe('false')

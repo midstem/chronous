@@ -15,11 +15,11 @@ export type ToolbarScope = {
   navigation: CalendarNavigation
   spec: RangeSpec
   title: string
-  onSpec: (spec: RangeSpec) => void
+  goTo: (spec: RangeSpec) => void
 }
 
 export type ToolbarOwnProps = OwnProps<ToolbarScope> & {
-  onSpec: (spec: RangeSpec) => void
+  onNavigate: (spec: RangeSpec) => void
   views?: readonly ViewKind[]
 }
 
@@ -32,7 +32,7 @@ export const Toolbar = <TTag extends ElementType = 'div'>({
   as,
   children,
   style,
-  onSpec,
+  onNavigate,
   views = VIEWS,
   ...rest
 }: ToolbarProps<TTag>): ReactNode => {
@@ -45,7 +45,11 @@ export const Toolbar = <TTag extends ElementType = 'div'>({
   if (children !== undefined) {
     return (
       <Tag {...rest} style={style}>
-        {renderSlot(children, { navigation, spec, title, onSpec }, null)}
+        {renderSlot(
+          children,
+          { navigation, spec, title, goTo: onNavigate },
+          null
+        )}
       </Tag>
     )
   }
@@ -56,14 +60,14 @@ export const Toolbar = <TTag extends ElementType = 'div'>({
         type="button"
         aria-label="Previous period"
         disabled={!prev}
-        onClick={() => prev && onSpec(prev)}
+        onClick={() => prev && onNavigate(prev)}
       >
         ‹
       </button>
       <button
         type="button"
         disabled={!today}
-        onClick={() => today && onSpec(today())}
+        onClick={() => today && onNavigate(today())}
       >
         Today
       </button>
@@ -71,7 +75,7 @@ export const Toolbar = <TTag extends ElementType = 'div'>({
         type="button"
         aria-label="Next period"
         disabled={!next}
-        onClick={() => next && onSpec(next)}
+        onClick={() => next && onNavigate(next)}
       >
         ›
       </button>
@@ -81,7 +85,7 @@ export const Toolbar = <TTag extends ElementType = 'div'>({
           key={view}
           type="button"
           aria-pressed={view === spec.view}
-          onClick={() => onSpec(navigation.withView(view))}
+          onClick={() => onNavigate(navigation.withView(view))}
         >
           {view}
         </button>

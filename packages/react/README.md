@@ -110,9 +110,10 @@ import { Calendar } from '@midstem/chronous-react'
 `MonthGrid` / `MonthWeekdays` / `MonthRows` / `MonthDays` / `MonthBars` /
 `MonthEntries` cover the month view, and `AgendaList` / `AgendaDays` /
 `AgendaBars` / `AgendaBoxes` the agenda. `Toolbar` wraps
-`useCalendarNavigation` and reports the spec to move to through `onSpec`, and
-`useNow` reads the wall clock in the calendar's own zone when you want to mark
-today yourself.
+`useCalendarNavigation` and reports where to move to through `onNavigate` — the
+same function reaches its render prop as `goTo`, so a toolbar of your own reads
+`goTo(navigation.next)`. `useNow` reads the wall clock in the calendar's own
+zone when you want to mark today yourself.
 
 Five rules cover the whole surface.
 
