@@ -63,6 +63,112 @@ and not on the inputs: it is read at the click, in the calendar's own zone. It
 is null only when that zone itself cannot be read, because then there is no
 today to read and no move that would help — fix the zone instead.
 
+## Components
+
+`Calendar` is a compound component built on the same two hooks. It owns
+geometry, scoping and keys — the parts every consumer would otherwise rewrite —
+and nothing else: no class names, no colours, no markup you cannot replace.
+
+```tsx
+import { Calendar } from '@midstem/chronous-react'
+
+;<Calendar.Root spec={spec} events={events} locale="en-GB">
+  <Calendar.Header className="grid-header">
+    <Calendar.DayHeadings className="heading">
+      {({ weekday, dayNumber }) => (
+        <>
+          <span>{weekday}</span> <strong>{dayNumber}</strong>
+        </>
+      )}
+    </Calendar.DayHeadings>
+  </Calendar.Header>
+
+  <Calendar.AllDayRow label="all-day">
+    <Calendar.AllDayEvents className="bar">
+      {({ event }) => event.data?.title}
+    </Calendar.AllDayEvents>
+  </Calendar.AllDayRow>
+
+  <Calendar.TimeGrid hourHeight={60}>
+    <Calendar.TimeAxis className="gutter">
+      <Calendar.TimeLabels className="tick" />
+    </Calendar.TimeAxis>
+
+    <Calendar.DayColumns className="column">
+      <Calendar.TimeSlots className="line" />
+      <Calendar.NowMarker className="now" />
+      <Calendar.TimedEvents as="button" className="event" onClick={open}>
+        {({ event }) => event.data?.title}
+      </Calendar.TimedEvents>
+    </Calendar.DayColumns>
+  </Calendar.TimeGrid>
+</Calendar.Root>
+```
+
+`MonthGrid` / `MonthWeekdays` / `MonthRows` / `MonthDays` / `MonthBars` /
+`MonthDots` cover the month view, and `AgendaList` / `AgendaDays` /
+`AgendaBars` / `AgendaBoxes` the agenda. `Toolbar` wraps
+`useCalendarNavigation` and reports the spec to move to through `onSpec`.
+
+Four rules cover the whole surface.
+
+**A plural name iterates.** `DayColumns` renders one element per day,
+`TimedEvents` one per box, `TimeSlots` one per slot. This is the one place the
+API departs from Radix, where a child is always one element: the calendar's
+repetition is the engine's, not the consumer's, so the component owns the loop
+and the keys. Singular names — `Root`, `Header`, `TimeGrid`, `NowMarker` — render
+once.
+
+**Children are a node or a function of the scope**, and either way they render
+inside that scope, so nested components resolve:
+
+```tsx
+<Calendar.MonthDays>
+  {({ dayNumber, inPeriod }) => (
+    <div data-outside={!inPeriod}>
+      {dayNumber}
+      <Calendar.MonthDots />
+    </div>
+  )}
+</Calendar.MonthDays>
+```
+
+Every scope is also a hook — `useDayColumnContext`, `useMonthRowContext`,
+`useAgendaDayContext` and the rest — so a component of your own can sit inside
+`Calendar.DayColumns` and read the day without a render prop. Reading a scope
+outside its parent throws and names the parent it wants.
+
+**`as` picks the tag, and your `style` wins.** Every component forwards
+`className`, `ref`, handlers and `aria-*` to the element it renders, and merges
+the layout it computed underneath the `style` you pass — so an event can be a
+`<button>`, and a `top` of your own overrides the one the engine placed.
+
+**The gutter lives on `Root`.** `Header`, `AllDayRow` and `TimeGrid` lay out the
+same CSS grid, so the width of the leading column is one prop on the root rather
+than three that can drift apart. Month and agenda ignore it.
+
+`Root` renders `fallback(error)` when the spec or the events cannot be read, and
+rethrows when no fallback is given: an invalid range is a bug in the input, and
+swallowing it into a blank grid hides it. Reach for `useCalendar` directly when
+you want to handle it as state instead.
+
+## Typed event data
+
+Context cannot infer a type argument, so `Calendar` on its own hands render
+props `data?: unknown`. `createCalendar` binds the namespace once and the type
+flows to every slot:
+
+```tsx
+const Calendar = createCalendar<{ title: string; owner: string }>()
+
+<Calendar.TimedEvents>
+  {({ event }) => event.data?.title}
+</Calendar.TimedEvents>
+```
+
+It is the same object at runtime — a cast, not a factory — so it costs nothing
+and can be created at module scope.
+
 ## Labels
 
 No formatting ships here, and the hooks take no `locale`. Labels are the
