@@ -8,6 +8,7 @@ import type {
 } from '@midstem/chronous'
 
 import type { Density } from '../density'
+import type { Style } from '../style'
 import type { PresetId } from '../fixtures'
 import type { EventData } from '../types'
 
@@ -22,6 +23,7 @@ export type PlaygroundState = {
   locale: LocaleId
   preset: PresetId
   density: Density
+  style: Style
 }
 
 export type ParseResult =

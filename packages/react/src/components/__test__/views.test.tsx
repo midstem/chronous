@@ -20,9 +20,10 @@ describe('the month view', () => {
         <Calendar.MonthWeekdays data-testid="weekday" />
         <Calendar.MonthRows data-testid="row">
           <Calendar.MonthDays data-testid="day">
-            {({ dayNumber }) => (
+            {({ dayNumber, lanes }) => (
               <>
                 <span>{dayNumber}</span>
+                <span data-testid="lanes">{lanes}</span>
                 <Calendar.MonthEntries data-testid="entry" />
               </>
             )}
@@ -52,6 +53,15 @@ describe('the month view', () => {
     expect(textOf(bar)).toBe('offsite')
     expect(styleOf(bar)).toContain('top: 28px')
     expect(styleOf(bar)).not.toContain('pointer-events: none')
+  })
+
+  it('tells a cell how many lanes the bars above it take', () => {
+    render(<Month />)
+
+    const lanes = textsOf('lanes')
+
+    expect(new Set(lanes)).toEqual(new Set(['0', '1']))
+    expect(lanes.filter((count) => count === '1')).toHaveLength(7)
   })
 
   it('lists every timed event of a day in its cell', () => {

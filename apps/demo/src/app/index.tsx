@@ -12,7 +12,6 @@ import { DEFAULT_MODE } from '../mode'
 import type { Mode } from '../mode'
 import { usePlayground } from '../playground'
 import { Sidebar } from '../sidebar'
-import { Simple } from '../simple'
 import { Snippet } from '../snippet'
 import { useColorScheme } from '../theme'
 
@@ -59,6 +58,7 @@ export const App = (): ReactElement => {
                 events={events}
                 locale={state.locale}
                 density={state.density}
+                style={state.style}
                 onNavigate={playground.applySpec}
                 onDensity={(density) => playground.update({ density })}
               />
@@ -71,15 +71,7 @@ export const App = (): ReactElement => {
               events={events}
               locale={state.locale}
               hourHeight={hourHeightOf(state.density)}
-            />
-          )}
-
-          {mode === 'simple' && (
-            <Simple
-              spec={spec}
-              events={events}
-              locale={state.locale}
-              hourHeight={hourHeightOf(state.density)}
+              style={state.style}
             />
           )}
         </main>

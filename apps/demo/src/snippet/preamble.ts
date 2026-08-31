@@ -8,7 +8,6 @@ import { KEY_PATTERN, KEY_REPLACEMENT, SPEC_INDENT } from './constants'
 export type Needs = {
   tones: boolean
   clock: boolean
-  rowScope: boolean
 }
 
 const literal = (value: unknown): string =>
@@ -30,9 +29,7 @@ const importsOf = (needs: Needs): readonly string[] => [
   needs.clock
     ? "import type { EventInput, IsoDateTime, RangeSpec, ViewKind } from '@midstem/chronous'"
     : "import type { EventInput, RangeSpec, ViewKind } from '@midstem/chronous'",
-  needs.rowScope
-    ? "import { createCalendar, useMonthRowContext } from '@midstem/chronous-react'"
-    : "import { createCalendar } from '@midstem/chronous-react'",
+  "import { createCalendar } from '@midstem/chronous-react'",
   "import { useState } from 'react'"
 ]
 

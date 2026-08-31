@@ -19,20 +19,20 @@ type Template = {
 const templateOf = (spec: RangeSpec, hourHeight: number): Template => {
   if (SLOTTED_VIEWS.includes(spec.view))
     return {
-      needs: { tones: true, clock: true, rowScope: false },
+      needs: { tones: true, clock: true },
       helpers: slottedHelpers(hourHeight),
       body: SLOTTED_BODY
     }
 
   if (spec.view === MONTH_VIEW)
     return {
-      needs: { tones: true, clock: false, rowScope: true },
+      needs: { tones: true, clock: false },
       helpers: MONTH_HELPERS,
       body: MONTH_BODY
     }
 
   return {
-    needs: { tones: false, clock: false, rowScope: false },
+    needs: { tones: false, clock: false },
     helpers: [],
     body: AGENDA_BODY
   }

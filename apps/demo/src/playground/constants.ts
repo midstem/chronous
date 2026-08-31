@@ -1,5 +1,6 @@
 import { DEFAULT_DENSITY } from '../density'
 import { DEFAULT_PRESET } from '../fixtures'
+import { DEFAULT_STYLE } from '../style'
 import { UNSET } from '../constants'
 
 import type { PlaygroundState } from './types'
@@ -14,7 +15,8 @@ export const INITIAL_STATE: PlaygroundState = {
   disambiguation: UNSET,
   locale: 'en-GB',
   preset: DEFAULT_PRESET.id,
-  density: DEFAULT_DENSITY
+  density: DEFAULT_DENSITY,
+  style: DEFAULT_STYLE
 }
 
 export const EVENTS_NOT_AN_ARRAY = 'The events must be a JSON array.'

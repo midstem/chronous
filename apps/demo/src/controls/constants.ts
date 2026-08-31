@@ -81,3 +81,6 @@ export const LOCALE_HINT =
   'Passed to formatIso for every heading, gutter label and cell number. The engine never reads it.'
 
 export const PRESET_HINT = 'Replaces the events below with a ready fixture.'
+
+export const STYLE_HINT =
+  'How the board draws itself, and which file the Code tab prints. Simple keeps the same components with plain markup on them.'

@@ -1,5 +1,4 @@
 import type { IsoDate } from '@midstem/chronous'
-import { useMonthRowContext } from '@midstem/chronous-react'
 import type { ReactElement } from 'react'
 
 import { Calendar } from '../calendar'
@@ -18,53 +17,12 @@ type MonthProps = {
   today: IsoDate | null
 }
 
-type CellProps = {
-  date: IsoDate
-  dayNumber: string
-  today: IsoDate | null
-}
-
 const edge = (shown: boolean): string => (shown ? CONTINUES : '')
 
 const numberClass = (isToday: boolean): string =>
   isToday
     ? 'flex size-6 items-center justify-center rounded-full bg-accent text-xs font-semibold text-surface'
     : 'flex size-6 items-center justify-center text-xs font-medium'
-
-const Cell = ({ date, dayNumber, today }: CellProps): ReactElement => {
-  const { row } = useMonthRowContext()
-
-  return (
-    <>
-      <span
-        className="flex items-center justify-center"
-        style={{ height: NUMBER_HEIGHT }}
-      >
-        <span className={numberClass(date === today)}>{dayNumber}</span>
-      </span>
-
-      <span className="block" style={{ height: row.lanes * LANE_HEIGHT }} />
-
-      <span className="flex flex-col gap-0.5">
-        <Calendar.MonthEntries
-          as="span"
-          className="flex items-center gap-1 truncate rounded px-1 text-[11px] leading-5 hover:bg-raised"
-        >
-          {({ event }) => (
-            <>
-              <span
-                className={`size-1.5 shrink-0 rounded-full ${dotOf(event.id)}`}
-              />
-              <span className="truncate" title={event.data?.title ?? event.id}>
-                {event.data?.title ?? event.id}
-              </span>
-            </>
-          )}
-        </Calendar.MonthEntries>
-      </span>
-    </>
-  )
-}
 
 export const Month = ({ today }: MonthProps): ReactElement => (
   <Calendar.MonthGrid>
@@ -83,8 +41,40 @@ export const Month = ({ today }: MonthProps): ReactElement => (
       style={{ minHeight: CELL_MIN_HEIGHT }}
     >
       <Calendar.MonthDays className="flex flex-col border-l border-hair px-1 pb-1 first:border-l-0 data-[in-period=false]:bg-sunken data-[in-period=false]:text-faint">
-        {({ day, dayNumber }) => (
-          <Cell date={day.date} dayNumber={dayNumber} today={today} />
+        {({ day, dayNumber, lanes }) => (
+          <>
+            <span
+              className="flex items-center justify-center"
+              style={{ height: NUMBER_HEIGHT }}
+            >
+              <span className={numberClass(day.date === today)}>
+                {dayNumber}
+              </span>
+            </span>
+
+            <span className="block" style={{ height: lanes * LANE_HEIGHT }} />
+
+            <span className="flex flex-col gap-0.5">
+              <Calendar.MonthEntries
+                as="span"
+                className="flex items-center gap-1 truncate rounded px-1 text-[11px] leading-5 hover:bg-raised"
+              >
+                {({ event }) => (
+                  <>
+                    <span
+                      className={`size-1.5 shrink-0 rounded-full ${dotOf(event.id)}`}
+                    />
+                    <span
+                      className="truncate"
+                      title={event.data?.title ?? event.id}
+                    >
+                      {event.data?.title ?? event.id}
+                    </span>
+                  </>
+                )}
+              </Calendar.MonthEntries>
+            </span>
+          </>
         )}
       </Calendar.MonthDays>
 
