@@ -40,6 +40,9 @@ export const TimedEvents = <TData, TTag extends ElementType = 'div'>({
       {day.boxes.map((box) => (
         <Tag
           key={`${box.event.id}-${box.startMinute}`}
+          data-event-id={box.event.id}
+          data-continues-before={box.continuesBefore}
+          data-continues-after={box.continuesAfter}
           {...rest}
           style={styleOf(
             {

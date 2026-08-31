@@ -63,7 +63,12 @@ export const AgendaDays = <TData, TTag extends ElementType = 'div'>({
 
         return (
           <AgendaDayProvider key={day.date} value={value}>
-            <Tag {...rest} style={style}>
+            <Tag
+              data-date={day.date}
+              data-in-period={day.inPeriod}
+              {...rest}
+              style={style}
+            >
               {renderSlot(children, scope, scope.dayNumber)}
             </Tag>
           </AgendaDayProvider>

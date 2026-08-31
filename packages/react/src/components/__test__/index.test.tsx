@@ -180,6 +180,40 @@ describe('the polymorphic surface', () => {
   })
 })
 
+describe('state a stylesheet can reach', () => {
+  it('marks a day with its date and whether it is in the period', () => {
+    render(<Week />)
+
+    const [first] = screen.getAllByTestId('heading')
+
+    expect(first.getAttribute('data-date')).toBe('2026-03-16')
+    expect(first.getAttribute('data-in-period')).toBe('true')
+  })
+
+  it('marks an event with its id and the edges it runs past', () => {
+    render(<Week />)
+
+    const bar = screen.getByTestId('bar')
+
+    expect(bar.getAttribute('data-event-id')).toBe('offsite')
+    expect(bar.getAttribute('data-continues-before')).toBe('false')
+  })
+
+  it('lets a consumer prop win over the attribute it sets', () => {
+    render(
+      <Calendar.Root spec={WEEK} events={EVENTS}>
+        <Calendar.Header>
+          <Calendar.DayHeadings data-testid="heading" data-date="pinned" />
+        </Calendar.Header>
+      </Calendar.Root>
+    )
+
+    expect(screen.getAllByTestId('heading')[0].getAttribute('data-date')).toBe(
+      'pinned'
+    )
+  })
+})
+
 describe('the gutter', () => {
   it('is read from the root so the three grids stay in step', () => {
     const { container } = render(<Week gutter="5rem" />)

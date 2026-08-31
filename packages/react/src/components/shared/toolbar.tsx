@@ -15,6 +15,7 @@ export type ToolbarScope = {
   navigation: CalendarNavigation
   spec: RangeSpec
   title: string
+  onSpec: (spec: RangeSpec) => void
 }
 
 export type ToolbarOwnProps = OwnProps<ToolbarScope> & {
@@ -44,7 +45,7 @@ export const Toolbar = <TTag extends ElementType = 'div'>({
   if (children !== undefined) {
     return (
       <Tag {...rest} style={style}>
-        {renderSlot(children, { navigation, spec, title }, null)}
+        {renderSlot(children, { navigation, spec, title, onSpec }, null)}
       </Tag>
     )
   }

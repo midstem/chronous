@@ -10,6 +10,10 @@ export type { CalendarNavigation } from '#src/navigation'
 
 export { Calendar, createCalendar } from '#src/components'
 
+export { useNow } from './components/slotted/use-now'
+
+export type { Now } from './components/slotted/use-now'
+
 export type * from '#src/components'
 
 export {

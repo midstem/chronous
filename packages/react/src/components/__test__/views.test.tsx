@@ -23,7 +23,7 @@ describe('the month view', () => {
             {({ dayNumber }) => (
               <>
                 <span>{dayNumber}</span>
-                <Calendar.MonthDots data-testid="dot" />
+                <Calendar.MonthEntries data-testid="entry" />
               </>
             )}
           </Calendar.MonthDays>
@@ -54,10 +54,10 @@ describe('the month view', () => {
     expect(styleOf(bar)).not.toContain('pointer-events: none')
   })
 
-  it('marks every timed event of a day with a dot', () => {
+  it('lists every timed event of a day in its cell', () => {
     render(<Month />)
 
-    expect(screen.getAllByTestId('dot')).toHaveLength(2)
+    expect(textsOf('entry')).toEqual(['standup', 'review'])
   })
 })
 
@@ -188,6 +188,21 @@ describe('the root', () => {
     )
 
     expect(textOf(screen.getByTestId('failed'))).toBe('InvalidRangeError')
+  })
+
+  it('keeps its own element around the fallback', () => {
+    const { container } = render(
+      <Calendar.Root
+        spec={BAD}
+        events={EVENTS}
+        className="shell"
+        fallback={() => <p>failed</p>}
+      >
+        <Calendar.Header />
+      </Calendar.Root>
+    )
+
+    expect(container.querySelector('.shell')?.textContent).toBe('failed')
   })
 
   it('lets the error through when no fallback is given', () => {

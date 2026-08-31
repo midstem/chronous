@@ -38,7 +38,12 @@ export const MonthDays = <TData, TTag extends ElementType = 'div'>({
 
         return (
           <MonthDayProvider key={day.date} value={{ day, boxes: day.boxes }}>
-            <Tag {...rest} style={style}>
+            <Tag
+              data-date={day.date}
+              data-in-period={day.inPeriod}
+              {...rest}
+              style={style}
+            >
               {renderSlot(
                 children,
                 { day, boxes: day.boxes, dayNumber, inPeriod: day.inPeriod },

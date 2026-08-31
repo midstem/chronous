@@ -27,7 +27,14 @@ export const AgendaBars = <TData, TTag extends ElementType = 'div'>({
   return (
     <>
       {bars.map((bar) => (
-        <Tag key={`${bar.event.id}-${bar.startDay}`} {...rest} style={style}>
+        <Tag
+          key={`${bar.event.id}-${bar.startDay}`}
+          data-event-id={bar.event.id}
+          data-continues-before={bar.continuesBefore}
+          data-continues-after={bar.continuesAfter}
+          {...rest}
+          style={style}
+        >
           {renderSlot(children, { event: bar.event, bar }, bar.event.id)}
         </Tag>
       ))}
