@@ -1,33 +1,42 @@
-import { useCalendarContext } from '../context/calendar-context'
-import { MonthRowProvider } from '../context/month-row-context'
-import { rowsWithDays } from '../helpers'
-import type { ReactNode } from 'react'
+import type { ElementType, ReactNode } from 'react'
 
-type MonthRowsProps = {
-  children: ReactNode
-  className?: string
-}
+import { MonthRowProvider, useCalendarContext } from '../context'
+import type { MonthRowContextValue } from '../context'
+import { columnsOf, renderSlot, rowsWithDays, styleOf, tagOf } from '../helpers'
+import type { OwnProps, PolymorphicProps } from '../types'
 
-export const MonthRows = <TData = any,>({
+export type MonthRowsProps<
+  TData,
+  TTag extends ElementType = 'div'
+> = PolymorphicProps<TTag, OwnProps<MonthRowContextValue<TData>>>
+
+export const MonthRows = <TData, TTag extends ElementType = 'div'>({
+  as,
   children,
-  className
-}: MonthRowsProps): ReactNode => {
+  style,
+  ...rest
+}: MonthRowsProps<TData, TTag>): ReactNode => {
   const { calendar } = useCalendarContext<TData>()
-  const groups = rowsWithDays(calendar)
+  const Tag = tagOf(as, 'div')
 
   return (
     <>
-      {groups.map(({ row, days }) => (
-        <MonthRowProvider key={row.start} value={{ row, days }}>
-          <div
-            className={className}
-            style={{
-              position: 'relative',
-              flex: 1
-            }}
+      {rowsWithDays(calendar).map((scope) => (
+        <MonthRowProvider key={scope.row.start} value={scope}>
+          <Tag
+            {...rest}
+            style={styleOf(
+              {
+                position: 'relative',
+                flex: 1,
+                display: 'grid',
+                gridTemplateColumns: columnsOf(scope.days.length)
+              },
+              style
+            )}
           >
-            {children}
-          </div>
+            {renderSlot(children, scope, null)}
+          </Tag>
         </MonthRowProvider>
       ))}
     </>

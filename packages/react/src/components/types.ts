@@ -1,26 +1,20 @@
-import type { ComponentPropsWithoutRef, ElementType, ReactNode } from 'react'
+import type {
+  ComponentPropsWithoutRef,
+  CSSProperties,
+  ElementType
+} from 'react'
+import type { ReactNode } from 'react'
 
-// ---------------------------------------------------------------------------
-// Polymorphic `as` prop
-// ---------------------------------------------------------------------------
+export type Slot<TScope> = ReactNode | ((scope: TScope) => ReactNode)
 
-export type AsProp<C extends ElementType> = {
-  as?: C
+export type OwnProps<TScope> = {
+  children?: Slot<TScope>
+  style?: CSSProperties
 }
 
-export type PolymorphicProps<C extends ElementType, Props = object> = Props &
-  AsProp<C> &
-  Omit<ComponentPropsWithoutRef<C>, keyof Props | 'as'>
-
-// ---------------------------------------------------------------------------
-// Render-prop children helper
-// ---------------------------------------------------------------------------
-
-export type RenderProp<Ctx> = ((ctx: Ctx) => ReactNode) | ReactNode
-
-// ---------------------------------------------------------------------------
-// Percent & layout constants
-// ---------------------------------------------------------------------------
-
-export const PERCENT = 100
-export const MINUTES_IN_DAY = 1440
+export type PolymorphicProps<TTag extends ElementType, TOwn> = TOwn & {
+  as?: TTag
+} & Omit<
+    ComponentPropsWithoutRef<TTag>,
+    'as' | 'style' | 'children' | keyof TOwn
+  >

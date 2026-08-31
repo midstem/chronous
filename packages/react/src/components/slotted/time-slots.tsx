@@ -1,35 +1,46 @@
-import type { ReactNode } from 'react'
 import type { CalendarSlot } from '@midstem/chronous'
-import { useDayColumnContext } from '../context/day-column-context'
-import { fractionOf } from '../helpers'
+import type { ElementType, ReactNode } from 'react'
 
-export type TimeSlotsProps = {
-  children?: (ctx: { slot: CalendarSlot; minuteOfDay: number }) => ReactNode
-  className?: string
+import { useDayColumnContext } from '../context'
+import { minutePercentOf, renderSlot, styleOf, tagOf } from '../helpers'
+import type { OwnProps, PolymorphicProps } from '../types'
+
+export type TimeSlotScope = {
+  slot: CalendarSlot
+  minuteOfDay: number
 }
 
-export const TimeSlots = ({
+export type TimeSlotsProps<TTag extends ElementType = 'span'> =
+  PolymorphicProps<TTag, OwnProps<TimeSlotScope>>
+
+export const TimeSlots = <TTag extends ElementType = 'span'>({
+  as,
   children,
-  className
-}: TimeSlotsProps): ReactNode => {
+  style,
+  ...rest
+}: TimeSlotsProps<TTag>): ReactNode => {
   const { day } = useDayColumnContext()
+  const Tag = tagOf(as, 'span')
 
   return (
     <>
-      {day.slots.map((slot) => {
-        const top = `${fractionOf(slot.minuteOfDay) * 100}%`
-        const ctx = { slot, minuteOfDay: slot.minuteOfDay }
-
-        return (
-          <span
-            key={slot.minuteOfDay}
-            style={{ position: 'absolute', top, left: 0, right: 0 }}
-            className={className}
-          >
-            {typeof children === 'function' ? children(ctx) : null}
-          </span>
-        )
-      })}
+      {day.slots.map((slot) => (
+        <Tag
+          key={slot.minuteOfDay}
+          {...rest}
+          style={styleOf(
+            {
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              top: minutePercentOf(slot.minuteOfDay)
+            },
+            style
+          )}
+        >
+          {renderSlot(children, { slot, minuteOfDay: slot.minuteOfDay }, null)}
+        </Tag>
+      ))}
     </>
   )
 }

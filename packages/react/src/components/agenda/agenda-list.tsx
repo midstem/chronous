@@ -1,51 +1,27 @@
-import { useCalendarContext } from '../context/calendar-context'
-import { AgendaDayProvider } from '../context/agenda-day-context'
-import type { Calendar, CalendarBar } from '@midstem/chronous'
-import type { ReactNode } from 'react'
+import type { ElementType, ReactNode } from 'react'
 
-const barsOnDay = <TData,>(
-  calendar: Calendar<TData>,
-  dayIndex: number
-): CalendarBar<TData>[] => {
-  let taken = 0
-  for (const row of calendar.rows) {
-    if (dayIndex < taken + row.days) {
-      const offset = dayIndex - taken
-      return row.bars.filter(
-        (bar) => bar.startDay <= offset && offset < bar.endDay
-      )
-    }
-    taken += row.days
-  }
-  return []
-}
+import { useCalendarContext } from '../context'
+import type { CalendarContextValue } from '../context'
+import { renderSlot, tagOf } from '../helpers'
+import type { OwnProps, PolymorphicProps } from '../types'
 
-export type AgendaListProps = {
-  children: ReactNode
-  className?: string
-  showEmpty?: boolean
-}
+export type AgendaListProps<
+  TData,
+  TTag extends ElementType = 'div'
+> = PolymorphicProps<TTag, OwnProps<CalendarContextValue<TData>>>
 
-export const AgendaList = ({
+export const AgendaList = <TData, TTag extends ElementType = 'div'>({
+  as,
   children,
-  className,
-  showEmpty = false
-}: AgendaListProps): ReactNode => {
-  const { calendar } = useCalendarContext()
+  style,
+  ...rest
+}: AgendaListProps<TData, TTag>): ReactNode => {
+  const scope = useCalendarContext<TData>()
+  const Tag = tagOf(as, 'div')
 
   return (
-    <div className={className}>
-      {calendar.days.map((day, index) => {
-        const bars = barsOnDay(calendar, index)
-        const boxes = day.boxes
-        if (!showEmpty && bars.length === 0 && boxes.length === 0) return null
-
-        return (
-          <AgendaDayProvider key={day.date} value={{ day, bars, boxes }}>
-            {children}
-          </AgendaDayProvider>
-        )
-      })}
-    </div>
+    <Tag {...rest} style={style}>
+      {renderSlot(children, scope, null)}
+    </Tag>
   )
 }

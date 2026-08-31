@@ -8,4 +8,26 @@ export { useCalendarNavigation } from '#src/navigation'
 
 export type { CalendarNavigation } from '#src/navigation'
 
-export { Calendar } from './components'
+export { Calendar, createCalendar } from '#src/components'
+
+export type * from '#src/components'
+
+export {
+  useAgendaDayContext,
+  useAllDayContext,
+  useCalendarContext,
+  useDayColumnContext,
+  useMonthDayContext,
+  useMonthRowContext,
+  useTimeGridContext
+} from './components/context'
+
+export type {
+  AgendaDayContextValue,
+  AllDayContextValue,
+  CalendarContextValue,
+  DayColumnContextValue,
+  MonthDayContextValue,
+  MonthRowContextValue,
+  TimeGridContextValue
+} from './components/context'

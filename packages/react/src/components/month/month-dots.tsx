@@ -1,52 +1,56 @@
-import { useMonthDayContext } from '../context/month-day-context'
-import type { TimedEntry, CalendarBox } from '@midstem/chronous'
-import { Fragment } from 'react'
-import type { ReactNode } from 'react'
+import type { CalendarBox, TimedEntry } from '@midstem/chronous'
+import type { ElementType, ReactNode } from 'react'
 
-type MonthDotsProps<TData = any> = {
-  children?: (ctx: {
-    event: TimedEntry<TData>
-    box: CalendarBox<TData>
-  }) => ReactNode
-  className?: string
+import { useMonthDayContext } from '../context'
+import { renderSlot, styleOf, tagOf } from '../helpers'
+import type { OwnProps, PolymorphicProps } from '../types'
+
+const SIZE = 6
+
+export type MonthDotScope<TData> = {
+  event: TimedEntry<TData>
+  box: CalendarBox<TData>
+}
+
+export type MonthDotsOwnProps<TData> = OwnProps<MonthDotScope<TData>> & {
   size?: number
 }
 
-export const MonthDots = <TData = any,>({
+export type MonthDotsProps<
+  TData,
+  TTag extends ElementType = 'span'
+> = PolymorphicProps<TTag, MonthDotsOwnProps<TData>>
+
+export const MonthDots = <TData, TTag extends ElementType = 'span'>({
+  as,
   children,
-  className,
-  size = 6
-}: MonthDotsProps<TData>): ReactNode => {
+  style,
+  size = SIZE,
+  ...rest
+}: MonthDotsProps<TData, TTag>): ReactNode => {
   const { boxes } = useMonthDayContext<TData>()
+  const Tag = tagOf(as, 'span')
 
   return (
-    <div
-      className={className}
-      style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: '2px'
-      }}
-    >
-      {boxes.map((box) => {
-        const event = box.event
-        const key = `${event.id}-${box.startMinute}`
-
-        return children ? (
-          <Fragment key={key}>{children({ event, box })}</Fragment>
-        ) : (
-          <span
-            key={key}
-            style={{
+    <>
+      {boxes.map((box) => (
+        <Tag
+          key={`${box.event.id}-${box.startMinute}`}
+          {...rest}
+          style={styleOf(
+            {
               display: 'inline-block',
               width: size,
               height: size,
               borderRadius: '50%',
               backgroundColor: 'currentColor'
-            }}
-          />
-        )
-      })}
-    </div>
+            },
+            style
+          )}
+        >
+          {renderSlot(children, { event: box.event, box }, null)}
+        </Tag>
+      ))}
+    </>
   )
 }

@@ -1,47 +1,52 @@
-import type { ReactNode } from 'react'
-import type { CalendarDay } from '@midstem/chronous'
-import { useCalendarContext } from '../context/calendar-context'
-import { weekdayLabel, numberLabel } from '../helpers'
+import type { CalendarDay, IsoDate } from '@midstem/chronous'
+import type { ElementType, ReactNode } from 'react'
 
-export type DayHeadingsProps<TData> = {
-  children?: (ctx: {
-    day: CalendarDay<TData>
-    weekday: string
-    dayNumber: string
-    date: string
-    inPeriod: boolean
-  }) => ReactNode
-  className?: string
+import { useCalendarContext } from '../context'
+import { DAY_NUMBER, WEEKDAY, labelOf, renderSlot, tagOf } from '../helpers'
+import type { OwnProps, PolymorphicProps } from '../types'
+
+export type DayHeadingScope<TData> = {
+  day: CalendarDay<TData>
+  date: IsoDate
+  weekday: string
+  dayNumber: string
+  inPeriod: boolean
 }
 
-export const DayHeadings = <TData,>({
+export type DayHeadingsProps<
+  TData,
+  TTag extends ElementType = 'div'
+> = PolymorphicProps<TTag, OwnProps<DayHeadingScope<TData>>>
+
+export const DayHeadings = <TData, TTag extends ElementType = 'div'>({
+  as,
   children,
-  className
-}: DayHeadingsProps<TData>): ReactNode => {
+  style,
+  ...rest
+}: DayHeadingsProps<TData, TTag>): ReactNode => {
   const { calendar, locale } = useCalendarContext<TData>()
+  const Tag = tagOf(as, 'div')
 
   return (
     <>
       {calendar.days.map((day) => {
-        const weekday = weekdayLabel(day.date, locale)
-        const dayNumber = numberLabel(day.date, locale)
+        const weekday = labelOf(day.date, locale, WEEKDAY)
+        const dayNumber = labelOf(day.date, locale, DAY_NUMBER)
 
         return (
-          <div key={day.date} className={className}>
-            {children ? (
-              children({
+          <Tag key={day.date} {...rest} style={style}>
+            {renderSlot(
+              children,
+              {
                 day,
+                date: day.date,
                 weekday,
                 dayNumber,
-                date: day.date,
                 inPeriod: day.inPeriod
-              })
-            ) : (
-              <>
-                <span>{weekday}</span> <span>{dayNumber}</span>
-              </>
+              },
+              `${weekday} ${dayNumber}`
             )}
-          </div>
+          </Tag>
         )
       })}
     </>

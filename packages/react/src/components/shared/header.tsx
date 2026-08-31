@@ -1,30 +1,45 @@
-import type { ReactNode } from 'react'
-import { useCalendarContext } from '../context/calendar-context'
-import { templateOf } from '../helpers'
+import type { ElementType, ReactNode } from 'react'
 
-export type HeaderProps = {
-  children: ReactNode
-  className?: string
-  gutterWidth?: string
+import { useCalendarContext } from '../context'
+import type { CalendarContextValue } from '../context'
+import { renderSlot, styleOf, tagOf, templateOf } from '../helpers'
+import type { OwnProps, PolymorphicProps } from '../types'
+
+export type HeaderOwnProps<TData> = OwnProps<CalendarContextValue<TData>> & {
+  gutterCell?: ReactNode
 }
 
-export const Header = ({
+export type HeaderProps<
+  TData,
+  TTag extends ElementType = 'div'
+> = PolymorphicProps<TTag, HeaderOwnProps<TData>>
+
+export const Header = <TData, TTag extends ElementType = 'div'>({
+  as,
   children,
-  className,
-  gutterWidth = '3.25rem'
-}: HeaderProps): ReactNode => {
-  const { calendar } = useCalendarContext()
+  style,
+  gutterCell = null,
+  ...rest
+}: HeaderProps<TData, TTag>): ReactNode => {
+  const scope = useCalendarContext<TData>()
+  const Tag = tagOf(as, 'div')
 
   return (
-    <div
-      className={className}
-      style={{
-        display: 'grid',
-        gridTemplateColumns: templateOf(gutterWidth, calendar.days.length)
-      }}
+    <Tag
+      {...rest}
+      style={styleOf(
+        {
+          display: 'grid',
+          gridTemplateColumns: templateOf(
+            scope.gutter,
+            scope.calendar.days.length
+          )
+        },
+        style
+      )}
     >
-      <div />
-      {children}
-    </div>
+      <div>{gutterCell}</div>
+      {renderSlot(children, scope, null)}
+    </Tag>
   )
 }

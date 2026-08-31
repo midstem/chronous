@@ -1,46 +1,70 @@
+import type { ElementType, ReactNode } from 'react'
 import { useEffect, useRef } from 'react'
-import type { ReactNode } from 'react'
-import { useCalendarContext } from '../context/calendar-context'
-import { TimeGridProvider } from '../context/time-grid-context'
-import { templateOf } from '../helpers'
 
-export type TimeGridProps = {
-  children: ReactNode
+import { TimeGridProvider, useCalendarContext } from '../context'
+import type { TimeGridContextValue } from '../context'
+import {
+  HOURS_IN_DAY,
+  renderSlot,
+  styleOf,
+  tagOf,
+  templateOf
+} from '../helpers'
+import type { OwnProps, PolymorphicProps } from '../types'
+
+const HOUR_HEIGHT = 60
+
+const SCROLL_TO_HOUR = 7
+
+export type TimeGridOwnProps = OwnProps<TimeGridContextValue> & {
   hourHeight?: number
-  gutterWidth?: string
-  scrollTo?: number
-  className?: string
+  scrollToHour?: number | null
 }
 
-export const TimeGrid = ({
+export type TimeGridProps<TTag extends ElementType = 'div'> = PolymorphicProps<
+  TTag,
+  TimeGridOwnProps
+>
+
+export const TimeGrid = <TTag extends ElementType = 'div'>({
+  as,
   children,
-  hourHeight = 60,
-  gutterWidth = '3.25rem',
-  scrollTo = 7,
-  className
-}: TimeGridProps): ReactNode => {
-  const { calendar } = useCalendarContext()
-  const dayHeight = hourHeight * 24
-  const scrollRef = useRef<HTMLDivElement>(null)
+  style,
+  hourHeight = HOUR_HEIGHT,
+  scrollToHour = SCROLL_TO_HOUR,
+  ...rest
+}: TimeGridProps<TTag>): ReactNode => {
+  const { calendar, gutter } = useCalendarContext()
+  const scroller = useRef<HTMLElement>(null)
+  const Tag = tagOf(as, 'div')
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = hourHeight * scrollTo
-    }
-  }, [hourHeight, scrollTo])
+    if (scrollToHour === null || !scroller.current) return
+
+    scroller.current.scrollTop = hourHeight * scrollToHour
+  }, [hourHeight, scrollToHour])
+
+  const scope: TimeGridContextValue = {
+    hourHeight,
+    dayHeight: hourHeight * HOURS_IN_DAY
+  }
 
   return (
-    <TimeGridProvider value={{ hourHeight, dayHeight, gutterWidth }}>
-      <div ref={scrollRef} style={{ overflowY: 'auto' }} className={className}>
+    <TimeGridProvider value={scope}>
+      <Tag
+        {...rest}
+        ref={scroller}
+        style={styleOf({ overflowY: 'auto' }, style)}
+      >
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: templateOf(gutterWidth, calendar.days.length)
+            gridTemplateColumns: templateOf(gutter, calendar.days.length)
           }}
         >
-          {children}
+          {renderSlot(children, scope, null)}
         </div>
-      </div>
+      </Tag>
     </TimeGridProvider>
   )
 }

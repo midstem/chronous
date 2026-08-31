@@ -1,57 +1,62 @@
-import type { ReactNode } from 'react'
 import type { CalendarSlot } from '@midstem/chronous'
-import { useCalendarContext } from '../context/calendar-context'
-import { useTimeGridContext } from '../context/time-grid-context'
-import { fractionOf, timeLabel, wallTimeOn } from '../helpers'
+import type { ElementType, ReactNode } from 'react'
 
-export type TimeLabelsProps = {
-  children?: (ctx: {
-    time: string
-    slot: CalendarSlot
-    minuteOfDay: number
-  }) => ReactNode
-  className?: string
+import { useCalendarContext } from '../context'
+import {
+  CLOCK,
+  labelOf,
+  minutePercentOf,
+  renderSlot,
+  styleOf,
+  tagOf
+} from '../helpers'
+import type { OwnProps, PolymorphicProps } from '../types'
+
+export type TimeLabelScope = {
+  slot: CalendarSlot
+  minuteOfDay: number
+  time: string
 }
 
-export const TimeLabels = ({
+export type TimeLabelsProps<TTag extends ElementType = 'div'> =
+  PolymorphicProps<TTag, OwnProps<TimeLabelScope>>
+
+export const TimeLabels = <TTag extends ElementType = 'div'>({
+  as,
   children,
-  className
-}: TimeLabelsProps): ReactNode => {
+  style,
+  ...rest
+}: TimeLabelsProps<TTag>): ReactNode => {
   const { calendar, locale } = useCalendarContext()
-  const { dayHeight } = useTimeGridContext()
-
-  if (calendar.days.length === 0) return null
-
+  const Tag = tagOf(as, 'div')
   const day = calendar.days[0]
 
   return (
-    <div
-      style={{ position: 'relative', height: dayHeight }}
-      className={className}
-    >
+    <>
       {day.slots.map((slot) => {
-        if (slot.minuteOfDay === 0) return null
-
-        const time = timeLabel(wallTimeOn(day.date, slot.minuteOfDay), locale)
-        const ctx = { time, slot, minuteOfDay: slot.minuteOfDay }
+        const time = labelOf(slot.start, locale, CLOCK)
 
         return (
-          <div
+          <Tag
             key={slot.minuteOfDay}
-            style={{
-              position: 'absolute',
-              top: `${fractionOf(slot.minuteOfDay) * 100}%`,
-              transform: 'translateY(-50%)'
-            }}
-          >
-            {typeof children === 'function' ? (
-              children(ctx)
-            ) : (
-              <span>{time}</span>
+            {...rest}
+            style={styleOf(
+              {
+                position: 'absolute',
+                top: minutePercentOf(slot.minuteOfDay),
+                transform: 'translateY(-50%)'
+              },
+              style
             )}
-          </div>
+          >
+            {renderSlot(
+              children,
+              { slot, minuteOfDay: slot.minuteOfDay, time },
+              time
+            )}
+          </Tag>
         )
       })}
-    </div>
+    </>
   )
 }

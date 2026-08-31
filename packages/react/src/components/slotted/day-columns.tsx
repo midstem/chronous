@@ -1,30 +1,39 @@
-import type { ReactNode } from 'react'
-import { useCalendarContext } from '../context/calendar-context'
-import { useTimeGridContext } from '../context/time-grid-context'
-import { DayColumnProvider } from '../context/day-column-context'
+import type { ElementType, ReactNode } from 'react'
 
-export type DayColumnsProps = {
-  children: ReactNode
-  className?: string
-}
+import {
+  DayColumnProvider,
+  useCalendarContext,
+  useTimeGridContext
+} from '../context'
+import type { DayColumnContextValue } from '../context'
+import { renderSlot, styleOf, tagOf } from '../helpers'
+import type { OwnProps, PolymorphicProps } from '../types'
 
-export const DayColumns = ({
+export type DayColumnsProps<
+  TData,
+  TTag extends ElementType = 'div'
+> = PolymorphicProps<TTag, OwnProps<DayColumnContextValue<TData>>>
+
+export const DayColumns = <TData, TTag extends ElementType = 'div'>({
+  as,
   children,
-  className
-}: DayColumnsProps): ReactNode => {
-  const { calendar } = useCalendarContext()
+  style,
+  ...rest
+}: DayColumnsProps<TData, TTag>): ReactNode => {
+  const { calendar } = useCalendarContext<TData>()
   const { dayHeight } = useTimeGridContext()
+  const Tag = tagOf(as, 'div')
 
   return (
     <>
       {calendar.days.map((day) => (
         <DayColumnProvider key={day.date} value={{ day }}>
-          <div
-            style={{ position: 'relative', height: dayHeight }}
-            className={className}
+          <Tag
+            {...rest}
+            style={styleOf({ position: 'relative', height: dayHeight }, style)}
           >
-            {children}
-          </div>
+            {renderSlot(children, { day }, null)}
+          </Tag>
         </DayColumnProvider>
       ))}
     </>

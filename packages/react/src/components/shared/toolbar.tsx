@@ -1,98 +1,90 @@
-import type { ReactNode } from 'react'
 import type { RangeSpec, ViewKind } from '@midstem/chronous'
-import { formatIso } from '@midstem/chronous'
-import { useCalendarContext } from '../context/calendar-context'
+import type { ElementType, ReactNode } from 'react'
+
 import { useCalendarNavigation } from '#src/navigation'
 import type { CalendarNavigation } from '#src/navigation'
 
-export type ToolbarProps = {
+import { useCalendarContext } from '../context'
+import { renderSlot, tagOf } from '../helpers'
+import type { OwnProps, PolymorphicProps } from '../types'
+import { titleOf } from './helpers'
+
+const VIEWS: ViewKind[] = ['day', 'week', 'month', 'agenda']
+
+export type ToolbarScope = {
+  navigation: CalendarNavigation
+  spec: RangeSpec
+  title: string
+}
+
+export type ToolbarOwnProps = OwnProps<ToolbarScope> & {
   onSpec: (spec: RangeSpec) => void
-  views?: ViewKind[]
-  children?: (ctx: {
-    navigation: CalendarNavigation
-    spec: RangeSpec
-    title: string
-  }) => ReactNode
-  className?: string
+  views?: readonly ViewKind[]
 }
 
-const formatTitle = (spec: RangeSpec, locale: string): string => {
-  try {
-    return formatIso(spec.date, {
-      locale,
-      timeZone: spec.timeZone,
-      options: {
-        month: 'long',
-        year: 'numeric',
-        ...(spec.view !== 'month' && { day: 'numeric' })
-      }
-    })
-  } catch {
-    return spec.date
-  }
-}
+export type ToolbarProps<TTag extends ElementType = 'div'> = PolymorphicProps<
+  TTag,
+  ToolbarOwnProps
+>
 
-export const Toolbar = ({
-  onSpec,
-  views = ['day', 'week', 'month', 'agenda'],
+export const Toolbar = <TTag extends ElementType = 'div'>({
+  as,
   children,
-  className
-}: ToolbarProps): ReactNode => {
+  style,
+  onSpec,
+  views = VIEWS,
+  ...rest
+}: ToolbarProps<TTag>): ReactNode => {
   const { spec, locale } = useCalendarContext()
   const navigation = useCalendarNavigation(spec)
-  const title = formatTitle(spec, locale)
+  const Tag = tagOf(as, 'div')
+  const title = titleOf(spec, locale)
+  const { prev, next, today } = navigation
 
-  if (children) {
+  if (children !== undefined) {
     return (
-      <div className={className}>{children({ navigation, spec, title })}</div>
+      <Tag {...rest} style={style}>
+        {renderSlot(children, { navigation, spec, title }, null)}
+      </Tag>
     )
   }
 
   return (
-    <header
-      className={className}
-      style={{ display: 'flex', alignItems: 'center', gap: 8 }}
-    >
-      <div style={{ display: 'flex', gap: 4 }}>
+    <Tag {...rest} style={style}>
+      <button
+        type="button"
+        aria-label="Previous period"
+        disabled={!prev}
+        onClick={() => prev && onSpec(prev)}
+      >
+        ‹
+      </button>
+      <button
+        type="button"
+        disabled={!today}
+        onClick={() => today && onSpec(today())}
+      >
+        Today
+      </button>
+      <button
+        type="button"
+        aria-label="Next period"
+        disabled={!next}
+        onClick={() => next && onSpec(next)}
+      >
+        ›
+      </button>
+      <span>{title}</span>
+      {views.map((view) => (
         <button
+          key={view}
           type="button"
-          aria-label="Previous period"
-          disabled={!navigation.prev}
-          onClick={() => navigation.prev && onSpec(navigation.prev)}
+          aria-pressed={view === spec.view}
+          onClick={() => onSpec(navigation.withView(view))}
         >
-          ‹
+          {view}
         </button>
-        <button
-          type="button"
-          disabled={!navigation.today}
-          onClick={() => navigation.today && onSpec(navigation.today())}
-        >
-          Today
-        </button>
-        <button
-          type="button"
-          aria-label="Next period"
-          disabled={!navigation.next}
-          onClick={() => navigation.next && onSpec(navigation.next)}
-        >
-          ›
-        </button>
-      </div>
-
-      <h2 style={{ flex: 1, textAlign: 'center', margin: 0 }}>{title}</h2>
-
-      <div style={{ display: 'flex', gap: 4 }}>
-        {views.map((view) => (
-          <button
-            key={view}
-            type="button"
-            aria-pressed={view === spec.view}
-            onClick={() => onSpec(navigation.withView(view))}
-          >
-            {view}
-          </button>
-        ))}
-      </div>
-    </header>
+      ))}
+    </Tag>
   )
 }

@@ -1,38 +1,36 @@
-import { useAgendaDayContext } from '../context/agenda-day-context'
-import type { CalendarEntry, CalendarBar } from '@midstem/chronous'
-import type { ReactNode } from 'react'
+import type { CalendarBar, CalendarEntry } from '@midstem/chronous'
+import type { ElementType, ReactNode } from 'react'
 
-export type AgendaBarsProps<TData = any> = {
-  children?: (ctx: {
-    event: CalendarEntry<TData>
-    bar: CalendarBar<TData>
-  }) => ReactNode
-  className?: string
+import { useAgendaDayContext } from '../context'
+import { renderSlot, tagOf } from '../helpers'
+import type { OwnProps, PolymorphicProps } from '../types'
+
+export type AgendaBarScope<TData> = {
+  event: CalendarEntry<TData>
+  bar: CalendarBar<TData>
 }
 
-export const AgendaBars = <TData = any,>({
+export type AgendaBarsProps<
+  TData,
+  TTag extends ElementType = 'div'
+> = PolymorphicProps<TTag, OwnProps<AgendaBarScope<TData>>>
+
+export const AgendaBars = <TData, TTag extends ElementType = 'div'>({
+  as,
   children,
-  className
-}: AgendaBarsProps<TData>): ReactNode => {
-  const { bars } = useAgendaDayContext()
+  style,
+  ...rest
+}: AgendaBarsProps<TData, TTag>): ReactNode => {
+  const { bars } = useAgendaDayContext<TData>()
+  const Tag = tagOf(as, 'div')
 
   return (
     <>
-      {bars.map((bar) => {
-        const typedBar = bar as CalendarBar<TData>
-        return (
-          <div
-            key={`${typedBar.event.id}-${typedBar.startDay}`}
-            className={className}
-          >
-            {children ? (
-              children({ event: typedBar.event, bar: typedBar })
-            ) : (
-              <div>{typedBar.event.id} (all-day)</div>
-            )}
-          </div>
-        )
-      })}
+      {bars.map((bar) => (
+        <Tag key={`${bar.event.id}-${bar.startDay}`} {...rest} style={style}>
+          {renderSlot(children, { event: bar.event, bar }, bar.event.id)}
+        </Tag>
+      ))}
     </>
   )
 }

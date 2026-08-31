@@ -1,52 +1,53 @@
-import { useCalendarContext } from '../context/calendar-context'
-import { useMonthRowContext } from '../context/month-row-context'
-import { MonthDayProvider } from '../context/month-day-context'
-import { numberLabel } from '../helpers'
-import type { CalendarDay, CalendarBox } from '@midstem/chronous'
-import type { ReactNode } from 'react'
+import type { CalendarBox, CalendarDay } from '@midstem/chronous'
+import type { ElementType, ReactNode } from 'react'
 
-type MonthDaysProps<TData = any> = {
-  children?: (ctx: {
-    day: CalendarDay<TData>
-    dayNumber: string
-    inPeriod: boolean
-    boxes: CalendarBox<TData>[]
-  }) => ReactNode
-  className?: string
+import {
+  MonthDayProvider,
+  useCalendarContext,
+  useMonthRowContext
+} from '../context'
+import { DAY_NUMBER, labelOf, renderSlot, tagOf } from '../helpers'
+import type { OwnProps, PolymorphicProps } from '../types'
+
+export type MonthDayScope<TData> = {
+  day: CalendarDay<TData>
+  boxes: CalendarBox<TData>[]
+  dayNumber: string
+  inPeriod: boolean
 }
 
-export const MonthDays = <TData = any,>({
+export type MonthDaysProps<
+  TData,
+  TTag extends ElementType = 'div'
+> = PolymorphicProps<TTag, OwnProps<MonthDayScope<TData>>>
+
+export const MonthDays = <TData, TTag extends ElementType = 'div'>({
+  as,
   children,
-  className
-}: MonthDaysProps<TData>): ReactNode => {
+  style,
+  ...rest
+}: MonthDaysProps<TData, TTag>): ReactNode => {
   const { locale } = useCalendarContext<TData>()
   const { days } = useMonthRowContext<TData>()
+  const Tag = tagOf(as, 'div')
 
   return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: `repeat(${days.length}, minmax(0, 1fr))`,
-        height: '100%'
-      }}
-    >
+    <>
       {days.map((day) => {
-        const dayNumber = numberLabel(day.date, locale)
-        const inPeriod = day.inPeriod
-        const boxes = day.boxes
+        const dayNumber = labelOf(day.date, locale, DAY_NUMBER)
 
         return (
-          <MonthDayProvider key={day.date} value={{ day, boxes }}>
-            <div className={className}>
-              {children ? (
-                children({ day, dayNumber, inPeriod, boxes })
-              ) : (
-                <span>{dayNumber}</span>
+          <MonthDayProvider key={day.date} value={{ day, boxes: day.boxes }}>
+            <Tag {...rest} style={style}>
+              {renderSlot(
+                children,
+                { day, boxes: day.boxes, dayNumber, inPeriod: day.inPeriod },
+                dayNumber
               )}
-            </div>
+            </Tag>
           </MonthDayProvider>
         )
       })}
-    </div>
+    </>
   )
 }

@@ -1,49 +1,33 @@
-import { useCalendarContext } from '../context/calendar-context'
-import { weekdayLabel } from '../helpers'
-import type { CalendarDay } from '@midstem/chronous'
-import type { ReactNode } from 'react'
+import type { ElementType, ReactNode } from 'react'
 
-type MonthGridProps<TData = any> = {
-  children: ReactNode
-  className?: string
-  weekdayHeader?: (ctx: { days: CalendarDay<TData>[] }) => ReactNode
-}
+import { useCalendarContext } from '../context'
+import type { CalendarContextValue } from '../context'
+import { renderSlot, styleOf, tagOf } from '../helpers'
+import type { OwnProps, PolymorphicProps } from '../types'
 
-export const MonthGrid = <TData = any,>({
+export type MonthGridProps<
+  TData,
+  TTag extends ElementType = 'div'
+> = PolymorphicProps<TTag, OwnProps<CalendarContextValue<TData>>>
+
+export const MonthGrid = <TData, TTag extends ElementType = 'div'>({
+  as,
   children,
-  className,
-  weekdayHeader
-}: MonthGridProps<TData>): ReactNode => {
-  const { calendar, locale } = useCalendarContext<TData>()
-
-  const firstDays = calendar.days.slice(0, 7)
+  style,
+  ...rest
+}: MonthGridProps<TData, TTag>): ReactNode => {
+  const scope = useCalendarContext<TData>()
+  const Tag = tagOf(as, 'div')
 
   return (
-    <div
-      className={className}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: '100%'
-      }}
-    >
-      {weekdayHeader ? (
-        weekdayHeader({ days: firstDays })
-      ) : (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(7, minmax(0, 1fr))'
-          }}
-        >
-          {firstDays.map((day) => (
-            <div key={day.date} style={{ textAlign: 'center' }}>
-              {weekdayLabel(day.date, locale)}
-            </div>
-          ))}
-        </div>
+    <Tag
+      {...rest}
+      style={styleOf(
+        { display: 'flex', flexDirection: 'column', minHeight: '100%' },
+        style
       )}
-      {children}
-    </div>
+    >
+      {renderSlot(children, scope, null)}
+    </Tag>
   )
 }

@@ -1,50 +1,74 @@
-import { useCalendarContext } from '../context/calendar-context'
-import { useAgendaDayContext } from '../context/agenda-day-context'
-import { numberLabel, weekdayLabel } from '../helpers'
-import type { CalendarDay } from '@midstem/chronous'
-import type { ReactNode } from 'react'
+import type { ElementType, ReactNode } from 'react'
 
-export type AgendaDaysProps<TData = any> = {
-  children?: ReactNode
-  heading?: (ctx: {
-    day: CalendarDay<TData>
-    dateFormatted: string
-    monthFormatted: string
-    weekdayFormatted: string
-  }) => ReactNode
-  className?: string
+import { AgendaDayProvider, useCalendarContext } from '../context'
+import type { AgendaDayContextValue } from '../context'
+import {
+  DAY_NUMBER,
+  MONTH,
+  WEEKDAY,
+  barsByDay,
+  labelOf,
+  renderSlot,
+  tagOf
+} from '../helpers'
+import type { OwnProps, PolymorphicProps } from '../types'
+
+export type AgendaDayScope<TData> = AgendaDayContextValue<TData> & {
+  weekday: string
+  dayNumber: string
+  month: string
 }
 
-export const AgendaDays = <TData = any,>({
-  children,
-  heading,
-  className
-}: AgendaDaysProps<TData>): ReactNode => {
-  const { locale } = useCalendarContext()
-  const { day } = useAgendaDayContext()
+export type AgendaDaysOwnProps<TData> = OwnProps<AgendaDayScope<TData>> & {
+  showEmpty?: boolean
+}
 
-  const dateFormatted = numberLabel(day.date, locale)
-  const monthFormatted = new Intl.DateTimeFormat(locale, {
-    month: 'short'
-  }).format(new Date(day.date))
-  const weekdayFormatted = weekdayLabel(day.date, locale)
+export type AgendaDaysProps<
+  TData,
+  TTag extends ElementType = 'div'
+> = PolymorphicProps<TTag, AgendaDaysOwnProps<TData>>
+
+export const AgendaDays = <TData, TTag extends ElementType = 'div'>({
+  as,
+  children,
+  style,
+  showEmpty = false,
+  ...rest
+}: AgendaDaysProps<TData, TTag>): ReactNode => {
+  const { calendar, locale } = useCalendarContext<TData>()
+  const Tag = tagOf(as, 'div')
+  const bars = barsByDay(calendar)
 
   return (
-    <div className={className}>
-      {heading ? (
-        heading({
-          day: day as CalendarDay<TData>,
-          dateFormatted,
-          monthFormatted,
-          weekdayFormatted
-        })
-      ) : (
-        <div>
-          <div>{dateFormatted}</div>
-          <div>{weekdayFormatted}</div>
-        </div>
-      )}
-      {children}
-    </div>
+    <>
+      {calendar.days.map((day, index) => {
+        const onDay = bars[index]
+
+        if (!showEmpty && onDay.length === 0 && day.boxes.length === 0) {
+          return null
+        }
+
+        const value: AgendaDayContextValue<TData> = {
+          day,
+          bars: onDay,
+          boxes: day.boxes
+        }
+
+        const scope: AgendaDayScope<TData> = {
+          ...value,
+          weekday: labelOf(day.date, locale, WEEKDAY),
+          dayNumber: labelOf(day.date, locale, DAY_NUMBER),
+          month: labelOf(day.date, locale, MONTH)
+        }
+
+        return (
+          <AgendaDayProvider key={day.date} value={value}>
+            <Tag {...rest} style={style}>
+              {renderSlot(children, scope, scope.dayNumber)}
+            </Tag>
+          </AgendaDayProvider>
+        )
+      })}
+    </>
   )
 }

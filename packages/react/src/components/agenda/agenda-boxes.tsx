@@ -1,43 +1,48 @@
-import { useCalendarContext } from '../context/calendar-context'
-import { useAgendaDayContext } from '../context/agenda-day-context'
-import { formatRange } from '../helpers'
-import type { TimedEntry, CalendarBox } from '@midstem/chronous'
-import type { ReactNode } from 'react'
+import type { CalendarBox, TimedEntry } from '@midstem/chronous'
+import type { ElementType, ReactNode } from 'react'
 
-export type AgendaBoxesProps<TData = any> = {
-  children?: (ctx: {
-    event: TimedEntry<TData>
-    box: CalendarBox<TData>
-    timeRange: string
-  }) => ReactNode
-  className?: string
+import { useAgendaDayContext, useCalendarContext } from '../context'
+import { rangeOf, renderSlot, tagOf } from '../helpers'
+import type { OwnProps, PolymorphicProps } from '../types'
+
+export type AgendaBoxScope<TData> = {
+  event: TimedEntry<TData>
+  box: CalendarBox<TData>
+  timeRange: string
 }
 
-export const AgendaBoxes = <TData = any,>({
+export type AgendaBoxesProps<
+  TData,
+  TTag extends ElementType = 'div'
+> = PolymorphicProps<TTag, OwnProps<AgendaBoxScope<TData>>>
+
+export const AgendaBoxes = <TData, TTag extends ElementType = 'div'>({
+  as,
   children,
-  className
-}: AgendaBoxesProps<TData>): ReactNode => {
+  style,
+  ...rest
+}: AgendaBoxesProps<TData, TTag>): ReactNode => {
   const { locale } = useCalendarContext()
-  const { boxes } = useAgendaDayContext()
+  const { boxes } = useAgendaDayContext<TData>()
+  const Tag = tagOf(as, 'div')
 
   return (
     <>
       {boxes.map((box) => {
-        const typedBox = box as CalendarBox<TData>
-        const timeRange = formatRange(typedBox.start, typedBox.end, locale)
+        const timeRange = rangeOf(box.start, box.end, locale)
+
         return (
-          <div
-            key={`${typedBox.event.id}-${typedBox.startMinute}`}
-            className={className}
+          <Tag
+            key={`${box.event.id}-${box.startMinute}`}
+            {...rest}
+            style={style}
           >
-            {children ? (
-              children({ event: typedBox.event, box: typedBox, timeRange })
-            ) : (
-              <div>
-                {typedBox.event.id} {timeRange}
-              </div>
+            {renderSlot(
+              children,
+              { event: box.event, box, timeRange },
+              timeRange
             )}
-          </div>
+          </Tag>
         )
       })}
     </>
