@@ -44,6 +44,7 @@ export const Controls = ({
     <Panel title="Style" badge="playground only">
       <SelectField
         label="style"
+        labelHidden
         hint={STYLE_HINT}
         value={state.style}
         options={STYLE_OPTIONS}

@@ -9,12 +9,14 @@ export type FrameProps = {
   id: string
   label: string
   hint?: string
+  labelHidden?: boolean
   children: ReactNode
 }
 
 export type SelectFieldProps = {
   label: string
   hint?: string
+  labelHidden?: boolean
   value: string
   options: readonly Option[]
   onChange: (value: string) => void

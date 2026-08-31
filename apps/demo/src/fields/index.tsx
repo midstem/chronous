@@ -8,10 +8,20 @@ import type {
   TextFieldProps
 } from './types'
 
-const Frame = ({ id, label, hint, children }: FrameProps): ReactElement => (
+const Frame = ({
+  id,
+  label,
+  hint,
+  labelHidden,
+  children
+}: FrameProps): ReactElement => (
   <div className="flex flex-col gap-1">
     <label
-      className="font-mono text-xs font-semibold tracking-tight text-ink"
+      className={
+        labelHidden
+          ? 'sr-only'
+          : 'font-mono text-xs font-semibold tracking-tight text-ink'
+      }
       htmlFor={id}
     >
       {label}
@@ -24,6 +34,7 @@ const Frame = ({ id, label, hint, children }: FrameProps): ReactElement => (
 export const SelectField = ({
   label,
   hint,
+  labelHidden,
   value,
   options,
   onChange
@@ -31,7 +42,7 @@ export const SelectField = ({
   const id = useId()
 
   return (
-    <Frame id={id} label={label} hint={hint}>
+    <Frame id={id} label={label} hint={hint} labelHidden={labelHidden}>
       <select
         id={id}
         className="field-control"
