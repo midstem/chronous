@@ -1,29 +1,20 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import {
-  PACKAGE_NAME,
-  buildCalendar,
-  formatIso,
-  isTemporalAvailable
-} from '../index'
-import type { FormatOptions } from '../index'
+import { buildCalendar, formatIso, isTemporalAvailable } from '../index'
+import type { DateTimeFormatOptions } from '../index'
 
-const CLOCK_OPTIONS: FormatOptions = {
+const CLOCK_OPTIONS: DateTimeFormatOptions = {
   hour: '2-digit',
   minute: '2-digit',
   hour12: false
 }
-const DAY_OPTIONS: FormatOptions = { day: 'numeric', month: 'long' }
+const DAY_OPTIONS: DateTimeFormatOptions = { day: 'numeric', month: 'long' }
 
 afterEach(() => {
   vi.unstubAllGlobals()
 })
 
 describe('@midstem/chronous', () => {
-  it('is published under the midstem scope', () => {
-    expect(PACKAGE_NAME).toBe('@midstem/chronous')
-  })
-
   it('reports Temporal as available in a prepared runtime', () => {
     expect(isTemporalAvailable()).toBe(true)
   })

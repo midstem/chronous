@@ -3,11 +3,11 @@ import { describe, expect, it } from 'vitest'
 import { InvalidEventError } from '#src/event'
 import type { EventInput } from '#src/event'
 import { InvalidRangeError } from '#src/range'
-import type { RangeSpec } from '#src/range'
+import type { CalendarRange } from '#src/range'
 import { MINUTES_IN_DAY } from '#src/time'
 
 import { buildCalendar } from '../index'
-import type { Calendar } from '../types'
+import type { CalendarLayout } from '../types'
 
 const KYIV = 'Europe/Kyiv'
 const ANCHOR = '2026-03-18'
@@ -20,12 +20,12 @@ const MONTH_GRID_ROWS = 6
 const AGENDA_DAYS = 30
 const HALF = 0.5
 
-const week: RangeSpec = { view: 'week', date: ANCHOR, timeZone: KYIV }
+const week: CalendarRange = { view: 'week', date: ANCHOR, timeZone: KYIV }
 
 const calendarOf = (
   inputs: readonly EventInput[] = [],
-  spec: RangeSpec = week
-): Calendar => buildCalendar(spec, inputs)
+  range: CalendarRange = week
+): CalendarLayout => buildCalendar(range, inputs)
 
 const timed = (id: string, start: string, end: string): EventInput => ({
   id,
@@ -170,7 +170,7 @@ describe('bars', () => {
     expect(row).toMatchObject({
       start: '2026-03-16',
       end: '2026-03-23',
-      days: 7,
+      dayCount: 7,
       lanes: 1
     })
     expect(row.bars[0]).toMatchObject({
@@ -178,7 +178,7 @@ describe('bars', () => {
       end: '2026-03-20',
       startDay: WEDNESDAY_INDEX,
       endDay: 4,
-      days: 2,
+      dayCount: 2,
       lane: 0,
       lanes: 1
     })
@@ -202,7 +202,7 @@ describe('bars', () => {
       start: '2026-03-18T09:00:00+02:00',
       end: '2026-03-19T09:00:00+02:00'
     })
-    expect(calendar.rows[0].bars[0]).toMatchObject({ startDay: 2, days: 2 })
+    expect(calendar.rows[0].bars[0]).toMatchObject({ startDay: 2, dayCount: 2 })
   })
 
   it('cuts a month into week rows', () => {
@@ -217,7 +217,7 @@ describe('bars', () => {
       '2026-03-23',
       '2026-03-30'
     ])
-    expect(rows.every((row) => row.days === 7)).toBe(true)
+    expect(rows.every((row) => row.dayCount === 7)).toBe(true)
   })
 
   it('gives every other view a single row', () => {

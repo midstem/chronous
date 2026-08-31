@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
-import { Calendar, createCalendar } from '../../index'
+import { Calendar, createCalendarComponents } from '../../index'
 import type { EventData } from './fixtures'
 import { EVENTS, LOCALE, WEEK } from './fixtures'
 
@@ -11,13 +11,18 @@ const styleOf = (element: HTMLElement): string =>
 
 const textOf = (element: HTMLElement): string => element.textContent ?? ''
 
-const Week = ({ gutter }: { gutter?: string }): ReactNode => (
-  <Calendar.Root spec={WEEK} events={EVENTS} locale={LOCALE} gutter={gutter}>
+const Week = ({ gutterWidth }: { gutterWidth?: string }): ReactNode => (
+  <Calendar.Root
+    range={WEEK}
+    events={EVENTS}
+    locale={LOCALE}
+    gutterWidth={gutterWidth}
+  >
     <Calendar.Header data-testid="header">
       <Calendar.DayHeadings data-testid="heading" />
     </Calendar.Header>
 
-    <Calendar.AllDayRow data-testid="all-day" label="all-day">
+    <Calendar.AllDayRow data-testid="all-day" gutterCell="all-day">
       <Calendar.AllDayEvents data-testid="bar" />
     </Calendar.AllDayRow>
 
@@ -87,7 +92,7 @@ describe('the slotted view', () => {
 
   it('drops the all-day row when the range holds no all-day event', () => {
     render(
-      <Calendar.Root spec={WEEK} events={[]}>
+      <Calendar.Root range={WEEK} events={[]}>
         <Calendar.AllDayRow data-testid="all-day">
           <Calendar.AllDayEvents />
         </Calendar.AllDayRow>
@@ -101,7 +106,7 @@ describe('the slotted view', () => {
 describe('a component slot', () => {
   it('hands the scope to a render prop', () => {
     render(
-      <Calendar.Root spec={WEEK} events={EVENTS} locale={LOCALE}>
+      <Calendar.Root range={WEEK} events={EVENTS} locale={LOCALE}>
         <Calendar.Header>
           <Calendar.DayHeadings data-testid="heading">
             {({ weekday, dayNumber, inPeriod }) =>
@@ -117,7 +122,7 @@ describe('a component slot', () => {
 
   it('accepts a plain node in place of a render prop', () => {
     render(
-      <Calendar.Root spec={WEEK} events={EVENTS}>
+      <Calendar.Root range={WEEK} events={EVENTS}>
         <Calendar.Header>
           <Calendar.DayHeadings data-testid="heading">
             <span>fixed</span>
@@ -135,7 +140,7 @@ describe('the polymorphic surface', () => {
     const onClick = vi.fn()
 
     render(
-      <Calendar.Root spec={WEEK} events={EVENTS}>
+      <Calendar.Root range={WEEK} events={EVENTS}>
         <Calendar.TimeGrid>
           <Calendar.DayColumns>
             <Calendar.TimedEvents
@@ -160,7 +165,7 @@ describe('the polymorphic surface', () => {
 
   it('lets a consumer style win over the layout it computed', () => {
     render(
-      <Calendar.Root spec={WEEK} events={EVENTS}>
+      <Calendar.Root range={WEEK} events={EVENTS}>
         <Calendar.TimeGrid>
           <Calendar.DayColumns>
             <Calendar.TimedEvents
@@ -201,7 +206,7 @@ describe('state a stylesheet can reach', () => {
 
   it('lets a consumer prop win over the attribute it sets', () => {
     render(
-      <Calendar.Root spec={WEEK} events={EVENTS}>
+      <Calendar.Root range={WEEK} events={EVENTS}>
         <Calendar.Header>
           <Calendar.DayHeadings data-testid="heading" data-date="pinned" />
         </Calendar.Header>
@@ -216,7 +221,7 @@ describe('state a stylesheet can reach', () => {
 
 describe('the gutter', () => {
   it('is read from the root so the three grids stay in step', () => {
-    const { container } = render(<Week gutter="5rem" />)
+    const { container } = render(<Week gutterWidth="5rem" />)
 
     const grids = Array.from(
       container.querySelectorAll<HTMLElement>(
@@ -240,12 +245,12 @@ describe('a scope', () => {
   })
 })
 
-describe('createCalendar', () => {
+describe('createCalendarComponents', () => {
   it('carries the event data type into every render prop', () => {
-    const Typed = createCalendar<EventData>()
+    const Typed = createCalendarComponents<EventData>()
 
     render(
-      <Typed.Root spec={WEEK} events={EVENTS}>
+      <Typed.Root range={WEEK} events={EVENTS}>
         <Typed.TimeGrid>
           <Typed.DayColumns>
             <Typed.TimedEvents data-testid="event">

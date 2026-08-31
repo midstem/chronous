@@ -1,4 +1,4 @@
-import type { EventInput, LocaleId, RangeSpec } from '@midstem/chronous'
+import type { EventInput, LocaleId, CalendarRange } from '@midstem/chronous'
 import type { ElementType, ReactNode } from 'react'
 
 import { useCalendar } from '#src/calendar'
@@ -6,17 +6,17 @@ import type { CalendarError } from '#src/calendar'
 
 import { CalendarProvider } from '../context'
 import type { CalendarContextValue } from '../context'
-import { GUTTER, renderSlot, tagOf } from '../helpers'
+import { GUTTER_WIDTH, renderChildren, tagOf } from '../helpers'
 import type { OwnProps, PolymorphicProps } from '../types'
 
 const LOCALE: LocaleId = 'en-US'
 
 export type RootOwnProps<TData> = OwnProps<CalendarContextValue<TData>> & {
-  spec: RangeSpec
+  range: CalendarRange
   events: readonly EventInput<TData>[]
   locale?: LocaleId
-  gutter?: string
-  fallback?: (error: CalendarError) => ReactNode
+  gutterWidth?: string
+  renderError?: (error: CalendarError) => ReactNode
 }
 
 export type RootProps<
@@ -26,34 +26,39 @@ export type RootProps<
 
 export const Root = <TData, TTag extends ElementType = 'div'>({
   as,
-  spec,
+  range,
   events,
   locale = LOCALE,
-  gutter = GUTTER,
+  gutterWidth = GUTTER_WIDTH,
   children,
   style,
-  fallback,
+  renderError,
   ...rest
 }: RootProps<TData, TTag>): ReactNode => {
-  const { calendar, error } = useCalendar(spec, events)
+  const { calendar, error } = useCalendar(range, events)
   const Tag = tagOf(as, 'div')
 
   if (error) {
-    if (!fallback) throw error
+    if (!renderError) throw error
 
     return (
       <Tag {...rest} style={style}>
-        {fallback(error)}
+        {renderError(error)}
       </Tag>
     )
   }
 
-  const scope: CalendarContextValue<TData> = { calendar, spec, locale, gutter }
+  const scope: CalendarContextValue<TData> = {
+    calendar,
+    range,
+    locale,
+    gutterWidth
+  }
 
   return (
     <Tag {...rest} style={style}>
       <CalendarProvider value={scope}>
-        {renderSlot(children, scope, null)}
+        {renderChildren(children, scope, null)}
       </CalendarProvider>
     </Tag>
   )

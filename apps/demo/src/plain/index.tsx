@@ -17,7 +17,9 @@ export const PlainSlotted = ({ hourHeight }: SlottedProps): ReactElement => (
 
       <Calendar.AllDayRow
         className="border-b border-line"
-        label={<span className="pl-2 text-[10px] text-faint">all-day</span>}
+        gutterCell={
+          <span className="pl-2 text-[10px] text-faint">all-day</span>
+        }
       >
         <Calendar.AllDayEvents className="truncate rounded bg-tone-2 px-2 text-[11px] leading-6 text-tone-2-ink">
           {({ event }) => event.data?.title}
@@ -51,19 +53,19 @@ export const PlainMonth = (): ReactElement => (
               {dayNumber}
             </div>
             <div style={{ height: lanes * LANE_HEIGHT }} />
-            <Calendar.MonthEntries className="truncate rounded bg-tone-1 px-1 text-[11px] leading-5 text-tone-1-ink">
+            <Calendar.MonthTimedEvents className="truncate rounded bg-tone-1 px-1 text-[11px] leading-5 text-tone-1-ink">
               {({ event }) => event.data?.title}
-            </Calendar.MonthEntries>
+            </Calendar.MonthTimedEvents>
           </>
         )}
       </Calendar.MonthDays>
 
-      <Calendar.MonthBars
+      <Calendar.MonthAllDayEvents
         laneHeight={LANE_HEIGHT}
         className="truncate rounded bg-tone-2 px-1.5 text-[11px] leading-5 text-tone-2-ink"
       >
         {({ event }) => event.data?.title}
-      </Calendar.MonthBars>
+      </Calendar.MonthAllDayEvents>
     </Calendar.MonthRows>
   </Calendar.MonthGrid>
 )
@@ -78,13 +80,13 @@ export const PlainAgenda = (): ReactElement => (
           </span>
 
           <span className="flex flex-col gap-1">
-            <Calendar.AgendaBars as="span" className="text-[13px]">
+            <Calendar.AgendaAllDayEvents as="span" className="text-[13px]">
               {({ event }) => `${event.data?.title} · all-day`}
-            </Calendar.AgendaBars>
+            </Calendar.AgendaAllDayEvents>
 
-            <Calendar.AgendaBoxes as="span" className="text-[13px]">
+            <Calendar.AgendaTimedEvents as="span" className="text-[13px]">
               {({ event, timeRange }) => `${event.data?.title} · ${timeRange}`}
-            </Calendar.AgendaBoxes>
+            </Calendar.AgendaTimedEvents>
           </span>
         </>
       )}

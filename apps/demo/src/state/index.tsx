@@ -1,4 +1,4 @@
-import type { Calendar } from '@midstem/chronous'
+import type { CalendarLayout } from '@midstem/chronous-react'
 import { useState } from 'react'
 import type { ReactElement } from 'react'
 
@@ -8,7 +8,7 @@ import { STATE_HINT } from './constants'
 import { jsonOf, summaryOf } from './helpers'
 
 type StateProps = {
-  calendar: Calendar<EventData>
+  calendar: CalendarLayout<EventData>
 }
 
 export const State = ({ calendar }: StateProps): ReactElement => {

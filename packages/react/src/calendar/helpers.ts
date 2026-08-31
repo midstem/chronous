@@ -4,7 +4,7 @@ import {
   InvalidRecurrenceError,
   buildCalendar
 } from '@midstem/chronous'
-import type { EventInput, RangeSpec } from '@midstem/chronous'
+import type { EventInput, CalendarRange } from '@midstem/chronous'
 
 import type { CalendarError, CalendarResult } from './types'
 
@@ -14,11 +14,11 @@ const isCalendarError = (cause: unknown): cause is CalendarError =>
   cause instanceof InvalidRecurrenceError
 
 export const resultOf = <TData>(
-  spec: RangeSpec,
+  range: CalendarRange,
   events: readonly EventInput<TData>[]
 ): CalendarResult<TData> => {
   try {
-    return { calendar: buildCalendar(spec, events), error: null }
+    return { calendar: buildCalendar(range, events), error: null }
   } catch (cause) {
     if (!isCalendarError(cause)) throw cause
 

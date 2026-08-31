@@ -1,4 +1,4 @@
-import type { IsoDate, LocaleId } from '@midstem/chronous'
+import type { IsoDate, LocaleId } from '@midstem/chronous-react'
 import type { ReactElement } from 'react'
 
 import { AllDay } from '../allday'

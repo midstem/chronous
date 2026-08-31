@@ -12,7 +12,7 @@ export const AllDay = (): ReactElement => (
   <Calendar.AllDayRow
     className="border-b border-line pt-0.5 pb-1.5"
     laneHeight={LANE_HEIGHT}
-    label={
+    gutterCell={
       <span className="block pt-1 pr-2 text-right text-[10px] text-faint">
         {ALL_DAY_LABEL}
       </span>

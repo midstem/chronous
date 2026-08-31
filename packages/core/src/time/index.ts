@@ -29,7 +29,7 @@ import type {
   CalendarDate,
   CompareResult,
   Disambiguation,
-  FormatSpec,
+  FormatOptions,
   IsoDate,
   IsoDateTime,
   Moment,
@@ -173,22 +173,22 @@ export const duration = (input: TimeSpanLike | string): TimeSpan =>
     ? parsedDuration(input)
     : requireTemporal().Duration.from(input)
 
-export const format = (value: TimePoint, spec: FormatSpec): string => {
+export const format = (value: TimePoint, range: FormatOptions): string => {
   const timeZone = isMoment(value)
-    ? (spec.timeZone ?? timeZoneOf(value))
+    ? (range.timeZone ?? timeZoneOf(value))
     : UTC_TIME_ZONE
 
-  return getFormatter(spec.locale, timeZone, spec.options ?? {}).format(
+  return getFormatter(range.locale, timeZone, range.options ?? {}).format(
     toFormattable(value)
   )
 }
 
-export const formatIso = (value: IsoDateTime, spec: FormatSpec): string => {
-  if (isDateOnly(value)) return format(plainDate(value), spec)
+export const formatIso = (value: IsoDateTime, range: FormatOptions): string => {
+  if (isDateOnly(value)) return format(plainDate(value), range)
 
-  const timeZone = spec.timeZone ?? isoZoneOf(value) ?? UTC_TIME_ZONE
+  const timeZone = range.timeZone ?? isoZoneOf(value) ?? UTC_TIME_ZONE
 
-  return format(zoned(value, timeZone), { ...spec, timeZone })
+  return format(zoned(value, timeZone), { ...range, timeZone })
 }
 
 export const now = (timeZone: TimeZoneId): Moment =>

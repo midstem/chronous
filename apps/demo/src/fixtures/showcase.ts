@@ -1,4 +1,4 @@
-import type { EventInput } from '@midstem/chronous'
+import type { EventInput } from '@midstem/chronous-react'
 
 import type { EventData } from '../types'
 

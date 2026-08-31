@@ -19,7 +19,7 @@ export const App = (): ReactElement => {
   const playground = usePlayground()
   const scheme = useColorScheme()
   const [mode, setMode] = useState<Mode>(DEFAULT_MODE)
-  const { state, spec, source, events, problem } = playground
+  const { state, range, source, events, problem } = playground
 
   return (
     <div className="flex h-dvh flex-col bg-canvas text-ink">
@@ -32,7 +32,7 @@ export const App = (): ReactElement => {
 
       <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(0,16rem)_minmax(0,1fr)] lg:grid-cols-[minmax(300px,23vw)_minmax(0,1fr)] lg:grid-rows-1">
         <Sidebar
-          spec={
+          range={
             <Controls
               state={state}
               update={playground.update}
@@ -52,14 +52,14 @@ export const App = (): ReactElement => {
 
         <main className="flex min-h-0 min-w-0 flex-col">
           {mode === 'calendar' && (
-            <Boundary key={JSON.stringify(spec)}>
+            <Boundary key={JSON.stringify(range)}>
               <Board
-                spec={spec}
+                range={range}
                 events={events}
                 locale={state.locale}
                 density={state.density}
                 style={state.style}
-                onNavigate={playground.applySpec}
+                onNavigate={playground.applyRange}
                 onDensity={(density) => playground.update({ density })}
               />
             </Boundary>
@@ -67,7 +67,7 @@ export const App = (): ReactElement => {
 
           {mode === 'code' && (
             <Snippet
-              spec={spec}
+              range={range}
               events={events}
               locale={state.locale}
               hourHeight={hourHeightOf(state.density)}

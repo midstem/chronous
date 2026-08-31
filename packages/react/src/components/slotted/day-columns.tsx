@@ -6,7 +6,7 @@ import {
   useTimeGridContext
 } from '../context'
 import type { DayColumnContextValue } from '../context'
-import { renderSlot, styleOf, tagOf } from '../helpers'
+import { renderChildren, styleOf, tagOf } from '../helpers'
 import type { OwnProps, PolymorphicProps } from '../types'
 
 export type DayColumnsProps<
@@ -34,7 +34,7 @@ export const DayColumns = <TData, TTag extends ElementType = 'div'>({
             {...rest}
             style={styleOf({ position: 'relative', height: dayHeight }, style)}
           >
-            {renderSlot(children, { day }, null)}
+            {renderChildren(children, { day }, null)}
           </Tag>
         </DayColumnProvider>
       ))}

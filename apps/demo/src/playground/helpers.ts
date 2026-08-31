@@ -1,9 +1,9 @@
 import type {
   Disambiguation,
   EventInput,
-  RangeSpec,
+  CalendarRange,
   WeekStartsOn
-} from '@midstem/chronous'
+} from '@midstem/chronous-react'
 
 import { JSON_INDENT, UNSET } from '../constants'
 import type { EventData } from '../types'
@@ -28,7 +28,7 @@ const numberOf = (value: string): number | undefined =>
 const textOf = (value: string): string | undefined =>
   value.trim() === UNSET ? undefined : value
 
-export const specOf = (state: PlaygroundState): RangeSpec => ({
+export const rangeOf = (state: PlaygroundState): CalendarRange => ({
   view: state.view,
   date: state.date,
   timeZone: state.timeZone,

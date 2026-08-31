@@ -24,41 +24,41 @@ import {
   requireTimeZone,
   sequence
 } from './helpers'
-import type { DateRange, RangeDay, RangeSpec, ResolvedSpec } from './types'
+import type { DateRange, RangeDay, CalendarRange, ResolvedRange } from './types'
 
-const resolveSpec = (spec: RangeSpec): ResolvedSpec => ({
-  timeZone: requireTimeZone(spec.timeZone),
-  weekStartsOn: spec.weekStartsOn ?? DEFAULT_WEEK_STARTS_ON,
-  slotMinutes: requireSlotMinutes(spec.slotMinutes ?? DEFAULT_SLOT_MINUTES),
-  slotted: SLOTTED_VIEWS.includes(spec.view)
+const resolveRange = (range: CalendarRange): ResolvedRange => ({
+  timeZone: requireTimeZone(range.timeZone),
+  weekStartsOn: range.weekStartsOn ?? DEFAULT_WEEK_STARTS_ON,
+  slotMinutes: requireSlotMinutes(range.slotMinutes ?? DEFAULT_SLOT_MINUTES),
+  slotted: SLOTTED_VIEWS.includes(range.view)
 })
 
-export const spanLength = (spec: RangeSpec): number => {
+export const spanLength = (range: CalendarRange): number => {
   const fallback =
-    spec.view === 'agenda' ? DEFAULT_AGENDA_DAYS : DEFAULT_SPAN_DAYS
+    range.view === 'agenda' ? DEFAULT_AGENDA_DAYS : DEFAULT_SPAN_DAYS
 
-  return requireDayCount(spec.dayCount ?? fallback)
+  return requireDayCount(range.dayCount ?? fallback)
 }
 
 const anchoredDates = (
   anchor: CalendarDate,
-  spec: RangeSpec,
-  resolved: ResolvedSpec
+  range: CalendarRange,
+  resolved: ResolvedRange
 ): CalendarDate[] => {
-  if (spec.view === 'day') return [anchor]
+  if (range.view === 'day') return [anchor]
 
-  if (spec.view === 'week')
+  if (range.view === 'week')
     return sequence(
       startOfWeekDate(anchor, resolved.weekStartsOn),
       DAYS_IN_WEEK
     )
 
-  return sequence(anchor, spanLength(spec))
+  return sequence(anchor, spanLength(range))
 }
 
 const monthDays = (
   anchor: CalendarDate,
-  resolved: ResolvedSpec
+  resolved: ResolvedRange
 ): RangeDay[] => {
   const monthStart = startOfMonth(anchor)
   const monthEnd = add(monthStart, ONE_MONTH)
@@ -75,18 +75,18 @@ const monthDays = (
   )
 }
 
-export const buildRange = (spec: RangeSpec): DateRange => {
-  const resolved = resolveSpec(spec)
-  const anchor = readAnchor(spec.date)
+export const buildRange = (range: CalendarRange): DateRange => {
+  const resolved = resolveRange(range)
+  const anchor = readAnchor(range.date)
   const days =
-    spec.view === 'month'
+    range.view === 'month'
       ? monthDays(anchor, resolved)
-      : anchoredDates(anchor, spec, resolved).map((date) =>
+      : anchoredDates(anchor, range, resolved).map((date) =>
           buildDay(date, resolved, true)
         )
 
   return {
-    view: spec.view,
+    view: range.view,
     start: days[0].start,
     end: days[days.length - 1].end,
     days

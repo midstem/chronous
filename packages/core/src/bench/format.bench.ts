@@ -1,25 +1,29 @@
 import { bench, describe } from 'vitest'
 
 import { buildCalendar } from '#src/calendar'
-import type { RangeSpec } from '#src/range'
+import type { CalendarRange } from '#src/range'
 import { formatIso } from '#src/time'
-import type { FormatOptions } from '#src/time'
+import type { DateTimeFormatOptions } from '#src/time'
 
 const KYIV = 'Europe/Kyiv'
 
 const ANCHOR = '2026-03-23'
 
-const DAY_OPTIONS: FormatOptions = { day: 'numeric', month: 'long' }
+const DAY_OPTIONS: DateTimeFormatOptions = { day: 'numeric', month: 'long' }
 
-const CLOCK_OPTIONS: FormatOptions = {
+const CLOCK_OPTIONS: DateTimeFormatOptions = {
   hour: '2-digit',
   minute: '2-digit',
   hour12: false
 }
 
-const monthSpec: RangeSpec = { view: 'month', date: ANCHOR, timeZone: KYIV }
+const monthRange: CalendarRange = {
+  view: 'month',
+  date: ANCHOR,
+  timeZone: KYIV
+}
 
-const month = buildCalendar(monthSpec, [])
+const month = buildCalendar(monthRange, [])
 
 const week = buildCalendar({ view: 'week', date: ANCHOR, timeZone: KYIV }, [])
 

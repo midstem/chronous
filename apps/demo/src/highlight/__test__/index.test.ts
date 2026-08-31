@@ -3,13 +3,13 @@ import { describe, expect, it } from 'vitest'
 import { highlight } from '../index'
 import type { CodeToken, CodeTokenKind } from '../index'
 
-const SOURCE = `import { createCalendar } from '@midstem/chronous-react'
+const SOURCE = `import { createCalendarComponents } from '@midstem/chronous-react'
 
-const Calendar = createCalendar<EventData>()
+const Calendar = createCalendarComponents<EventData>()
 
 // the board
 export const Board = () => (
-  <Calendar.Root spec={SPEC} events={EVENTS} gutter="66px">
+  <Calendar.Root range={RANGE} events={EVENTS} gutterWidth="66px">
     <Calendar.TimeGrid hourHeight={60}>
       {({ dayHeight }) => \`\${dayHeight}px\`}
     </Calendar.TimeGrid>
@@ -51,8 +51,8 @@ describe('highlight', () => {
     const tokens = highlight(SOURCE)
 
     expect(kindOf(tokens, 'Calendar.Root')).toBe('tag')
-    expect(kindOf(tokens, 'spec')).toBe('attribute')
-    expect(kindOf(tokens, 'gutter')).toBe('attribute')
+    expect(kindOf(tokens, 'range')).toBe('attribute')
+    expect(kindOf(tokens, 'gutterWidth')).toBe('attribute')
     expect(kindOf(tokens, '"66px"')).toBe('string')
   })
 

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { normalizeEvents } from '#src/event'
 import type { EventInput } from '#src/event'
 import { buildRange } from '#src/range'
-import type { RangeSpec } from '#src/range'
+import type { CalendarRange } from '#src/range'
 import { DAYS_IN_WEEK } from '#src/time'
 
 import { buildLanes } from '../index'
@@ -15,21 +15,21 @@ const WEEK_STARTS = [0, 1, 2, 3, 4, 5, 6] as const
 const AGENDA_DAYS = 30
 const WEDNESDAY_INDEX = 2
 
-const base: RangeSpec = { date: ANCHOR, timeZone: KYIV, view: 'week' }
+const base: CalendarRange = { date: ANCHOR, timeZone: KYIV, view: 'week' }
 
 const rowsOf = (
   inputs: readonly EventInput[],
-  spec: RangeSpec = base
+  range: CalendarRange = base
 ): LaneRow[] =>
   buildLanes(
-    buildRange(spec),
-    normalizeEvents(inputs, { timeZone: spec.timeZone })
+    buildRange(range),
+    normalizeEvents(inputs, { timeZone: range.timeZone })
   )
 
 const spansOf = (
   inputs: readonly EventInput[],
-  spec: RangeSpec = base
-): PlacedSpan[] => rowsOf(inputs, spec)[0].spans
+  range: CalendarRange = base
+): PlacedSpan[] => rowsOf(inputs, range)[0].spans
 
 const idsOf = (spans: readonly PlacedSpan[]): string[] =>
   spans.map((span) => span.event.id)
@@ -47,7 +47,7 @@ describe('placing one bar', () => {
     expect(span).toMatchObject({
       startDay: WEDNESDAY_INDEX,
       endDay: WEDNESDAY_INDEX + 1,
-      days: 1,
+      dayCount: 1,
       lane: 0,
       lanes: 1,
       continuesBefore: false,
@@ -62,20 +62,20 @@ describe('placing one bar', () => {
   it('reads the end as exclusive', () => {
     const [span] = spansOf([allDay('a', '2026-03-16', '2026-03-18')])
 
-    expect(span).toMatchObject({ startDay: 0, endDay: 2, days: 2 })
+    expect(span).toMatchObject({ startDay: 0, endDay: 2, dayCount: 2 })
     expect(span.end.toString()).toBe('2026-03-18')
   })
 
   it('keeps a one-day event when the end repeats the start', () => {
     const [span] = spansOf([allDay('a', ANCHOR, ANCHOR)])
 
-    expect(span.days).toBe(1)
+    expect(span.dayCount).toBe(1)
   })
 
   it('leaves a row empty when nothing lands in it', () => {
     const [row] = rowsOf([allDay('a', '2026-04-01')])
 
-    expect(row).toMatchObject({ lanes: 0, days: DAYS_IN_WEEK })
+    expect(row).toMatchObject({ lanes: 0, dayCount: DAYS_IN_WEEK })
     expect(row.spans).toEqual([])
     expect(row.start.toString()).toBe('2026-03-16')
     expect(row.end.toString()).toBe('2026-03-23')
@@ -133,7 +133,7 @@ describe('clipping to the row', () => {
     expect(span).toMatchObject({
       startDay: 0,
       endDay: DAYS_IN_WEEK,
-      days: DAYS_IN_WEEK,
+      dayCount: DAYS_IN_WEEK,
       left: 0,
       width: 1,
       continuesBefore: true,
@@ -158,7 +158,7 @@ describe('timed events', () => {
   it('lifts an event of a whole day into a lane', () => {
     const [span] = spansOf([timed('a', '2026-03-18T09:00', '2026-03-19T09:00')])
 
-    expect(span).toMatchObject({ startDay: 2, endDay: 4, days: 2 })
+    expect(span).toMatchObject({ startDay: 2, endDay: 4, dayCount: 2 })
   })
 
   it('leaves an event five minutes short of a day in the grid', () => {
@@ -170,15 +170,15 @@ describe('timed events', () => {
   it('lifts an event that runs over several days', () => {
     const [span] = spansOf([timed('a', '2026-03-17T22:00', '2026-03-20T02:00')])
 
-    expect(span).toMatchObject({ days: 4, continuesAfter: false })
+    expect(span).toMatchObject({ dayCount: 4, continuesAfter: false })
   })
 })
 
 describe('a month grid', () => {
-  const spec: RangeSpec = { ...base, view: 'month' }
+  const range: CalendarRange = { ...base, view: 'month' }
 
   it('breaks a bar at the week boundary', () => {
-    const rows = rowsOf([allDay('a', ANCHOR, '2026-03-25')], spec)
+    const rows = rowsOf([allDay('a', ANCHOR, '2026-03-25')], range)
     const [before] = rows[3].spans
     const [after] = rows[4].spans
 
@@ -190,27 +190,29 @@ describe('a month grid', () => {
     })
     expect(after).toMatchObject({
       startDay: 0,
-      days: 2,
+      dayCount: 2,
       continuesBefore: true,
       continuesAfter: false
     })
   })
 
   it('carries bars on the days around the month', () => {
-    const rows = rowsOf([allDay('a', '2026-02-24')], spec)
+    const rows = rowsOf([allDay('a', '2026-02-24')], range)
 
     expect(idsOf(rows[0].spans)).toEqual(['a'])
   })
 
   it.each(WEEK_STARTS)('cuts into whole weeks from day %d', (weekStartsOn) => {
-    const weekly: RangeSpec = { ...spec, weekStartsOn }
+    const weekly: CalendarRange = { ...range, weekStartsOn }
     const rows = rowsOf([allDay('a', '2026-03-10', '2026-04-02')], weekly)
-    const range = buildRange(weekly)
+    const built = buildRange(weekly)
 
-    expect(rows.length * DAYS_IN_WEEK).toBe(range.days.length)
-    expect(rows.every((row) => row.days === DAYS_IN_WEEK)).toBe(true)
+    expect(rows.length * DAYS_IN_WEEK).toBe(built.days.length)
+    expect(rows.every((row) => row.dayCount === DAYS_IN_WEEK)).toBe(true)
     expect(
-      rows.every((row) => row.spans.every((span) => span.days <= DAYS_IN_WEEK))
+      rows.every((row) =>
+        row.spans.every((span) => span.dayCount <= DAYS_IN_WEEK)
+      )
     ).toBe(true)
     expect(new Set(rows.map((row) => row.start.dayOfWeek)).size).toBe(1)
   })
@@ -221,7 +223,7 @@ describe('views without week rows', () => {
     const rows = rowsOf([allDay('a', ANCHOR)], { ...base, view: 'day' })
 
     expect(rows).toHaveLength(1)
-    expect(rows[0]).toMatchObject({ days: 1, lanes: 1 })
+    expect(rows[0]).toMatchObject({ dayCount: 1, lanes: 1 })
     expect(rows[0].spans[0]).toMatchObject({ left: 0, width: 1 })
   })
 
@@ -229,6 +231,6 @@ describe('views without week rows', () => {
     const rows = rowsOf([allDay('a', ANCHOR)], { ...base, view: 'agenda' })
 
     expect(rows).toHaveLength(1)
-    expect(rows[0].days).toBe(AGENDA_DAYS)
+    expect(rows[0].dayCount).toBe(AGENDA_DAYS)
   })
 })

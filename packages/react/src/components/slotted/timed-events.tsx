@@ -2,7 +2,7 @@ import type { CalendarBox, TimedEntry } from '@midstem/chronous'
 import type { ElementType, ReactNode } from 'react'
 
 import { useDayColumnContext } from '../context'
-import { percentOf, renderSlot, styleOf, tagOf } from '../helpers'
+import { percentOf, renderChildren, styleOf, tagOf } from '../helpers'
 import type { OwnProps, PolymorphicProps } from '../types'
 
 const MIN_HEIGHT = 22
@@ -57,7 +57,7 @@ export const TimedEvents = <TData, TTag extends ElementType = 'div'>({
             style
           )}
         >
-          {renderSlot(children, { event: box.event, box }, box.event.id)}
+          {renderChildren(children, { event: box.event, box }, box.event.id)}
         </Tag>
       ))}
     </>

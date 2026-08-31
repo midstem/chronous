@@ -1,59 +1,71 @@
 # `@midstem/chronous-react`
 
-Headless React hooks on top of [`@midstem/chronous`](../core). The engine owns
-geometry and semantics, the hooks own memoization and navigation, and every
-pixel stays yours.
+Headless React hooks and primitives on top of
+[`@midstem/chronous`](../core). The engine owns geometry and semantics, the
+hooks own memoization and navigation, and every pixel stays yours.
 
 ## Installation
 
 ```bash
-npm install @midstem/chronous @midstem/chronous-react
+npm install @midstem/chronous-react
 ```
 
-`@midstem/chronous` is a peer dependency and is installed alongside. Temporal
-has to be available before the first render — see the core README.
+One package is enough. The engine comes with it as a dependency, and everything
+it exports is re-exported from here — `buildCalendar`, `formatIso`,
+`calendarReducer`, the error classes and every type — so a React app never
+imports `@midstem/chronous` by name:
+
+```tsx
+import { Calendar, formatIso } from '@midstem/chronous-react'
+import type { CalendarRange, EventInput } from '@midstem/chronous-react'
+```
+
+Install `@midstem/chronous` on its own only where React is not involved — a
+server, a worker, another framework. Temporal has to be available before the
+first render either way; see the core README.
 
 ## `useCalendar`
 
-`useCalendar(spec, events)` is a memoized projection of `buildCalendar`. It
-holds no state and runs no effects: the spec is yours, so it can live in a
-router, a query string or `useState`.
+`useCalendar(range, events)` is a memoized projection of `buildCalendar`. It
+holds no state and runs no effects: the range is yours, so it can live in a
+router, a query string or `useState`. A `CalendarRange` names what to draw —
+the view, the anchor date and the time zone.
 
 ```tsx
-const { calendar, error } = useCalendar(spec, events)
+const { calendar, error } = useCalendar(range, events)
 ```
 
-The memo is keyed on the fields of the spec rather than on its identity, so an
+The memo is keyed on the fields of the range rather than on its identity, so an
 inline object literal does not rebuild the calendar on every render. Events are
 keyed by reference — memoize that array yourself if it is built inline.
 
-`buildCalendar` throws on the first unusable event, on an unreadable spec and on
-a recurrence rule it cannot read, and a throw during render takes the whole tree
-down. The hook catches `InvalidEventError`, `InvalidRangeError` and
+`buildCalendar` throws on the first unusable event, on an unreadable range and
+on a recurrence rule it cannot read, and a throw during render takes the whole
+tree down. The hook catches `InvalidEventError`, `InvalidRangeError` and
 `InvalidRecurrenceError` and hands them back instead: `calendar` is null exactly
 when `error` is set. Anything else is a bug and is left to propagate.
 
 ## `useCalendarNavigation`
 
-`useCalendarNavigation(spec)` returns the specs to move to, and never sets state
-itself. It is a thin wrapper over `calendarReducer` from `@midstem/chronous` —
-the same steps are available without React, and without a rendered calendar.
+`useCalendarNavigation(range)` returns the ranges to move to, and never sets
+state itself. It is a thin wrapper over `calendarReducer` — the same steps are
+available without React, and without a rendered calendar.
 
 ```tsx
-const { next, prev, today, withView } = useCalendarNavigation(spec)
+const { next, prev, today, withView } = useCalendarNavigation(range)
 
-<button disabled={!prev} onClick={() => prev && setSpec(prev)}>Back</button>
-<button disabled={!today} onClick={() => today && setSpec(today())}>Today</button>
-<button disabled={!next} onClick={() => next && setSpec(next)}>Forward</button>
+<button disabled={!prev} onClick={() => prev && setRange(prev)}>Back</button>
+<button disabled={!today} onClick={() => today && setRange(today())}>Today</button>
+<button disabled={!next} onClick={() => next && setRange(next)}>Forward</button>
 ```
 
-A step moves by the period the spec asks for: a day by one day, a week by seven,
-a span by its own length, and a month by one month anchored on the first — so a
-long month never drags the anchor backwards. The weekday of the anchor survives
-a week step, which is what makes switching to `day` afterwards land where the
-reader was looking.
+A step moves by the period the range asks for: a day by one day, a week by
+seven, a span by its own length, and a month by one month anchored on the
+first — so a long month never drags the anchor backwards. The weekday of the
+anchor survives a week step, which is what makes switching to `day` afterwards
+land where the reader was looking.
 
-`next` and `prev` are null when the spec itself cannot be stepped: an anchor
+`next` and `prev` are null when the range itself cannot be stepped: an anchor
 date that cannot be read, or a `dayCount` that is not a whole number of days.
 An unreadable time zone does not stop a step — it stops the calendar, not the
 arithmetic — so the buttons keep working while the zone is being fixed.
@@ -74,7 +86,7 @@ pieces arrive pre-wired, not locked down, so styling is the part left for you.
 ```tsx
 import { Calendar } from '@midstem/chronous-react'
 
-;<Calendar.Root spec={spec} events={events} locale="en-GB">
+;<Calendar.Root range={range} events={events} locale="en-GB">
   <Calendar.Header className="grid-header">
     <Calendar.DayHeadings className="heading">
       {({ weekday, dayNumber }) => (
@@ -85,7 +97,7 @@ import { Calendar } from '@midstem/chronous-react'
     </Calendar.DayHeadings>
   </Calendar.Header>
 
-  <Calendar.AllDayRow label="all-day">
+  <Calendar.AllDayRow gutterCell="all-day">
     <Calendar.AllDayEvents className="bar">
       {({ event }) => event.data?.title}
     </Calendar.AllDayEvents>
@@ -107,9 +119,11 @@ import { Calendar } from '@midstem/chronous-react'
 </Calendar.Root>
 ```
 
-`MonthGrid` / `MonthWeekdays` / `MonthRows` / `MonthDays` / `MonthBars` /
-`MonthEntries` cover the month view, and `AgendaList` / `AgendaDays` /
-`AgendaBars` / `AgendaBoxes` the agenda. `Toolbar` wraps
+`MonthGrid` / `MonthWeekdays` / `MonthRows` / `MonthDays` /
+`MonthAllDayEvents` / `MonthTimedEvents` cover the month view, and
+`AgendaList` / `AgendaDays` / `AgendaAllDayEvents` / `AgendaTimedEvents` the
+agenda. The pair repeats in every view: `AllDayEvents` draws what the engine
+laid out as bars, `TimedEvents` what it laid out inside a day. `Toolbar` wraps
 `useCalendarNavigation` and reports where to move to through `onNavigate` — the
 same function reaches its render prop as `goTo`, so a toolbar of your own reads
 `goTo(navigation.next)`. `useNow` reads the wall clock in the calendar's own
@@ -158,28 +172,29 @@ prop you pass wins over the attribute, so you can pin one when you need to:
 <Calendar.MonthDays className="data-[in-period=false]:bg-zinc-50" />
 ```
 
-**The gutter lives on `Root`.** `Header`, `AllDayRow` and `TimeGrid` lay out the
-same CSS grid, so the width of the leading column is one prop on the root rather
-than three that can drift apart. Month and agenda ignore it.
+**The gutter lives on `Root`.** `Header`, `AllDayRow` and `TimeGrid` lay out
+the same CSS grid, so `gutterWidth` is one prop on the root rather than three
+that can drift apart. Month and agenda ignore it. What goes _in_ that leading
+column is `gutterCell`, on `Header` and on `AllDayRow`.
 
 `TimeGrid` scrolls to `scrollToHour` on mount by finding the nearest element
 that actually scrolls — itself when nothing else does, the ancestor when your
 layout puts a sticky header above it. Pass `null` to leave the scroll alone.
 
-`Root` renders `fallback(error)` inside its own element when the spec or the
-events cannot be read, so the layout does not collapse, and
-rethrows when no fallback is given: an invalid range is a bug in the input, and
+`Root` renders `renderError(error)` inside its own element when the range or
+the events cannot be read, so the layout does not collapse, and rethrows when
+no `renderError` is given: an invalid range is a bug in the input, and
 swallowing it into a blank grid hides it. Reach for `useCalendar` directly when
 you want to handle it as state instead.
 
 ## Typed event data
 
 Context cannot infer a type argument, so `Calendar` on its own hands render
-props `data?: unknown`. `createCalendar` binds the namespace once and the type
-flows to every slot:
+props `data?: unknown`. `createCalendarComponents` binds the namespace once and
+the type flows to every render prop:
 
 ```tsx
-const Calendar = createCalendar<{ title: string; owner: string }>()
+const Calendar = createCalendarComponents<{ title: string; owner: string }>()
 
 <Calendar.TimedEvents>
   {({ event }) => event.data?.title}
@@ -187,16 +202,17 @@ const Calendar = createCalendar<{ title: string; owner: string }>()
 ```
 
 It is the same object at runtime — a cast, not a factory — so it costs nothing
-and can be created at module scope.
+and can be created at module scope. It is named for what it returns, and not
+`createCalendar`, because `buildCalendar` arrives from the same import and
+builds something else entirely.
 
 ## Labels
 
 No formatting ships here, and the hooks take no `locale`. Labels are the
-consumer's, and `formatIso` from `@midstem/chronous` reads either shape a
-calendar hands back:
+consumer's, and `formatIso` reads either shape a calendar hands back:
 
 ```tsx
-import { formatIso } from '@midstem/chronous'
+import { formatIso } from '@midstem/chronous-react'
 
 formatIso(day.date, { locale, options: { weekday: 'short', day: 'numeric' } })
 formatIso(slot.start, {
@@ -208,7 +224,7 @@ formatIso(slot.start, {
 `day.date` is a bare `2026-03-18` with no time and no offset, meant for keys,
 comparisons and headings; `day.start`, `slot.start` and `box.start` are full
 date-times carrying their offset. `formatIso` keeps the first floating and reads
-the second in the offset it carries, so neither needs `spec.timeZone` passed
+the second in the offset it carries, so neither needs `range.timeZone` passed
 back in. Reach for raw `Intl` only to step outside that — `new Date(day.date)`
 is UTC midnight, which is the previous day west of Greenwich.
 

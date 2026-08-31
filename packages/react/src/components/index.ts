@@ -1,14 +1,14 @@
 import type { ElementType, ReactNode } from 'react'
 
-import { AgendaBars } from './agenda/agenda-bars'
-import { AgendaBoxes } from './agenda/agenda-boxes'
+import { AgendaAllDayEvents } from './agenda/agenda-all-day-events'
 import { AgendaDays } from './agenda/agenda-days'
 import { AgendaList } from './agenda/agenda-list'
-import { MonthBars } from './month/month-bars'
+import { AgendaTimedEvents } from './agenda/agenda-timed-events'
+import { MonthAllDayEvents } from './month/month-all-day-events'
 import { MonthDays } from './month/month-days'
-import { MonthEntries } from './month/month-entries'
 import { MonthGrid } from './month/month-grid'
 import { MonthRows } from './month/month-rows'
+import { MonthTimedEvents } from './month/month-timed-events'
 import { MonthWeekdays } from './month/month-weekdays'
 import { AllDayEvents } from './shared/all-day-events'
 import { AllDayRow } from './shared/all-day-row'
@@ -24,15 +24,15 @@ import { TimeLabels } from './slotted/time-labels'
 import { TimeSlots } from './slotted/time-slots'
 import { TimedEvents } from './slotted/timed-events'
 
-import type { AgendaBarsProps } from './agenda/agenda-bars'
-import type { AgendaBoxesProps } from './agenda/agenda-boxes'
+import type { AgendaAllDayEventsProps } from './agenda/agenda-all-day-events'
 import type { AgendaDaysProps } from './agenda/agenda-days'
 import type { AgendaListProps } from './agenda/agenda-list'
-import type { MonthBarsProps } from './month/month-bars'
+import type { AgendaTimedEventsProps } from './agenda/agenda-timed-events'
+import type { MonthAllDayEventsProps } from './month/month-all-day-events'
 import type { MonthDaysProps } from './month/month-days'
-import type { MonthEntriesProps } from './month/month-entries'
 import type { MonthGridProps } from './month/month-grid'
 import type { MonthRowsProps } from './month/month-rows'
+import type { MonthTimedEventsProps } from './month/month-timed-events'
 import type { MonthWeekdaysProps } from './month/month-weekdays'
 import type { AllDayEventsProps } from './shared/all-day-events'
 import type { AllDayRowProps } from './shared/all-day-row'
@@ -66,12 +66,12 @@ export const Calendar = {
   MonthWeekdays,
   MonthRows,
   MonthDays,
-  MonthBars,
-  MonthEntries,
+  MonthAllDayEvents,
+  MonthTimedEvents,
   AgendaList,
   AgendaDays,
-  AgendaBars,
-  AgendaBoxes
+  AgendaAllDayEvents,
+  AgendaTimedEvents
 }
 
 export type CalendarComponents<TData> = {
@@ -126,11 +126,11 @@ export type CalendarComponents<TData> = {
   MonthDays: <TTag extends ElementType = 'div'>(
     props: MonthDaysProps<TData, TTag>
   ) => ReactNode
-  MonthBars: <TTag extends ElementType = 'div'>(
-    props: MonthBarsProps<TData, TTag>
+  MonthAllDayEvents: <TTag extends ElementType = 'div'>(
+    props: MonthAllDayEventsProps<TData, TTag>
   ) => ReactNode
-  MonthEntries: <TTag extends ElementType = 'div'>(
-    props: MonthEntriesProps<TData, TTag>
+  MonthTimedEvents: <TTag extends ElementType = 'div'>(
+    props: MonthTimedEventsProps<TData, TTag>
   ) => ReactNode
   AgendaList: <TTag extends ElementType = 'div'>(
     props: AgendaListProps<TData, TTag>
@@ -138,27 +138,40 @@ export type CalendarComponents<TData> = {
   AgendaDays: <TTag extends ElementType = 'div'>(
     props: AgendaDaysProps<TData, TTag>
   ) => ReactNode
-  AgendaBars: <TTag extends ElementType = 'div'>(
-    props: AgendaBarsProps<TData, TTag>
+  AgendaAllDayEvents: <TTag extends ElementType = 'div'>(
+    props: AgendaAllDayEventsProps<TData, TTag>
   ) => ReactNode
-  AgendaBoxes: <TTag extends ElementType = 'div'>(
-    props: AgendaBoxesProps<TData, TTag>
+  AgendaTimedEvents: <TTag extends ElementType = 'div'>(
+    props: AgendaTimedEventsProps<TData, TTag>
   ) => ReactNode
 }
 
-export const createCalendar = <TData>(): CalendarComponents<TData> => Calendar
+export const createCalendarComponents = <TData>(): CalendarComponents<TData> =>
+  Calendar
 
-export type * from './types'
+export type { ScopedChildren } from './types'
 
-export type { AgendaBarScope, AgendaBarsProps } from './agenda/agenda-bars'
-export type { AgendaBoxScope, AgendaBoxesProps } from './agenda/agenda-boxes'
+export type {
+  AgendaAllDayEventScope,
+  AgendaAllDayEventsProps
+} from './agenda/agenda-all-day-events'
 export type { AgendaDayScope, AgendaDaysProps } from './agenda/agenda-days'
 export type { AgendaListProps } from './agenda/agenda-list'
-export type { MonthBarScope, MonthBarsProps } from './month/month-bars'
+export type {
+  AgendaTimedEventScope,
+  AgendaTimedEventsProps
+} from './agenda/agenda-timed-events'
+export type {
+  MonthAllDayEventScope,
+  MonthAllDayEventsProps
+} from './month/month-all-day-events'
 export type { MonthDayScope, MonthDaysProps } from './month/month-days'
-export type { MonthEntriesProps, MonthEntryScope } from './month/month-entries'
 export type { MonthGridProps } from './month/month-grid'
 export type { MonthRowsProps } from './month/month-rows'
+export type {
+  MonthTimedEventScope,
+  MonthTimedEventsProps
+} from './month/month-timed-events'
 export type {
   MonthWeekdayScope,
   MonthWeekdaysProps

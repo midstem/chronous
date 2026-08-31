@@ -1,5 +1,5 @@
 import type { EventId } from '#src/event'
-import type { RangeSpec, ViewKind } from '#src/range'
+import type { CalendarRange, ViewKind } from '#src/range'
 import type { IsoDate, IsoDateTime } from '#src/time'
 
 export type CalendarSelection =
@@ -8,7 +8,7 @@ export type CalendarSelection =
   | { kind: 'date'; date: IsoDate }
 
 export type CalendarState = {
-  spec: RangeSpec
+  range: CalendarRange
   selection: CalendarSelection | null
 }
 

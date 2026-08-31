@@ -9,7 +9,7 @@ import type {
 
 export type ViewKind = 'day' | 'week' | 'days' | 'month' | 'agenda'
 
-export type RangeSpec = {
+export type CalendarRange = {
   view: ViewKind
   date: IsoDate
   timeZone: TimeZoneId
@@ -19,7 +19,7 @@ export type RangeSpec = {
   disambiguation?: Disambiguation
 }
 
-export type ResolvedSpec = {
+export type ResolvedRange = {
   timeZone: TimeZoneId
   weekStartsOn: WeekStartsOn
   slotMinutes: number

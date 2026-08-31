@@ -2,14 +2,14 @@ import type { ElementType, ReactNode } from 'react'
 
 import { AllDayProvider, useCalendarContext } from '../context'
 import type { AllDayContextValue } from '../context'
-import { renderSlot, styleOf, tagOf, templateOf } from '../helpers'
+import { renderChildren, styleOf, tagOf, templateOf } from '../helpers'
 import type { OwnProps, PolymorphicProps } from '../types'
 
 const LANE_HEIGHT = 24
 
 export type AllDayRowOwnProps<TData> = OwnProps<AllDayContextValue<TData>> & {
   laneHeight?: number
-  label?: ReactNode
+  gutterCell?: ReactNode
 }
 
 export type AllDayRowProps<
@@ -22,10 +22,10 @@ export const AllDayRow = <TData, TTag extends ElementType = 'div'>({
   children,
   style,
   laneHeight = LANE_HEIGHT,
-  label = null,
+  gutterCell = null,
   ...rest
 }: AllDayRowProps<TData, TTag>): ReactNode => {
-  const { calendar, gutter } = useCalendarContext<TData>()
+  const { calendar, gutterWidth } = useCalendarContext<TData>()
   const Tag = tagOf(as, 'div')
   const row = calendar.rows[0]
 
@@ -40,12 +40,12 @@ export const AllDayRow = <TData, TTag extends ElementType = 'div'>({
         style={styleOf(
           {
             display: 'grid',
-            gridTemplateColumns: templateOf(gutter, calendar.days.length)
+            gridTemplateColumns: templateOf(gutterWidth, calendar.days.length)
           },
           style
         )}
       >
-        <div>{label}</div>
+        <div>{gutterCell}</div>
         <div
           style={{
             gridColumn: '2 / -1',
@@ -53,7 +53,7 @@ export const AllDayRow = <TData, TTag extends ElementType = 'div'>({
             height: row.lanes * laneHeight
           }}
         >
-          {renderSlot(children, scope, null)}
+          {renderChildren(children, scope, null)}
         </div>
       </Tag>
     </AllDayProvider>

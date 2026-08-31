@@ -17,7 +17,7 @@ import { requireTemporal } from './temporal'
 import type {
   CompareResult,
   DateFields,
-  FormatOptions,
+  DateTimeFormatOptions,
   IsoDateTime,
   LocaleId,
   Moment,
@@ -74,7 +74,7 @@ export const isoZoneOf = (iso: IsoDateTime): TimeZoneId | null => {
 export const getFormatter = (
   locale: LocaleId,
   timeZone: TimeZoneId,
-  options: FormatOptions
+  options: DateTimeFormatOptions
 ): Intl.DateTimeFormat => {
   const key = `${locale}|${timeZone}|${JSON.stringify(options)}`
   const cached = formatterCache.get(key)

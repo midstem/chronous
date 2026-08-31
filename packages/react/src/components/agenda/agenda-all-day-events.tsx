@@ -2,25 +2,25 @@ import type { CalendarBar, CalendarEntry } from '@midstem/chronous'
 import type { ElementType, ReactNode } from 'react'
 
 import { useAgendaDayContext } from '../context'
-import { renderSlot, tagOf } from '../helpers'
+import { renderChildren, tagOf } from '../helpers'
 import type { OwnProps, PolymorphicProps } from '../types'
 
-export type AgendaBarScope<TData> = {
+export type AgendaAllDayEventScope<TData> = {
   event: CalendarEntry<TData>
   bar: CalendarBar<TData>
 }
 
-export type AgendaBarsProps<
+export type AgendaAllDayEventsProps<
   TData,
   TTag extends ElementType = 'div'
-> = PolymorphicProps<TTag, OwnProps<AgendaBarScope<TData>>>
+> = PolymorphicProps<TTag, OwnProps<AgendaAllDayEventScope<TData>>>
 
-export const AgendaBars = <TData, TTag extends ElementType = 'div'>({
+export const AgendaAllDayEvents = <TData, TTag extends ElementType = 'div'>({
   as,
   children,
   style,
   ...rest
-}: AgendaBarsProps<TData, TTag>): ReactNode => {
+}: AgendaAllDayEventsProps<TData, TTag>): ReactNode => {
   const { bars } = useAgendaDayContext<TData>()
   const Tag = tagOf(as, 'div')
 
@@ -35,7 +35,7 @@ export const AgendaBars = <TData, TTag extends ElementType = 'div'>({
           {...rest}
           style={style}
         >
-          {renderSlot(children, { event: bar.event, bar }, bar.event.id)}
+          {renderChildren(children, { event: bar.event, bar }, bar.event.id)}
         </Tag>
       ))}
     </>

@@ -1,4 +1,4 @@
-import type { RangeSpec, ViewKind } from '@midstem/chronous'
+import type { CalendarRange, ViewKind } from '@midstem/chronous-react'
 import type { CalendarNavigation } from '@midstem/chronous-react'
 import type { ReactElement } from 'react'
 
@@ -13,7 +13,7 @@ type ToolbarProps = {
   view: ViewKind
   density: Density
   slotted: boolean
-  onChange: (spec: RangeSpec) => void
+  onChange: (range: CalendarRange) => void
   onDensity: (density: Density) => void
 }
 

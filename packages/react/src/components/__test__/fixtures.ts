@@ -1,4 +1,4 @@
-import type { EventInput, RangeSpec } from '@midstem/chronous'
+import type { EventInput, CalendarRange } from '@midstem/chronous'
 
 export type EventData = {
   title: string
@@ -8,19 +8,19 @@ export const ZONE = 'Europe/Kyiv'
 
 export const LOCALE = 'en-GB'
 
-export const WEEK: RangeSpec = {
+export const WEEK: CalendarRange = {
   view: 'week',
   date: '2026-03-18',
   timeZone: ZONE
 }
 
-export const MONTH: RangeSpec = {
+export const MONTH: CalendarRange = {
   view: 'month',
   date: '2026-03-18',
   timeZone: ZONE
 }
 
-export const AGENDA: RangeSpec = {
+export const AGENDA: CalendarRange = {
   view: 'agenda',
   date: '2026-03-18',
   timeZone: ZONE

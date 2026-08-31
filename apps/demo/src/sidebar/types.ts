@@ -1,1 +1,1 @@
-export type TabId = 'spec' | 'events'
+export type TabId = 'range' | 'events'

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { normalizeEvents } from '#src/event'
 import type { EventInput } from '#src/event'
 import { buildRange } from '#src/range'
-import type { RangeSpec } from '#src/range'
+import type { CalendarRange } from '#src/range'
 import { DAYS_IN_WEEK } from '#src/time'
 
 import { buildLanes } from '../index'
@@ -23,12 +23,12 @@ const TRANSITIONS: [string, string][] = [
 ]
 
 const spansOn = (
-  spec: RangeSpec,
+  range: CalendarRange,
   inputs: readonly EventInput[]
 ): PlacedSpan[] =>
   buildLanes(
-    buildRange(spec),
-    normalizeEvents(inputs, { timeZone: spec.timeZone })
+    buildRange(range),
+    normalizeEvents(inputs, { timeZone: range.timeZone })
   )[0].spans
 
 describe('all-day bars ignore the clock', () => {
@@ -39,7 +39,7 @@ describe('all-day bars ignore the clock', () => {
 
     expect(span).toMatchObject({
       startDay: 0,
-      days: 1,
+      dayCount: 1,
       left: 0,
       width: 1,
       continuesBefore: false,
@@ -49,17 +49,17 @@ describe('all-day bars ignore the clock', () => {
   })
 
   it.each(TRANSITIONS)('fills a week in %s over %s', (timeZone, date) => {
-    const range = buildRange({ view: 'week', date, timeZone })
+    const built = buildRange({ view: 'week', date, timeZone })
     const [span] = spansOn({ view: 'week', date, timeZone }, [
       {
         id: 'a',
-        start: range.days[0].date.toString(),
-        end: range.days[DAYS_IN_WEEK - 1].date.add({ days: 1 }).toString()
+        start: built.days[0].date.toString(),
+        end: built.days[DAYS_IN_WEEK - 1].date.add({ days: 1 }).toString()
       }
     ])
 
     expect(span).toMatchObject({
-      days: DAYS_IN_WEEK,
+      dayCount: DAYS_IN_WEEK,
       width: 1,
       continuesBefore: false,
       continuesAfter: false
@@ -67,27 +67,31 @@ describe('all-day bars ignore the clock', () => {
   })
 
   it('lands on the day whose midnight the zone skips', () => {
-    const spec: RangeSpec = {
+    const range: CalendarRange = {
       view: 'days',
       date: '2026-09-05',
       timeZone: SANTIAGO,
       dayCount: THREE_DAYS
     }
-    const [span] = spansOn(spec, [{ id: 'a', start: '2026-09-06' }])
+    const [span] = spansOn(range, [{ id: 'a', start: '2026-09-06' }])
 
-    expect(span).toMatchObject({ startDay: 1, days: 1 })
+    expect(span).toMatchObject({ startDay: 1, dayCount: 1 })
   })
 })
 
 describe('a day is measured by the wall clock', () => {
-  const week: RangeSpec = { view: 'week', date: '2026-03-25', timeZone: KYIV }
+  const week: CalendarRange = {
+    view: 'week',
+    date: '2026-03-25',
+    timeZone: KYIV
+  }
 
   it('lifts twenty-three elapsed hours that fill a short day', () => {
     const [span] = spansOn(week, [
       { id: 'a', start: '2026-03-28T09:00', end: '2026-03-29T09:00' }
     ])
 
-    expect(span).toMatchObject({ days: 2 })
+    expect(span).toMatchObject({ dayCount: 2 })
   })
 
   it('lifts the same wall span on a week without a transition', () => {
@@ -95,7 +99,7 @@ describe('a day is measured by the wall clock', () => {
       { id: 'a', start: '2026-03-18T09:00', end: '2026-03-19T09:00' }
     ])
 
-    expect(span).toMatchObject({ days: 2 })
+    expect(span).toMatchObject({ dayCount: 2 })
   })
 
   it('lifts twenty-five elapsed hours that fill a long day', () => {
@@ -103,7 +107,7 @@ describe('a day is measured by the wall clock', () => {
       { id: 'a', start: '2026-10-24T09:00', end: '2026-10-25T09:00' }
     ])
 
-    expect(span).toMatchObject({ days: 2 })
+    expect(span).toMatchObject({ dayCount: 2 })
   })
 
   it('leaves twenty-three elapsed hours inside a long day in the grid', () => {

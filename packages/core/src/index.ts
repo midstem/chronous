@@ -1,16 +1,14 @@
-export { PACKAGE_NAME } from '#src/constants'
-
 export { isTemporalAvailable } from '#src/runtime'
 
 export { buildCalendar } from '#src/calendar'
 
 export type {
   AllDayEntry,
-  Calendar,
   CalendarBar,
   CalendarBox,
   CalendarDay,
   CalendarEntry,
+  CalendarLayout,
   CalendarRow,
   CalendarSlot,
   TimedEntry
@@ -29,7 +27,6 @@ export { InvalidEventError } from '#src/event'
 export type {
   EventId,
   EventInput,
-  NormalizeContext,
   RecurrenceInput,
   RecurrenceOverride
 } from '#src/event'
@@ -38,14 +35,14 @@ export { InvalidRangeError } from '#src/range'
 
 export { InvalidRecurrenceError } from '#src/recurrence'
 
-export type { RangeSpec, ViewKind } from '#src/range'
+export type { CalendarRange, ViewKind } from '#src/range'
 
 export { formatIso } from '#src/time'
 
 export type {
+  DateTimeFormatOptions,
   Disambiguation,
   FormatOptions,
-  FormatSpec,
   IsoDate,
   IsoDateTime,
   LocaleId,

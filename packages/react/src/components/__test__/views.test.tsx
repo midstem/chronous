@@ -1,4 +1,4 @@
-import type { RangeSpec } from '@midstem/chronous'
+import type { CalendarRange } from '@midstem/chronous'
 import { render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -15,7 +15,7 @@ const textsOf = (id: string): string[] =>
 
 describe('the month view', () => {
   const Month = (): React.ReactNode => (
-    <Calendar.Root spec={MONTH} events={EVENTS} locale={LOCALE}>
+    <Calendar.Root range={MONTH} events={EVENTS} locale={LOCALE}>
       <Calendar.MonthGrid data-testid="month">
         <Calendar.MonthWeekdays data-testid="weekday" />
         <Calendar.MonthRows data-testid="row">
@@ -24,11 +24,11 @@ describe('the month view', () => {
               <>
                 <span>{dayNumber}</span>
                 <span data-testid="lanes">{lanes}</span>
-                <Calendar.MonthEntries data-testid="entry" />
+                <Calendar.MonthTimedEvents data-testid="entry" />
               </>
             )}
           </Calendar.MonthDays>
-          <Calendar.MonthBars data-testid="bar" />
+          <Calendar.MonthAllDayEvents data-testid="bar" />
         </Calendar.MonthRows>
       </Calendar.MonthGrid>
     </Calendar.Root>
@@ -73,14 +73,14 @@ describe('the month view', () => {
 
 describe('the agenda view', () => {
   const Agenda = ({ showEmpty }: { showEmpty?: boolean }): React.ReactNode => (
-    <Calendar.Root spec={AGENDA} events={EVENTS} locale={LOCALE}>
+    <Calendar.Root range={AGENDA} events={EVENTS} locale={LOCALE}>
       <Calendar.AgendaList data-testid="list">
         <Calendar.AgendaDays data-testid="day" showEmpty={showEmpty}>
           {({ month, dayNumber }) => (
             <>
               <span data-testid="heading">{`${dayNumber} ${month}`}</span>
-              <Calendar.AgendaBars data-testid="bar" />
-              <Calendar.AgendaBoxes data-testid="box" />
+              <Calendar.AgendaAllDayEvents data-testid="bar" />
+              <Calendar.AgendaTimedEvents data-testid="box" />
             </>
           )}
         </Calendar.AgendaDays>
@@ -122,7 +122,7 @@ describe('the now marker', () => {
 
   const DayAt = (): React.ReactNode => (
     <Calendar.Root
-      spec={{ view: 'day', date: '2026-03-18', timeZone: ZONE }}
+      range={{ view: 'day', date: '2026-03-18', timeZone: ZONE }}
       events={EVENTS}
     >
       <Calendar.TimeGrid>
@@ -156,14 +156,14 @@ describe('the toolbar', () => {
   const Toolbar = ({
     onNavigate
   }: {
-    onNavigate: (spec: RangeSpec) => void
+    onNavigate: (range: CalendarRange) => void
   }): React.ReactNode => (
-    <Calendar.Root spec={WEEK} events={EVENTS} locale={LOCALE}>
+    <Calendar.Root range={WEEK} events={EVENTS} locale={LOCALE}>
       <Calendar.Toolbar onNavigate={onNavigate} views={['week', 'month']} />
     </Calendar.Root>
   )
 
-  it('steps the spec the engine handed it', () => {
+  it('steps the range the engine handed it', () => {
     const onNavigate = vi.fn()
 
     render(<Toolbar onNavigate={onNavigate} />)
@@ -184,14 +184,14 @@ describe('the toolbar', () => {
 })
 
 describe('the root', () => {
-  const BAD: RangeSpec = { ...WEEK, timeZone: 'Not/AZone' }
+  const BAD: CalendarRange = { ...WEEK, timeZone: 'Not/AZone' }
 
-  it('hands an unusable spec to the fallback it was given', () => {
+  it('hands an unusable range to the fallback it was given', () => {
     render(
       <Calendar.Root
-        spec={BAD}
+        range={BAD}
         events={EVENTS}
-        fallback={(error) => <p data-testid="failed">{error.name}</p>}
+        renderError={(error) => <p data-testid="failed">{error.name}</p>}
       >
         <Calendar.Header />
       </Calendar.Root>
@@ -203,10 +203,10 @@ describe('the root', () => {
   it('keeps its own element around the fallback', () => {
     const { container } = render(
       <Calendar.Root
-        spec={BAD}
+        range={BAD}
         events={EVENTS}
         className="shell"
-        fallback={() => <p>failed</p>}
+        renderError={() => <p>failed</p>}
       >
         <Calendar.Header />
       </Calendar.Root>
@@ -218,7 +218,7 @@ describe('the root', () => {
   it('lets the error through when no fallback is given', () => {
     expect(() =>
       render(
-        <Calendar.Root spec={BAD} events={EVENTS}>
+        <Calendar.Root range={BAD} events={EVENTS}>
           <Calendar.Header />
         </Calendar.Root>
       )

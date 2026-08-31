@@ -1,11 +1,11 @@
-import type { RangeSpec, ViewKind } from '@midstem/chronous'
+import type { CalendarRange, ViewKind } from '@midstem/chronous'
 import type { ElementType, ReactNode } from 'react'
 
 import { useCalendarNavigation } from '#src/navigation'
 import type { CalendarNavigation } from '#src/navigation'
 
 import { useCalendarContext } from '../context'
-import { renderSlot, tagOf } from '../helpers'
+import { renderChildren, tagOf } from '../helpers'
 import type { OwnProps, PolymorphicProps } from '../types'
 import { titleOf } from './helpers'
 
@@ -13,13 +13,13 @@ const VIEWS: ViewKind[] = ['day', 'week', 'month', 'agenda']
 
 export type ToolbarScope = {
   navigation: CalendarNavigation
-  spec: RangeSpec
+  range: CalendarRange
   title: string
-  goTo: (spec: RangeSpec) => void
+  goTo: (range: CalendarRange) => void
 }
 
 export type ToolbarOwnProps = OwnProps<ToolbarScope> & {
-  onNavigate: (spec: RangeSpec) => void
+  onNavigate: (range: CalendarRange) => void
   views?: readonly ViewKind[]
 }
 
@@ -36,18 +36,18 @@ export const Toolbar = <TTag extends ElementType = 'div'>({
   views = VIEWS,
   ...rest
 }: ToolbarProps<TTag>): ReactNode => {
-  const { spec, locale } = useCalendarContext()
-  const navigation = useCalendarNavigation(spec)
+  const { range, locale } = useCalendarContext()
+  const navigation = useCalendarNavigation(range)
   const Tag = tagOf(as, 'div')
-  const title = titleOf(spec, locale)
+  const title = titleOf(range, locale)
   const { prev, next, today } = navigation
 
   if (children !== undefined) {
     return (
       <Tag {...rest} style={style}>
-        {renderSlot(
+        {renderChildren(
           children,
-          { navigation, spec, title, goTo: onNavigate },
+          { navigation, range, title, goTo: onNavigate },
           null
         )}
       </Tag>
@@ -84,7 +84,7 @@ export const Toolbar = <TTag extends ElementType = 'div'>({
         <button
           key={view}
           type="button"
-          aria-pressed={view === spec.view}
+          aria-pressed={view === range.view}
           onClick={() => onNavigate(navigation.withView(view))}
         >
           {view}

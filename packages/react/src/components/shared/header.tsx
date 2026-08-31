@@ -2,7 +2,7 @@ import type { ElementType, ReactNode } from 'react'
 
 import { useCalendarContext } from '../context'
 import type { CalendarContextValue } from '../context'
-import { renderSlot, styleOf, tagOf, templateOf } from '../helpers'
+import { renderChildren, styleOf, tagOf, templateOf } from '../helpers'
 import type { OwnProps, PolymorphicProps } from '../types'
 
 export type HeaderOwnProps<TData> = OwnProps<CalendarContextValue<TData>> & {
@@ -31,7 +31,7 @@ export const Header = <TData, TTag extends ElementType = 'div'>({
         {
           display: 'grid',
           gridTemplateColumns: templateOf(
-            scope.gutter,
+            scope.gutterWidth,
             scope.calendar.days.length
           )
         },
@@ -39,7 +39,7 @@ export const Header = <TData, TTag extends ElementType = 'div'>({
       )}
     >
       <div>{gutterCell}</div>
-      {renderSlot(children, scope, null)}
+      {renderChildren(children, scope, null)}
     </Tag>
   )
 }

@@ -13,7 +13,6 @@
     "test:run": "vitest run"
   },
   "dependencies": {
-    "@midstem/chronous": "*",
     "@midstem/chronous-react": "*",
     "temporal-polyfill": "^1.0.4"
   },

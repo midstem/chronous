@@ -1,18 +1,18 @@
 import type {
-  Calendar,
   CalendarBar,
   CalendarBox,
   CalendarDay,
+  CalendarLayout,
+  CalendarRange,
   CalendarRow,
-  LocaleId,
-  RangeSpec
+  LocaleId
 } from '@midstem/chronous'
 
 export type CalendarContextValue<TData = unknown> = {
-  calendar: Calendar<TData>
-  spec: RangeSpec
+  calendar: CalendarLayout<TData>
+  range: CalendarRange
   locale: LocaleId
-  gutter: string
+  gutterWidth: string
 }
 
 export type TimeGridContextValue = {

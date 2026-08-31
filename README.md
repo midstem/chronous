@@ -17,25 +17,32 @@ opt-in.</p>
 | [`@midstem/chronous`](packages/core)        | The engine: time model, layout, recurrence. No React, no DOM |
 | [`@midstem/chronous-react`](packages/react) | Hooks and headless primitives for React                      |
 
+A React app installs one package. `@midstem/chronous-react` depends on the
+engine and re-exports all of it, so `buildCalendar`, `formatIso`, the error
+classes and every type come from the same import as the components. Reach for
+`@midstem/chronous` on its own where React is not involved — a server, a
+worker, another framework.
+
 The previous generation shipped as `chronous@1.0.2` and stays available under
 the git tag [`1.0.2`](https://github.com/midstem/chronous/tree/1.0.2).
 
 ## Playground
 
 [`apps/demo`](apps/demo) is an interactive playground: every field of
-`RangeSpec` in the left rail, next to the events as editable JSON, and beside
-them a full-width board that is nothing but what `buildCalendar` returned —
-plus the raw result under it. A switch in the masthead trades the board for the
-one file that draws it, spec, events and all, ready to paste — in full, or
-stripped down to the shortest thing that still draws a calendar. It carries a
-light and a dark theme.
+`CalendarRange` in the left rail, next to the events as editable JSON, and
+beside them a full-width board that is nothing but what `buildCalendar`
+returned — plus the raw result under it. A switch in the masthead trades the
+board for the one file that draws it, range, events and all, ready to paste —
+in full, or stripped down to the shortest thing that still draws a calendar. It
+carries a light and a dark theme.
 
 ```bash
 npm run start
 ```
 
-It resolves the packages by name, so it reads their built output the way an
-outside consumer would. Build them first:
+It imports only `@midstem/chronous-react`, by name, so it reads the built
+output the way an outside consumer would — and proves the one install is
+enough. Build the packages first:
 
 ```bash
 npm run build

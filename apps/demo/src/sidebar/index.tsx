@@ -5,11 +5,11 @@ import { DEFAULT_TAB, TABS } from './constants'
 import type { TabId } from './types'
 
 type SidebarProps = {
-  spec: ReactNode
+  range: ReactNode
   events: ReactNode
 }
 
-export const Sidebar = ({ spec, events }: SidebarProps): ReactElement => {
+export const Sidebar = ({ range, events }: SidebarProps): ReactElement => {
   const [tab, setTab] = useState<TabId>(DEFAULT_TAB)
 
   return (
@@ -29,7 +29,7 @@ export const Sidebar = ({ spec, events }: SidebarProps): ReactElement => {
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col p-3">
-        {tab === 'spec' && spec}
+        {tab === 'range' && range}
         {tab === 'events' && events}
       </div>
     </aside>

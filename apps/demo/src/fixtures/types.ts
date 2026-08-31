@@ -3,7 +3,7 @@ import type {
   IsoDate,
   TimeZoneId,
   ViewKind
-} from '@midstem/chronous'
+} from '@midstem/chronous-react'
 
 import type { EventData } from '../types'
 

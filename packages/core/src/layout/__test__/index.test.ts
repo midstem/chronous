@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { normalizeEvents } from '#src/event'
 import type { EventInput } from '#src/event'
 import { buildRange } from '#src/range'
-import type { RangeSpec } from '#src/range'
+import type { CalendarRange } from '#src/range'
 import { MINUTES_IN_DAY, toIso } from '#src/time'
 
 import { buildLayout } from '../index'
@@ -19,11 +19,11 @@ const base = { date: ANCHOR, timeZone: KYIV, view: 'day' } as const
 
 const layoutOf = (
   inputs: readonly EventInput[],
-  spec: RangeSpec = base
+  range: CalendarRange = base
 ): PlacedEvent[][] =>
   buildLayout(
-    buildRange(spec),
-    normalizeEvents(inputs, { timeZone: spec.timeZone })
+    buildRange(range),
+    normalizeEvents(inputs, { timeZone: range.timeZone })
   ).days.map((day) => day.events)
 
 const timed = (id: string, start: string, end?: string): EventInput => ({
@@ -154,10 +154,10 @@ describe('ordering', () => {
 })
 
 describe('events that cross midnight', () => {
-  const spec = { ...base, view: 'days', dayCount: 2 } as const
+  const range = { ...base, view: 'days', dayCount: 2 } as const
   const days = layoutOf(
     [{ id: 'a', start: '2026-03-18T22:00', end: '2026-03-19T02:00' }],
-    spec
+    range
   )
 
   it('clips the first day to the end of the grid', () => {
@@ -186,31 +186,31 @@ describe('events that cross midnight', () => {
 })
 
 describe('events of a whole day or longer', () => {
-  const spec = { ...base, view: 'days', dayCount: 3 } as const
+  const range = { ...base, view: 'days', dayCount: 3 } as const
   const input = { id: 'a', start: '2026-03-18T22:00', end: '2026-03-20T02:00' }
 
   it('leaves the grid for a lane', () => {
-    expect(layoutOf([input], spec).flat()).toEqual([])
+    expect(layoutOf([input], range).flat()).toEqual([])
   })
 
   it('is placed as one bar across the days it covers', () => {
     const [span] = buildLayout(
-      buildRange(spec),
+      buildRange(range),
       normalizeEvents([input], { timeZone: KYIV })
     ).rows[0].spans
 
     expect(span.event.id).toBe('a')
-    expect(span).toMatchObject({ startDay: 0, days: 3 })
+    expect(span).toMatchObject({ startDay: 0, dayCount: 3 })
   })
 })
 
 describe('day boundaries', () => {
-  const spec = { ...base, view: 'days', dayCount: 2 } as const
+  const range = { ...base, view: 'days', dayCount: 2 } as const
 
   it('leaves out an event that ends when the day starts', () => {
     const days = layoutOf(
       [{ id: 'a', start: '2026-03-18T23:00', end: '2026-03-19T00:00' }],
-      spec
+      range
     )
 
     expect(idsOf(days[0])).toEqual(['a'])
@@ -218,7 +218,7 @@ describe('day boundaries', () => {
   })
 
   it('keeps a zero-length event that lands on midnight', () => {
-    const days = layoutOf([{ id: 'a', start: '2026-03-19T00:00' }], spec)
+    const days = layoutOf([{ id: 'a', start: '2026-03-19T00:00' }], range)
 
     expect(days[0]).toHaveLength(0)
     expect(idsOf(days[1])).toEqual(['a'])
@@ -226,12 +226,12 @@ describe('day boundaries', () => {
 })
 
 describe('a range of several days', () => {
-  const spec = { ...base, view: 'days', dayCount: 4 } as const
+  const range = { ...base, view: 'days', dayCount: 4 } as const
 
   it('clips an event that starts before the range', () => {
     const days = layoutOf(
       [{ id: 'a', start: '2026-03-17T22:00', end: '2026-03-18T02:00' }],
-      spec
+      range
     )
 
     expect(idsOf(days[0])).toEqual(['a'])
@@ -245,7 +245,7 @@ describe('a range of several days', () => {
         { id: 'before', start: '2026-03-16T09:00', end: '2026-03-16T10:00' },
         { id: 'after', start: '2026-03-25T09:00', end: '2026-03-25T10:00' }
       ],
-      spec
+      range
     )
 
     expect(days.flat()).toEqual([])
@@ -254,7 +254,7 @@ describe('a range of several days', () => {
   it('carries an event over midnight and stops where it ends', () => {
     const days = layoutOf(
       [{ id: 'a', start: '2026-03-19T23:00', end: '2026-03-20T01:00' }],
-      spec
+      range
     )
 
     expect(days[0]).toHaveLength(0)

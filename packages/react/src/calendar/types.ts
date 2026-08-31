@@ -1,5 +1,5 @@
 import type {
-  Calendar,
+  CalendarLayout,
   InvalidEventError,
   InvalidRangeError,
   InvalidRecurrenceError
@@ -9,5 +9,5 @@ export type CalendarError =
   InvalidEventError | InvalidRangeError | InvalidRecurrenceError
 
 export type CalendarResult<TData = unknown> =
-  | { calendar: Calendar<TData>; error: null }
+  | { calendar: CalendarLayout<TData>; error: null }
   | { calendar: null; error: CalendarError }

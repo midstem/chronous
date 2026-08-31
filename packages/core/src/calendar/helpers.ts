@@ -64,7 +64,7 @@ const barOf = <TData>(placed: PlacedSpan<TData>): CalendarBar<TData> => ({
 export const rowOf = <TData>(row: LaneRow<TData>): CalendarRow<TData> => ({
   start: toIso(row.start),
   end: toIso(row.end),
-  days: row.days,
+  dayCount: row.dayCount,
   lanes: row.lanes,
   bars: row.spans.map((span) => barOf(span))
 })

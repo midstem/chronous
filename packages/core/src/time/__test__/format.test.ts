@@ -2,16 +2,16 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { MISSING_TEMPORAL_MESSAGE } from '../constants'
 import { format, formatIso, plainDate, zoned } from '../index'
-import type { FormatOptions } from '../types'
+import type { DateTimeFormatOptions } from '../types'
 
 const KYIV = 'Europe/Kyiv'
 const NEW_YORK = 'America/New_York'
-const CLOCK_OPTIONS: FormatOptions = {
+const CLOCK_OPTIONS: DateTimeFormatOptions = {
   hour: '2-digit',
   minute: '2-digit',
   hour12: false
 }
-const DATE_OPTIONS: FormatOptions = {
+const DATE_OPTIONS: DateTimeFormatOptions = {
   year: 'numeric',
   month: '2-digit',
   day: '2-digit'
@@ -56,9 +56,9 @@ describe('format', () => {
   })
 
   it('reuses a formatter for a repeated request', () => {
-    const spec = { locale: 'en-GB', options: CLOCK_OPTIONS }
+    const range = { locale: 'en-GB', options: CLOCK_OPTIONS }
 
-    expect(format(moment, spec)).toBe(format(moment, spec))
+    expect(format(moment, range)).toBe(format(moment, range))
   })
 
   it('falls back to the locale default when no options are given', () => {

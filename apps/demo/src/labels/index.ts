@@ -1,33 +1,39 @@
-import { formatIso } from '@midstem/chronous'
-import type { FormatOptions, IsoDateTime, LocaleId } from '@midstem/chronous'
+import { formatIso } from '@midstem/chronous-react'
+import type {
+  DateTimeFormatOptions,
+  IsoDateTime,
+  LocaleId
+} from '@midstem/chronous-react'
 
-const DAY_OPTIONS: FormatOptions = {
+const DAY_OPTIONS: DateTimeFormatOptions = {
   weekday: 'short',
   day: 'numeric',
   month: 'short'
 }
 
-const TIME_OPTIONS: FormatOptions = {
+const TIME_OPTIONS: DateTimeFormatOptions = {
   hour: '2-digit',
   minute: '2-digit'
 }
 
-const WEEKDAY_OPTIONS: FormatOptions = { weekday: 'short' }
+const WEEKDAY_OPTIONS: DateTimeFormatOptions = { weekday: 'short' }
 
-const NUMBER_OPTIONS: FormatOptions = { day: 'numeric' }
+const NUMBER_OPTIONS: DateTimeFormatOptions = { day: 'numeric' }
 
-const TITLE_OPTIONS: FormatOptions = {
+const TITLE_OPTIONS: DateTimeFormatOptions = {
   day: 'numeric',
   month: 'long',
   year: 'numeric'
 }
 
-const MONTH_OPTIONS: FormatOptions = { month: 'long', year: 'numeric' }
+const MONTH_OPTIONS: DateTimeFormatOptions = { month: 'long', year: 'numeric' }
 
-const SHORT_OPTIONS: FormatOptions = { day: 'numeric', month: 'short' }
+const SHORT_OPTIONS: DateTimeFormatOptions = { day: 'numeric', month: 'short' }
 
 const labelWith =
-  (options: FormatOptions): ((at: IsoDateTime, locale: LocaleId) => string) =>
+  (
+    options: DateTimeFormatOptions
+  ): ((at: IsoDateTime, locale: LocaleId) => string) =>
   (at, locale) => {
     try {
       return formatIso(at, { locale, options })

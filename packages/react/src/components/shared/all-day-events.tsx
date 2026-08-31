@@ -2,7 +2,7 @@ import type { CalendarBar, CalendarEntry } from '@midstem/chronous'
 import type { ElementType, ReactNode } from 'react'
 
 import { useAllDayContext } from '../context'
-import { percentOf, renderSlot, styleOf, tagOf } from '../helpers'
+import { percentOf, renderChildren, styleOf, tagOf } from '../helpers'
 import type { OwnProps, PolymorphicProps } from '../types'
 
 const GAP = 4
@@ -51,7 +51,7 @@ export const AllDayEvents = <TData, TTag extends ElementType = 'div'>({
             style
           )}
         >
-          {renderSlot(children, { event: bar.event, bar }, bar.event.id)}
+          {renderChildren(children, { event: bar.event, bar }, bar.event.id)}
         </Tag>
       ))}
     </>

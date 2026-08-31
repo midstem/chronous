@@ -1,4 +1,8 @@
-import type { EventInput, LocaleId, RangeSpec } from '@midstem/chronous'
+import type {
+  CalendarRange,
+  EventInput,
+  LocaleId
+} from '@midstem/chronous-react'
 import type { ReactElement } from 'react'
 
 import { Code } from '../code'
@@ -11,7 +15,7 @@ import { FILE_NAME, SNIPPET_HINT, badgeOf } from './constants'
 import { snippetOf } from './helpers'
 
 type SnippetProps = {
-  spec: RangeSpec
+  range: CalendarRange
   events: readonly EventInput<EventData>[]
   locale: LocaleId
   hourHeight: number
@@ -19,7 +23,7 @@ type SnippetProps = {
 }
 
 export const Snippet = ({
-  spec,
+  range,
   events,
   locale,
   hourHeight,
@@ -28,15 +32,15 @@ export const Snippet = ({
   isSimple(style) ? (
     <Code
       fileName={FILE_NAME}
-      badge={simpleBadgeOf(spec.view, events.length)}
+      badge={simpleBadgeOf(range.view, events.length)}
       hint={SIMPLE_HINT}
-      source={simpleOf(spec, events, locale, hourHeight)}
+      source={simpleOf(range, events, locale, hourHeight)}
     />
   ) : (
     <Code
       fileName={FILE_NAME}
-      badge={badgeOf(spec.view, hourHeight, locale, events.length)}
+      badge={badgeOf(range.view, hourHeight, locale, events.length)}
       hint={SNIPPET_HINT}
-      source={snippetOf(spec, events, locale, hourHeight)}
+      source={snippetOf(range, events, locale, hourHeight)}
     />
   )

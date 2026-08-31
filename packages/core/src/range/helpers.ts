@@ -22,7 +22,7 @@ import {
   UNREADABLE_TIME_ZONE_REASON
 } from './constants'
 import { InvalidRangeError } from './errors'
-import type { DaySlot, RangeDay, ResolvedSpec } from './types'
+import type { DaySlot, RangeDay, ResolvedRange } from './types'
 
 export const readAnchor = (iso: IsoDate): CalendarDate => {
   try {
@@ -83,12 +83,12 @@ const clampAscending = (
 const buildSlots = (
   date: CalendarDate,
   dayEnd: Moment,
-  spec: ResolvedSpec
+  resolved: ResolvedRange
 ): DaySlot[] => {
-  const count = Math.ceil(MINUTES_IN_DAY / spec.slotMinutes)
+  const count = Math.ceil(MINUTES_IN_DAY / resolved.slotMinutes)
   const starts = clampAscending(
     Array.from({ length: count }, (_, index) =>
-      atWallTime(date, index * spec.slotMinutes, spec.timeZone)
+      atWallTime(date, index * resolved.slotMinutes, resolved.timeZone)
     ),
     dayEnd
   )
@@ -97,7 +97,7 @@ const buildSlots = (
     const end = starts[index + 1] ?? dayEnd
 
     return {
-      minuteOfDay: index * spec.slotMinutes,
+      minuteOfDay: index * resolved.slotMinutes,
       start,
       end,
       minutes: minutesBetween(start, end)
@@ -107,11 +107,11 @@ const buildSlots = (
 
 export const buildDay = (
   date: CalendarDate,
-  spec: ResolvedSpec,
+  resolved: ResolvedRange,
   inPeriod: boolean
 ): RangeDay => {
-  const start = dayStart(date, spec.timeZone)
-  const end = dayStart(add(date, SINGLE_DAY), spec.timeZone)
+  const start = dayStart(date, resolved.timeZone)
+  const end = dayStart(add(date, SINGLE_DAY), resolved.timeZone)
 
   return {
     date,
@@ -119,6 +119,6 @@ export const buildDay = (
     end,
     minutes: minutesBetween(start, end),
     inPeriod,
-    slots: spec.slotted ? buildSlots(date, end, spec) : []
+    slots: resolved.slotted ? buildSlots(date, end, resolved) : []
   }
 }

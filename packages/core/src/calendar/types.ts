@@ -56,7 +56,7 @@ export type CalendarBar<TData = unknown> = {
   end: IsoDate
   startDay: number
   endDay: number
-  days: number
+  dayCount: number
   lane: number
   lanes: number
   left: number
@@ -78,12 +78,12 @@ export type CalendarDay<TData = unknown> = {
 export type CalendarRow<TData = unknown> = {
   start: IsoDate
   end: IsoDate
-  days: number
+  dayCount: number
   lanes: number
   bars: CalendarBar<TData>[]
 }
 
-export type Calendar<TData = unknown> = {
+export type CalendarLayout<TData = unknown> = {
   view: ViewKind
   start: IsoDateTime
   end: IsoDateTime

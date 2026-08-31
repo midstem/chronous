@@ -1,5 +1,5 @@
-import { createCalendar } from '@midstem/chronous-react'
+import { createCalendarComponents } from '@midstem/chronous-react'
 
 import type { EventData } from '../types'
 
-export const Calendar = createCalendar<EventData>()
+export const Calendar = createCalendarComponents<EventData>()

@@ -6,7 +6,7 @@ import {
   CLOCK,
   labelOf,
   minutePercentOf,
-  renderSlot,
+  renderChildren,
   styleOf,
   tagOf
 } from '../helpers'
@@ -49,7 +49,7 @@ export const TimeLabels = <TTag extends ElementType = 'div'>({
               style
             )}
           >
-            {renderSlot(
+            {renderChildren(
               children,
               { slot, minuteOfDay: slot.minuteOfDay, time },
               time

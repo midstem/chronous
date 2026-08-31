@@ -1,4 +1,4 @@
-import type { Calendar } from '@midstem/chronous'
+import type { CalendarLayout } from '@midstem/chronous-react'
 
 import { JSON_INDENT } from '../constants'
 
@@ -9,7 +9,7 @@ const sum = (values: readonly number[]): number =>
   values.reduce((total, value) => total + value, 0)
 
 export const summaryOf = <TData>(
-  calendar: Calendar<TData>
+  calendar: CalendarLayout<TData>
 ): readonly Metric[] => [
   { label: 'view', value: calendar.view },
   { label: 'start', value: calendar.start },
@@ -30,7 +30,7 @@ export const summaryOf = <TData>(
   }
 ]
 
-export const jsonOf = <TData>(calendar: Calendar<TData>): string => {
+export const jsonOf = <TData>(calendar: CalendarLayout<TData>): string => {
   const text = JSON.stringify(calendar, null, JSON_INDENT)
 
   return text.length > MAX_JSON_LENGTH

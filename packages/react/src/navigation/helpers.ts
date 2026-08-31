@@ -1,17 +1,17 @@
 import { calendarReducer, initialCalendarState } from '@midstem/chronous'
-import type { CalendarAction, RangeSpec, ViewKind } from '@midstem/chronous'
+import type { CalendarAction, CalendarRange, ViewKind } from '@midstem/chronous'
 
 import type { CalendarNavigation } from './types'
 
-const applied = (spec: RangeSpec, action: CalendarAction): RangeSpec =>
-  calendarReducer(initialCalendarState(spec), action).spec
+const applied = (range: CalendarRange, action: CalendarAction): CalendarRange =>
+  calendarReducer(initialCalendarState(range), action).range
 
 const attempted = (
-  spec: RangeSpec,
+  range: CalendarRange,
   action: CalendarAction
-): RangeSpec | null => {
+): CalendarRange | null => {
   try {
-    return applied(spec, action)
+    return applied(range, action)
   } catch {
     return null
   }
@@ -22,11 +22,11 @@ const todayAction = (): CalendarAction => ({
   now: new Date().toISOString()
 })
 
-export const navigationOf = (spec: RangeSpec): CalendarNavigation => ({
-  next: attempted(spec, { type: 'next' }),
-  prev: attempted(spec, { type: 'prev' }),
-  today: attempted(spec, todayAction())
-    ? () => applied(spec, todayAction())
+export const navigationOf = (range: CalendarRange): CalendarNavigation => ({
+  next: attempted(range, { type: 'next' }),
+  prev: attempted(range, { type: 'prev' }),
+  today: attempted(range, todayAction())
+    ? () => applied(range, todayAction())
     : null,
-  withView: (view: ViewKind) => applied(spec, { type: 'view', view })
+  withView: (view: ViewKind) => applied(range, { type: 'view', view })
 })
