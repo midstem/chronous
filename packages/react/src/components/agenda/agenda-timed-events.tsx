@@ -8,7 +8,7 @@ import type { OwnProps, PolymorphicProps } from '../types'
 export type AgendaTimedEventScope<TData> = {
   event: TimedEntry<TData>
   box: CalendarBox<TData>
-  timeRange: string
+  timeRangeLabel: string
 }
 
 export type AgendaTimedEventsProps<
@@ -29,7 +29,7 @@ export const AgendaTimedEvents = <TData, TTag extends ElementType = 'div'>({
   return (
     <>
       {boxes.map((box) => {
-        const timeRange = rangeOf(box.start, box.end, locale)
+        const timeRangeLabel = rangeOf(box.start, box.end, locale)
 
         return (
           <Tag
@@ -42,8 +42,8 @@ export const AgendaTimedEvents = <TData, TTag extends ElementType = 'div'>({
           >
             {renderChildren(
               children,
-              { event: box.event, box, timeRange },
-              timeRange
+              { event: box.event, box, timeRangeLabel },
+              timeRangeLabel
             )}
           </Tag>
         )

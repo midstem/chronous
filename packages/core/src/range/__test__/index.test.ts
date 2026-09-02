@@ -12,7 +12,7 @@ const DAYS_IN_MARCH = 31
 const MONDAY_GRID = 42
 const SUNDAY_GRID = 35
 
-const base = { date: ANCHOR, timeZone: KYIV } as const
+const base = { currentDate: ANCHOR, timeZone: KYIV } as const
 
 describe('view spans', () => {
   it('builds a single day', () => {
@@ -82,11 +82,11 @@ describe('month grids', () => {
 
   it('marks padding days as outside the period', () => {
     const range = buildRange({ ...base, view: 'month' })
-    const inPeriod = range.days.filter((day) => day.inPeriod)
+    const inCurrentPeriod = range.days.filter((day) => day.inCurrentPeriod)
 
-    expect(inPeriod).toHaveLength(DAYS_IN_MARCH)
-    expect(toIso(inPeriod[0].date)).toBe('2026-03-01')
-    expect(range.days[0].inPeriod).toBe(false)
+    expect(inCurrentPeriod).toHaveLength(DAYS_IN_MARCH)
+    expect(toIso(inCurrentPeriod[0].date)).toBe('2026-03-01')
+    expect(range.days[0].inCurrentPeriod).toBe(false)
   })
 })
 
@@ -152,19 +152,19 @@ describe('rejected ranges', () => {
 
   it('rejects an unreadable anchor', () => {
     expect(() =>
-      buildRange({ view: 'day', date: 'not-a-date', timeZone: KYIV })
+      buildRange({ view: 'day', currentDate: 'not-a-date', timeZone: KYIV })
     ).toThrow(InvalidRangeError)
   })
 
   it('rejects an unreadable time zone', () => {
     expect(() =>
-      buildRange({ view: 'day', date: ANCHOR, timeZone: 'Not/AZone' })
+      buildRange({ view: 'day', currentDate: ANCHOR, timeZone: 'Not/AZone' })
     ).toThrow(InvalidRangeError)
   })
 
   it('names the time zone and keeps what Temporal threw', () => {
     try {
-      buildRange({ view: 'day', date: ANCHOR, timeZone: 'Not/AZone' })
+      buildRange({ view: 'day', currentDate: ANCHOR, timeZone: 'Not/AZone' })
       expect.unreachable()
     } catch (error) {
       expect(error).toBeInstanceOf(InvalidRangeError)
@@ -175,7 +175,7 @@ describe('rejected ranges', () => {
 
   it('reads a zone whose name is spelled in another case', () => {
     expect(() =>
-      buildRange({ view: 'day', date: ANCHOR, timeZone: 'europe/kyiv' })
+      buildRange({ view: 'day', currentDate: ANCHOR, timeZone: 'europe/kyiv' })
     ).not.toThrow()
   })
 

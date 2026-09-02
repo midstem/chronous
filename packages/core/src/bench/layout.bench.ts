@@ -13,9 +13,9 @@ const ANCHOR = '2026-03-23'
 
 const context: NormalizeContext = { timeZone: KYIV }
 
-const week = buildRange({ view: 'week', date: ANCHOR, timeZone: KYIV })
+const week = buildRange({ view: 'week', currentDate: ANCHOR, timeZone: KYIV })
 
-const month = buildRange({ view: 'month', date: ANCHOR, timeZone: KYIV })
+const month = buildRange({ view: 'month', currentDate: ANCHOR, timeZone: KYIV })
 
 const spread = normalizeEvents(timedEvents(10_000, 7, ANCHOR), context)
 

@@ -45,12 +45,15 @@ export const PlainSlotted = ({ hourHeight }: SlottedProps): ReactElement => (
 
 export const PlainMonth = (): ReactElement => (
   <Calendar.MonthGrid>
-    <Calendar.MonthRows className="border-b border-line last:border-b-0">
-      <Calendar.MonthDays className="min-h-28 border-l border-hair p-1 first:border-l-0 data-[in-period=false]:bg-sunken data-[in-period=false]:text-faint">
-        {({ dayNumber, lanes }) => (
+    <Calendar.MonthRows
+      className="border-b border-line last:border-b-0"
+      laneHeight={LANE_HEIGHT}
+    >
+      <Calendar.MonthDays className="min-h-28 border-l border-hair p-1 first:border-l-0 data-[in-current-period=false]:bg-sunken data-[in-current-period=false]:text-faint">
+        {({ dayLabel, lanes }) => (
           <>
             <div className="h-7 text-center text-xs font-medium">
-              {dayNumber}
+              {dayLabel}
             </div>
             <div style={{ height: lanes * LANE_HEIGHT }} />
             <Calendar.MonthTimedEvents className="truncate rounded bg-tone-1 px-1 text-[11px] leading-5 text-tone-1-ink">
@@ -60,10 +63,7 @@ export const PlainMonth = (): ReactElement => (
         )}
       </Calendar.MonthDays>
 
-      <Calendar.MonthAllDayEvents
-        laneHeight={LANE_HEIGHT}
-        className="truncate rounded bg-tone-2 px-1.5 text-[11px] leading-5 text-tone-2-ink"
-      >
+      <Calendar.MonthAllDayEvents className="truncate rounded bg-tone-2 px-1.5 text-[11px] leading-5 text-tone-2-ink">
         {({ event }) => event.data?.title}
       </Calendar.MonthAllDayEvents>
     </Calendar.MonthRows>
@@ -73,10 +73,10 @@ export const PlainMonth = (): ReactElement => (
 export const PlainAgenda = (): ReactElement => (
   <Calendar.AgendaList as="ul" className="divide-y divide-hair">
     <Calendar.AgendaDays as="li" className="flex gap-4 px-4 py-3">
-      {({ dayNumber, weekday }) => (
+      {({ dayLabel, weekdayLabel }) => (
         <>
           <span className="w-16 shrink-0 text-sm font-semibold">
-            {weekday} {dayNumber}
+            {weekdayLabel} {dayLabel}
           </span>
 
           <span className="flex flex-col gap-1">
@@ -85,7 +85,9 @@ export const PlainAgenda = (): ReactElement => (
             </Calendar.AgendaAllDayEvents>
 
             <Calendar.AgendaTimedEvents as="span" className="text-[13px]">
-              {({ event, timeRange }) => `${event.data?.title} · ${timeRange}`}
+              {({ event, timeRangeLabel }) =>
+                `${event.data?.title} · ${timeRangeLabel}`
+              }
             </Calendar.AgendaTimedEvents>
           </span>
         </>

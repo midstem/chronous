@@ -15,7 +15,7 @@ const MINUTES_IN_HOUR = 60
 const HALF = 0.5
 const THIRD = 1 / 3
 
-const base = { date: ANCHOR, timeZone: KYIV, view: 'day' } as const
+const base = { currentDate: ANCHOR, timeZone: KYIV, view: 'day' } as const
 
 const layoutOf = (
   inputs: readonly EventInput[],

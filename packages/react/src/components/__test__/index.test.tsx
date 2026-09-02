@@ -109,8 +109,8 @@ describe('a component slot', () => {
       <Calendar.Root range={WEEK} events={EVENTS} locale={LOCALE}>
         <Calendar.Header>
           <Calendar.DayHeadings data-testid="heading">
-            {({ weekday, dayNumber, inPeriod }) =>
-              `${weekday}/${dayNumber}/${String(inPeriod)}`
+            {({ weekdayLabel, dayLabel, inCurrentPeriod }) =>
+              `${weekdayLabel}/${dayLabel}/${String(inCurrentPeriod)}`
             }
           </Calendar.DayHeadings>
         </Calendar.Header>
@@ -192,7 +192,7 @@ describe('state a stylesheet can reach', () => {
     const [first] = screen.getAllByTestId('heading')
 
     expect(first.getAttribute('data-date')).toBe('2026-03-16')
-    expect(first.getAttribute('data-in-period')).toBe('true')
+    expect(first.getAttribute('data-in-current-period')).toBe('true')
   })
 
   it('marks an event with its id and the edges it runs past', () => {

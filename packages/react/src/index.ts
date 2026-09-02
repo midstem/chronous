@@ -57,7 +57,7 @@ export { Calendar, createCalendarComponents } from '#src/components'
 
 export { useNow } from './components/slotted/use-now'
 
-export type { Now } from './components/slotted/use-now'
+export type { CalendarNow } from './components/slotted/use-now'
 
 export type * from '#src/components'
 

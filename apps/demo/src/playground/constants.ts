@@ -7,7 +7,7 @@ import type { PlaygroundState } from './types'
 
 export const INITIAL_STATE: PlaygroundState = {
   view: DEFAULT_PRESET.view,
-  date: DEFAULT_PRESET.date,
+  currentDate: DEFAULT_PRESET.date,
   timeZone: DEFAULT_PRESET.timeZone,
   weekStartsOn: UNSET,
   dayCount: UNSET,

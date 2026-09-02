@@ -34,6 +34,7 @@ export type MonthRowContextValue<TData = unknown> = {
   row: CalendarRow<TData>
   days: CalendarDay<TData>[]
   maxLanes: number | null
+  laneHeight: number
 }
 
 export type MonthDayContextValue<TData = unknown> = {

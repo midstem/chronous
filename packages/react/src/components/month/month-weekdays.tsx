@@ -13,7 +13,7 @@ import type { OwnProps, PolymorphicProps } from '../types'
 
 export type MonthWeekdayScope<TData> = {
   day: CalendarDay<TData>
-  weekday: string
+  weekdayLabel: string
 }
 
 export type MonthWeekdaysProps<
@@ -34,11 +34,11 @@ export const MonthWeekdays = <TData, TTag extends ElementType = 'div'>({
   return (
     <>
       {first.days.map((day) => {
-        const weekday = labelOf(day.date, locale, WEEKDAY)
+        const weekdayLabel = labelOf(day.date, locale, WEEKDAY)
 
         return (
           <Tag key={day.date} {...rest} style={style}>
-            {renderChildren(children, { day, weekday }, weekday)}
+            {renderChildren(children, { day, weekdayLabel }, weekdayLabel)}
           </Tag>
         )
       })}

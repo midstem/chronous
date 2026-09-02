@@ -71,11 +71,11 @@ export const Controls = ({
         onChange={(value) => update({ view: value as ViewKind })}
       />
       <TextField
-        label="date"
+        label="currentDate"
         type="date"
         hint={DATE_HINT}
-        value={state.date}
-        onChange={(date) => update({ date })}
+        value={state.currentDate}
+        onChange={(currentDate) => update({ currentDate })}
       />
       <TextField
         label="timeZone"

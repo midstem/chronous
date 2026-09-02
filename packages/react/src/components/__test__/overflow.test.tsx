@@ -8,7 +8,7 @@ import { LOCALE, WEEK, ZONE } from './fixtures'
 
 const MONTH: CalendarRange = {
   view: 'month',
-  date: '2026-03-18',
+  currentDate: '2026-03-18',
   timeZone: ZONE
 }
 
@@ -36,9 +36,9 @@ const Month = ({ maxLanes }: { maxLanes?: number | null }): React.ReactNode => (
     <Calendar.MonthGrid>
       <Calendar.MonthRows maxLanes={maxLanes}>
         <Calendar.MonthDays>
-          {({ dayNumber, bars, hiddenBars, lanes }) => (
+          {({ dayLabel, bars, hiddenBars, lanes }) => (
             <>
-              <span>{dayNumber}</span>
+              <span>{dayLabel}</span>
               <span data-testid="covering">{bars.length}</span>
               <span data-testid="hidden">{hiddenBars.length}</span>
               <span data-testid="lanes">{lanes}</span>

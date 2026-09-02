@@ -15,7 +15,7 @@ const ISO_DATE_LENGTH = 10
 
 const rangeOf = (patch: Partial<CalendarRange> = {}): CalendarRange => ({
   view: 'week',
-  date: ANCHOR,
+  currentDate: ANCHOR,
   timeZone: TIME_ZONE,
   ...patch
 })
@@ -39,26 +39,30 @@ describe('the reducer steps a period at a time', () => {
     (view, patch, forward, backward) => {
       const state = stateOf({ view, ...patch })
 
-      expect(calendarReducer(state, { type: 'next' }).range.date).toBe(forward)
-      expect(calendarReducer(state, { type: 'prev' }).range.date).toBe(backward)
+      expect(calendarReducer(state, { type: 'next' }).range.currentDate).toBe(
+        forward
+      )
+      expect(calendarReducer(state, { type: 'prev' }).range.currentDate).toBe(
+        backward
+      )
     }
   )
 
   it('anchors a month on the first, so short months do not drag it back', () => {
-    const january = stateOf({ view: 'month', date: '2026-01-31' })
+    const january = stateOf({ view: 'month', currentDate: '2026-01-31' })
     const february = calendarReducer(january, { type: 'next' })
     const march = calendarReducer(february, { type: 'next' })
 
-    expect(february.range.date).toBe('2026-02-01')
-    expect(march.range.date).toBe('2026-03-01')
+    expect(february.range.currentDate).toBe('2026-02-01')
+    expect(march.range.currentDate).toBe('2026-03-01')
   })
 
   it('steps over a DST transition without losing a day', () => {
-    const state = stateOf({ view: 'day', date: '2026-03-28' })
+    const state = stateOf({ view: 'day', currentDate: '2026-03-28' })
     const across = calendarReducer(state, { type: 'next' })
 
-    expect(across.range.date).toBe('2026-03-29')
-    expect(calendarReducer(across, { type: 'next' }).range.date).toBe(
+    expect(across.range.currentDate).toBe('2026-03-29')
+    expect(calendarReducer(across, { type: 'next' }).range.currentDate).toBe(
       '2026-03-30'
     )
   })
@@ -88,7 +92,7 @@ const isRun = (dates: readonly string[]): boolean =>
 
 const periodDates = (range: CalendarRange): string[] =>
   buildRange(range)
-    .days.filter((day) => day.inPeriod)
+    .days.filter((day) => day.inCurrentPeriod)
     .map((day) => toIso(day.date))
 
 describe('the step agrees with the range it will build', () => {
@@ -127,7 +131,9 @@ describe('today reads the given moment in the range time zone', () => {
   it.each(TODAY_READINGS)('%s at %s is %s', (timeZone, now, date) => {
     const state = stateOf({ timeZone })
 
-    expect(calendarReducer(state, { type: 'today', now }).range.date).toBe(date)
+    expect(
+      calendarReducer(state, { type: 'today', now }).range.currentDate
+    ).toBe(date)
   })
 
   it('takes a wall-clock string as local to the range time zone', () => {
@@ -137,7 +143,7 @@ describe('today reads the given moment in the range time zone', () => {
       now: '2026-08-26T00:30:00'
     })
 
-    expect(moved.range.date).toBe('2026-08-26')
+    expect(moved.range.currentDate).toBe('2026-08-26')
   })
 })
 
@@ -146,7 +152,7 @@ describe('the reducer moves the view, the date and the selection', () => {
     const state = stateOf({ dayCount: 3, slotMinutes: 15 })
     const moved = calendarReducer(state, { type: 'goto', date: '2027-01-04' })
 
-    expect(moved.range).toEqual({ ...state.range, date: '2027-01-04' })
+    expect(moved.range).toEqual({ ...state.range, currentDate: '2027-01-04' })
     expect(moved.selection).toBeNull()
   })
 
@@ -154,7 +160,7 @@ describe('the reducer moves the view, the date and the selection', () => {
     const moved = calendarReducer(stateOf(), { type: 'view', view: 'month' })
 
     expect(moved.range.view).toBe('month')
-    expect(moved.range.date).toBe(ANCHOR)
+    expect(moved.range.currentDate).toBe(ANCHOR)
   })
 
   const SELECTIONS: CalendarSelection[] = [
@@ -204,7 +210,7 @@ describe('the reducer hands back the same state when nothing moves', () => {
 
 describe('the reducer refuses what the range would refuse', () => {
   it('reports an unreadable anchor', () => {
-    const state = stateOf({ date: 'the day after tomorrow' })
+    const state = stateOf({ currentDate: 'the day after tomorrow' })
 
     expect(() => calendarReducer(state, { type: 'next' })).toThrow(
       InvalidRangeError

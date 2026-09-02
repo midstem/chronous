@@ -9,7 +9,11 @@ import type { CalendarLayout } from '../types'
 
 const KYIV = 'Europe/Kyiv'
 
-const week: CalendarRange = { view: 'week', date: '2026-03-18', timeZone: KYIV }
+const week: CalendarRange = {
+  view: 'week',
+  currentDate: '2026-03-18',
+  timeZone: KYIV
+}
 
 const daily: EventInput = {
   id: 'stand-up',
@@ -94,7 +98,7 @@ describe('a recurring event on the grid', () => {
 
   it('packs overlapping instances into columns', () => {
     const boxes = boxesOf(
-      buildCalendar({ ...week, view: 'day', date: '2026-03-18' }, [
+      buildCalendar({ ...week, view: 'day', currentDate: '2026-03-18' }, [
         daily,
         { ...daily, id: 'review' }
       ])

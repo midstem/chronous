@@ -19,13 +19,16 @@ const CLOCK_OPTIONS: DateTimeFormatOptions = {
 
 const monthRange: CalendarRange = {
   view: 'month',
-  date: ANCHOR,
+  currentDate: ANCHOR,
   timeZone: KYIV
 }
 
 const month = buildCalendar(monthRange, [])
 
-const week = buildCalendar({ view: 'week', date: ANCHOR, timeZone: KYIV }, [])
+const week = buildCalendar(
+  { view: 'week', currentDate: ANCHOR, timeZone: KYIV },
+  []
+)
 
 const dates = month.days.map((day) => day.date)
 

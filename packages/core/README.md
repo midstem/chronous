@@ -38,7 +38,7 @@ import { buildCalendar, ensureTemporal, formatIso } from '@midstem/chronous'
 await ensureTemporal()
 
 const calendar = buildCalendar(
-  { view: 'week', date: '2026-03-18', timeZone: 'Europe/Kyiv' },
+  { view: 'week', currentDate: '2026-03-18', timeZone: 'Europe/Kyiv' },
   [
     {
       id: 'standup',

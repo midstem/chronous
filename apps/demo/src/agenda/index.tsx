@@ -2,7 +2,7 @@ import type { IsoDate, LocaleId } from '@midstem/chronous-react'
 import type { ReactElement } from 'react'
 
 import { Calendar } from '../calendar'
-import { dayLabel } from '../labels'
+import { formatDay } from '../labels'
 import { dotOf } from '../tone'
 
 import { ALL_DAY_LABEL, EMPTY_LABEL } from './constants'
@@ -21,18 +21,18 @@ export const Agenda = ({ locale, today }: AgendaProps): ReactElement => (
   <Calendar.AgendaList as="ul" className="divide-y divide-hair">
     <Calendar.AgendaDays
       as="li"
-      showEmpty
-      className="grid grid-cols-[88px_minmax(0,1fr)] gap-4 px-4 py-3 data-[in-period=false]:bg-sunken"
+      showEmptyDays
+      className="grid grid-cols-[88px_minmax(0,1fr)] gap-4 px-4 py-3 data-[in-current-period=false]:bg-sunken"
     >
-      {({ day, weekday, dayNumber, bars, boxes }) => (
+      {({ day, weekdayLabel, dayLabel, bars, boxes }) => (
         <>
           <div
             className="flex items-baseline gap-2"
-            title={dayLabel(day.date, locale)}
+            title={formatDay(day.date, locale)}
           >
-            <span className={numberClass(day.date === today)}>{dayNumber}</span>
+            <span className={numberClass(day.date === today)}>{dayLabel}</span>
             <span className="text-[11px] tracking-wide text-muted uppercase">
-              {weekday}
+              {weekdayLabel}
             </span>
           </div>
 
@@ -64,13 +64,13 @@ export const Agenda = ({ locale, today }: AgendaProps): ReactElement => (
               as="span"
               className="flex items-center gap-2 text-[13px]"
             >
-              {({ event, timeRange }) => (
+              {({ event, timeRangeLabel }) => (
                 <>
                   <span
                     className={`size-2 shrink-0 rounded-full ${dotOf(event.id)}`}
                   />
                   <span className="w-24 shrink-0 font-mono text-[11px] tabular-nums text-muted">
-                    {timeRange}
+                    {timeRangeLabel}
                   </span>
                   <span className="truncate">
                     {event.data?.title ?? event.id}

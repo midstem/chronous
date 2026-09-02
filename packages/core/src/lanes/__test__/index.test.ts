@@ -15,7 +15,11 @@ const WEEK_STARTS = [0, 1, 2, 3, 4, 5, 6] as const
 const AGENDA_DAYS = 30
 const WEDNESDAY_INDEX = 2
 
-const base: CalendarRange = { date: ANCHOR, timeZone: KYIV, view: 'week' }
+const base: CalendarRange = {
+  currentDate: ANCHOR,
+  timeZone: KYIV,
+  view: 'week'
+}
 
 const rowsOf = (
   inputs: readonly EventInput[],

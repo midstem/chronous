@@ -97,7 +97,7 @@ export const Board = ({
       className="flex min-h-0 flex-1 flex-col p-4"
       renderError={(error) => (
         <>
-          {bar(range.date)}
+          {bar(range.currentDate)}
           <p
             role="alert"
             className="rounded-lg border border-danger/40 bg-danger-soft px-4 py-3 text-sm text-danger"

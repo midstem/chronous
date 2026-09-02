@@ -27,7 +27,7 @@ describe('@midstem/chronous', () => {
 
   it('labels the strings a calendar hands back', () => {
     const calendar = buildCalendar(
-      { view: 'day', date: '2026-03-29', timeZone: 'Europe/Kyiv' },
+      { view: 'day', currentDate: '2026-03-29', timeZone: 'Europe/Kyiv' },
       []
     )
     const [day] = calendar.days

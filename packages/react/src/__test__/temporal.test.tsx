@@ -12,7 +12,7 @@ const held = carrier.Temporal
 
 const RANGE: CalendarRange = {
   view: 'day',
-  date: '2026-03-18',
+  currentDate: '2026-03-18',
   timeZone: 'Europe/Kyiv'
 }
 
@@ -76,7 +76,7 @@ describe('a browser with no Temporal', () => {
 
       await waitFor(() => expect(result.current.next).not.toBeNull())
 
-      expect(result.current.prev?.date).toBe('2026-03-17')
+      expect(result.current.prev?.currentDate).toBe('2026-03-17')
       expect(result.current.today).not.toBeNull()
     })
   })

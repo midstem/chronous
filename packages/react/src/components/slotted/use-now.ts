@@ -1,7 +1,7 @@
 import type { IsoDate, TimeZoneId } from '@midstem/chronous'
 import { useEffect, useMemo, useState } from 'react'
 
-export type Now = {
+export type CalendarNow = {
   date: IsoDate
   minuteOfDay: number
 }
@@ -33,7 +33,7 @@ const formatterOf = (timeZone: TimeZoneId): Intl.DateTimeFormat | null => {
 const nowOf = (
   formatter: Intl.DateTimeFormat | null,
   at: Date | null
-): Now | null => {
+): CalendarNow | null => {
   if (!formatter || !at) return null
 
   const parts: Record<string, string> = {}
@@ -48,7 +48,7 @@ const nowOf = (
   }
 }
 
-export const useNow = (timeZone: TimeZoneId): Now | null => {
+export const useNow = (timeZone: TimeZoneId): CalendarNow | null => {
   const [at, setAt] = useState<Date | null>(null)
   const formatter = useMemo(() => formatterOf(timeZone), [timeZone])
 

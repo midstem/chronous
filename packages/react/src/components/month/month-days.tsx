@@ -23,8 +23,8 @@ export type MonthDayScope<TData> = {
   boxes: CalendarBox<TData>[]
   bars: CalendarBar<TData>[]
   hiddenBars: CalendarBar<TData>[]
-  dayNumber: string
-  inPeriod: boolean
+  dayLabel: string
+  inCurrentPeriod: boolean
   lanes: number
 }
 
@@ -47,7 +47,7 @@ export const MonthDays = <TData, TTag extends ElementType = 'div'>({
   return (
     <>
       {days.map((day, index) => {
-        const dayNumber = labelOf(day.date, locale, DAY_NUMBER)
+        const dayLabel = labelOf(day.date, locale, DAY_NUMBER)
         const bars = barsByDay[index]
         const value: MonthDayContextValue<TData> = {
           day,
@@ -60,7 +60,7 @@ export const MonthDays = <TData, TTag extends ElementType = 'div'>({
           <MonthDayProvider key={day.date} value={value}>
             <Tag
               data-date={day.date}
-              data-in-period={day.inPeriod}
+              data-in-current-period={day.inCurrentPeriod}
               {...rest}
               style={style}
             >
@@ -68,11 +68,11 @@ export const MonthDays = <TData, TTag extends ElementType = 'div'>({
                 children,
                 {
                   ...value,
-                  dayNumber,
-                  inPeriod: day.inPeriod,
+                  dayLabel,
+                  inCurrentPeriod: day.inCurrentPeriod,
                   lanes: laneCount(row.lanes, maxLanes)
                 },
-                dayNumber
+                dayLabel
               )}
             </Tag>
           </MonthDayProvider>

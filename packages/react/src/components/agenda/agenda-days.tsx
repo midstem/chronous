@@ -14,13 +14,13 @@ import {
 import type { OwnProps, PolymorphicProps } from '../types'
 
 export type AgendaDayScope<TData> = AgendaDayContextValue<TData> & {
-  weekday: string
-  dayNumber: string
-  month: string
+  weekdayLabel: string
+  dayLabel: string
+  monthLabel: string
 }
 
 export type AgendaDaysOwnProps<TData> = OwnProps<AgendaDayScope<TData>> & {
-  showEmpty?: boolean
+  showEmptyDays?: boolean
 }
 
 export type AgendaDaysProps<
@@ -32,7 +32,7 @@ export const AgendaDays = <TData, TTag extends ElementType = 'div'>({
   as,
   children,
   style,
-  showEmpty = false,
+  showEmptyDays = false,
   ...rest
 }: AgendaDaysProps<TData, TTag>): ReactNode => {
   const { calendar, locale } = useCalendarContext<TData>()
@@ -44,7 +44,7 @@ export const AgendaDays = <TData, TTag extends ElementType = 'div'>({
       {calendar.days.map((day, index) => {
         const onDay = bars[index]
 
-        if (!showEmpty && onDay.length === 0 && day.boxes.length === 0) {
+        if (!showEmptyDays && onDay.length === 0 && day.boxes.length === 0) {
           return null
         }
 
@@ -56,20 +56,20 @@ export const AgendaDays = <TData, TTag extends ElementType = 'div'>({
 
         const scope: AgendaDayScope<TData> = {
           ...value,
-          weekday: labelOf(day.date, locale, WEEKDAY),
-          dayNumber: labelOf(day.date, locale, DAY_NUMBER),
-          month: labelOf(day.date, locale, MONTH)
+          weekdayLabel: labelOf(day.date, locale, WEEKDAY),
+          dayLabel: labelOf(day.date, locale, DAY_NUMBER),
+          monthLabel: labelOf(day.date, locale, MONTH)
         }
 
         return (
           <AgendaDayProvider key={day.date} value={value}>
             <Tag
               data-date={day.date}
-              data-in-period={day.inPeriod}
+              data-in-current-period={day.inCurrentPeriod}
               {...rest}
               style={style}
             >
-              {renderChildren(children, scope, scope.dayNumber)}
+              {renderChildren(children, scope, scope.dayLabel)}
             </Tag>
           </AgendaDayProvider>
         )

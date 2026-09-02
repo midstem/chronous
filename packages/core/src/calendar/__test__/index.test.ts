@@ -20,7 +20,11 @@ const MONTH_GRID_ROWS = 6
 const AGENDA_DAYS = 30
 const HALF = 0.5
 
-const week: CalendarRange = { view: 'week', date: ANCHOR, timeZone: KYIV }
+const week: CalendarRange = {
+  view: 'week',
+  currentDate: ANCHOR,
+  timeZone: KYIV
+}
 
 const calendarOf = (
   inputs: readonly EventInput[] = [],
@@ -51,7 +55,7 @@ describe('the calendar wraps the range', () => {
       start: '2026-03-18T00:00:00+02:00',
       end: '2026-03-19T00:00:00+02:00',
       minutes: MINUTES_IN_DAY,
-      inPeriod: true
+      inCurrentPeriod: true
     })
   })
 
@@ -86,8 +90,11 @@ describe('the calendar wraps the range', () => {
   it('marks the padding of a month grid out of period', () => {
     const { days } = calendarOf([], { ...week, view: 'month' })
 
-    expect(days[0]).toMatchObject({ date: '2026-02-23', inPeriod: false })
-    expect(days[6]).toMatchObject({ date: '2026-03-01', inPeriod: true })
+    expect(days[0]).toMatchObject({
+      date: '2026-02-23',
+      inCurrentPeriod: false
+    })
+    expect(days[6]).toMatchObject({ date: '2026-03-01', inCurrentPeriod: true })
   })
 })
 
@@ -261,7 +268,7 @@ describe('invalid input', () => {
   })
 
   it('throws on an anchor that cannot be read', () => {
-    expect(() => calendarOf([], { ...week, date: 'yesterday' })).toThrow(
+    expect(() => calendarOf([], { ...week, currentDate: 'yesterday' })).toThrow(
       InvalidRangeError
     )
   })

@@ -30,7 +30,7 @@ const textOf = (value: string): string | undefined =>
 
 export const rangeOf = (state: PlaygroundState): CalendarRange => ({
   view: state.view,
-  date: state.date,
+  currentDate: state.currentDate,
   timeZone: state.timeZone,
   ...optional(
     'weekStartsOn',

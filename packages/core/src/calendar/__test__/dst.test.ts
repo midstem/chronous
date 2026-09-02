@@ -24,7 +24,8 @@ const dayOf = (
   timeZone: string,
   date: string,
   inputs: readonly EventInput[] = []
-): CalendarDay => buildCalendar({ view: 'day', date, timeZone }, inputs).days[0]
+): CalendarDay =>
+  buildCalendar({ view: 'day', currentDate: date, timeZone }, inputs).days[0]
 
 describe('serialised rows keep the transition', () => {
   it.each(TRANSITIONS)(
@@ -121,7 +122,7 @@ describe('boxes are drawn by the wall clock', () => {
 describe('the range reaches event normalization', () => {
   const range: CalendarRange = {
     view: 'day',
-    date: '2026-03-29',
+    currentDate: '2026-03-29',
     timeZone: KYIV
   }
 
@@ -156,7 +157,7 @@ describe('the range reaches event normalization', () => {
 
   it('lifts a wall-clock day that is only twenty-three real hours', () => {
     const calendar = buildCalendar(
-      { view: 'week', date: '2026-03-25', timeZone: KYIV },
+      { view: 'week', currentDate: '2026-03-25', timeZone: KYIV },
       [{ id: 'a', start: '2026-03-28T09:00', end: '2026-03-29T09:00' }]
     )
 

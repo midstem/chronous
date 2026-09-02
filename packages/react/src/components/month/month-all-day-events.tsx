@@ -11,11 +11,9 @@ import {
 } from '../helpers'
 import type { OwnProps, PolymorphicProps } from '../types'
 
-const LANE_HEIGHT = 20
-
 const GAP = 4
 
-const TOP_OFFSET = 28
+const LANES_TOP_OFFSET = 28
 
 const Z_INDEX = 1
 
@@ -27,9 +25,8 @@ export type MonthAllDayEventScope<TData> = {
 export type MonthAllDayEventsOwnProps<TData> = OwnProps<
   MonthAllDayEventScope<TData>
 > & {
-  laneHeight?: number
   gap?: number
-  topOffset?: number
+  lanesTopOffset?: number
 }
 
 export type MonthAllDayEventsProps<
@@ -41,12 +38,11 @@ export const MonthAllDayEvents = <TData, TTag extends ElementType = 'div'>({
   as,
   children,
   style,
-  laneHeight = LANE_HEIGHT,
   gap = GAP,
-  topOffset = TOP_OFFSET,
+  lanesTopOffset = LANES_TOP_OFFSET,
   ...rest
 }: MonthAllDayEventsProps<TData, TTag>): ReactNode => {
-  const { row, maxLanes } = useMonthRowContext<TData>()
+  const { row, maxLanes, laneHeight } = useMonthRowContext<TData>()
   const Tag = tagOf(as, 'div')
 
   return (
@@ -63,7 +59,7 @@ export const MonthAllDayEvents = <TData, TTag extends ElementType = 'div'>({
               position: 'absolute',
               left: `calc(${percentOf(bar.left)} + ${gap / 2}px)`,
               width: `calc(${percentOf(bar.width)} - ${gap}px)`,
-              top: topOffset + bar.lane * laneHeight,
+              top: lanesTopOffset + bar.lane * laneHeight,
               height: laneHeight,
               zIndex: Z_INDEX
             },

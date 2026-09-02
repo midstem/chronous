@@ -30,7 +30,7 @@ export const DayColumns = <TData, TTag extends ElementType = 'div'>({
         <DayColumnProvider key={day.date} value={{ day }}>
           <Tag
             data-date={day.date}
-            data-in-period={day.inPeriod}
+            data-in-current-period={day.inCurrentPeriod}
             {...rest}
             style={styleOf({ position: 'relative', height: dayHeight }, style)}
           >

@@ -15,7 +15,7 @@ const ZONE = 'Europe/Kyiv'
 
 const ANCHOR = '2026-03-18'
 
-const SPEC: CalendarRange = { view: 'day', date: ANCHOR, timeZone: ZONE }
+const SPEC: CalendarRange = { view: 'day', currentDate: ANCHOR, timeZone: ZONE }
 
 const EVENTS: EventInput[] = [
   { id: 'a', start: '2026-03-18T09:00:00', end: '2026-03-18T10:30:00' }
@@ -32,7 +32,7 @@ const renderAt = (
 ): RenderHookResult<CalendarResult, CalendarProps> =>
   renderHook(
     ({ at, events }: CalendarProps) =>
-      useCalendar({ view: 'day', date: at, timeZone: ZONE }, events),
+      useCalendar({ view: 'day', currentDate: at, timeZone: ZONE }, events),
     { initialProps: { at: date, events: EVENTS } }
   )
 
@@ -105,7 +105,7 @@ describe('useCalendar', () => {
   })
 
   it('reports an unreadable range instead of throwing', () => {
-    const broken: CalendarRange = { ...SPEC, date: 'not a date' }
+    const broken: CalendarRange = { ...SPEC, currentDate: 'not a date' }
     const { result } = renderHook(() => useCalendar(broken, EVENTS))
 
     expect(result.current.calendar).toBeNull()

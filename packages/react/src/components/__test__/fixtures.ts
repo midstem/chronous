@@ -10,19 +10,19 @@ export const LOCALE = 'en-GB'
 
 export const WEEK: CalendarRange = {
   view: 'week',
-  date: '2026-03-18',
+  currentDate: '2026-03-18',
   timeZone: ZONE
 }
 
 export const MONTH: CalendarRange = {
   view: 'month',
-  date: '2026-03-18',
+  currentDate: '2026-03-18',
   timeZone: ZONE
 }
 
 export const AGENDA: CalendarRange = {
   view: 'agenda',
-  date: '2026-03-18',
+  currentDate: '2026-03-18',
   timeZone: ZONE
 }
 

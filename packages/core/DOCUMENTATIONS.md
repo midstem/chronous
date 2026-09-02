@@ -157,7 +157,7 @@ draws them on.
 ```ts
 type CalendarRange = {
   view: 'day' | 'week' | 'days' | 'month' | 'agenda'
-  date: string
+  currentDate: string
   timeZone: string
   weekStartsOn?: 0 | 1 | 2 | 3 | 4 | 5 | 6
   dayCount?: number
@@ -166,10 +166,14 @@ type CalendarRange = {
 }
 ```
 
+- `currentDate` is the date the calendar is on: the period drawn is the one
+  that **contains** it. `view: 'week'` with `currentDate: '2026-03-18'` — a
+  Wednesday — draws Monday 16 to Sunday 22. It is not read as today and it is
+  not a selection; `next`, `prev` and `today` move it, and nothing else does.
 - `day` is one day and `week` is seven from `weekStartsOn` (Monday by
   default). `days` and `agenda` span `dayCount`, which defaults to a week and
   to thirty days. `month` covers the anchor's month padded out to whole weeks;
-  the padding days are marked `inPeriod: false`.
+  the padding days are marked `inCurrentPeriod: false`.
 - A time grid is built for `day`, `week` and `days`. `month` and `agenda`
   carry no slots.
 - Slots are wall-clock rows. A day always has `1440 / slotMinutes` of them —
@@ -183,7 +187,14 @@ type CalendarRange = {
 - Rows are placed by the wall clock alone. `disambiguation` is what the events
   are read with and is never applied to a row, so the hour a zone skips stays a
   zero-length row instead of becoming an error.
-- An anchor date or a time zone that cannot be read, a `slotMinutes` outside 1
+- `disambiguation` decides what a wall time means when a DST transition made it
+  ambiguous or impossible — 01:30 on the night an hour repeats happens twice,
+  and on the night an hour is skipped it never happens at all. It is Temporal's
+  own option, passed straight through: `compatible` (the default) takes the
+  earlier of a repeated pair and pushes a skipped time forward, `earlier` and
+  `later` pick a side of a repeated hour, and `reject` throws instead of
+  guessing. Leave it alone unless a schedule has to round one way by policy.
+- `currentDate` or a time zone that cannot be read, a `slotMinutes` outside 1
   to 1440 or a `dayCount` below one throws `InvalidRangeError`. The zone is
   checked once, where the range is resolved, so a mistyped one never reaches the
   engine as a bare `RangeError`.
@@ -198,11 +209,11 @@ import { calendarReducer, initialCalendarState } from '@midstem/chronous'
 
 const state = initialCalendarState({
   view: 'week',
-  date: '2026-08-25',
+  currentDate: '2026-08-25',
   timeZone: 'Europe/Kyiv'
 })
 
-calendarReducer(state, { type: 'next' }).range.date
+calendarReducer(state, { type: 'next' }).range.currentDate
 calendarReducer(state, { type: 'view', view: 'month' }).range.view
 calendarReducer(state, {
   type: 'select',
@@ -237,7 +248,7 @@ plain object out.
 
 ```ts
 const calendar = buildCalendar(
-  { view: 'week', date: '2026-03-18', timeZone: 'Europe/Kyiv' },
+  { view: 'week', currentDate: '2026-03-18', timeZone: 'Europe/Kyiv' },
   [{ id: 'standup', start: '2026-03-18T09:00', duration: 'PT30M' }]
 )
 ```
@@ -256,7 +267,7 @@ type CalendarDay<TData = unknown> = {
   start: IsoDateTime
   end: IsoDateTime
   minutes: number
-  inPeriod: boolean
+  inCurrentPeriod: boolean
   slots: CalendarSlot[]
   boxes: CalendarBox<TData>[]
 }

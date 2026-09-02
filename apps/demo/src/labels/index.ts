@@ -42,16 +42,16 @@ const labelWith =
     }
   }
 
-export const dayLabel = labelWith(DAY_OPTIONS)
+export const formatDay = labelWith(DAY_OPTIONS)
 
-export const timeLabel = labelWith(TIME_OPTIONS)
+export const formatTime = labelWith(TIME_OPTIONS)
 
-export const weekdayLabel = labelWith(WEEKDAY_OPTIONS)
+export const formatWeekday = labelWith(WEEKDAY_OPTIONS)
 
-export const numberLabel = labelWith(NUMBER_OPTIONS)
+export const formatNumber = labelWith(NUMBER_OPTIONS)
 
-export const titleLabel = labelWith(TITLE_OPTIONS)
+export const formatTitle = labelWith(TITLE_OPTIONS)
 
-export const monthLabel = labelWith(MONTH_OPTIONS)
+export const formatMonth = labelWith(MONTH_OPTIONS)
 
-export const shortLabel = labelWith(SHORT_OPTIONS)
+export const formatShort = labelWith(SHORT_OPTIONS)
