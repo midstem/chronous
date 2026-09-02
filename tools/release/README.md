@@ -36,7 +36,7 @@ which one you mean, and then takes whichever half of the release is due:
 
 A release is therefore two runs: one to bump, one to tag. Publishing is the
 `Release` workflow's job — it reads the package out of the tag and runs `npm
-publish` after the gates. See [PUBLISH.md](../../PUBLISH.md) for the whole flow.
+publish` after the gates. See [PUBLISH.md](../../docs/PUBLISH.md) for the whole flow.
 
 ## Layout
 
