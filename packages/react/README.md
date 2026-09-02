@@ -86,8 +86,24 @@ when `error` is set. Anything else is a bug and is left to propagate.
 
 `pending` is set only while the polyfill is in flight, and it comes alongside a
 `MissingTemporalError` rather than in place of one — so code written against
-`calendar` and `error` alone still reads correctly, and code that wants to draw
-a skeleton instead of an error can check `pending` first.
+`calendar` and `error` alone keeps reading correctly. Check it before the error
+to draw a skeleton instead, which is what `Calendar.Root` does with
+`renderPending`:
+
+```tsx
+const { calendar, error, pending } = useCalendar(range, events)
+
+if (pending) return <Skeleton />
+if (error) return <Failed error={error} />
+
+return <Board calendar={calendar} />
+```
+
+The order is the whole trick: without the first line the error branch draws for
+that one render, and with it nothing does. `pending` never arrives on its own —
+an engine that is not here yet is still an engine that is not here, and saying
+so as `error: null` would drop code that only checks `error` straight into a
+null `calendar`.
 
 ## `useCalendarNavigation`
 
