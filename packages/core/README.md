@@ -1,4 +1,4 @@
-# `@midstem/chronous`
+# Сhronous
 
 <a href='https://midstem.net'>
   <img src='https://raw.githubusercontent.com/midstem/chronous/main/images/midstem.png' height='60'>
