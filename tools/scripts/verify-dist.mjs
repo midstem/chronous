@@ -16,7 +16,9 @@ const SUBPATH_IMPORT_PREFIX = '#src'
 
 const TEMPORAL_NAMESPACE = 'Temporal'
 
-const TEMPORAL_PROBE_NAME = 'isTemporalAvailable'
+const TEMPORAL_NAMESPACE_PATTERN = new RegExp(
+  `(?<![A-Za-z0-9_$])${TEMPORAL_NAMESPACE}(?![A-Za-z0-9_$])`
+)
 
 const CORE_PACKAGE = '@midstem/chronous'
 
@@ -83,11 +85,11 @@ bundles.forEach((content, name) => {
   if (!name.endsWith('.d.ts')) return
 
   const temporalLines = findLines(content, (line) =>
-    line.replaceAll(TEMPORAL_PROBE_NAME, '').includes(TEMPORAL_NAMESPACE)
+    TEMPORAL_NAMESPACE_PATTERN.test(line)
   )
 
   check(
-    `${name} names ${TEMPORAL_NAMESPACE} outside ${TEMPORAL_PROBE_NAME} on lines ${temporalLines.join(', ')}`,
+    `${name} names the ${TEMPORAL_NAMESPACE} namespace on lines ${temporalLines.join(', ')}`,
     !temporalLines.length
   )
 })

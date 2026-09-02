@@ -54,15 +54,12 @@
     "prepack": "node ../../tools/scripts/copy-license.mjs"
   },
   "peerDependencies": {
-    "react": ">=18",
-    "temporal-polyfill": ">=0.3.0"
-  },
-  "peerDependenciesMeta": {
-    "temporal-polyfill": {
-      "optional": true
-    }
+    "react": ">=18"
   },
   "devDependencies": {
     "@midstem/chronous": "*"
+  },
+  "dependencies": {
+    "temporal-polyfill": "^1.0.4"
   }
 }

@@ -11,10 +11,10 @@ and every pixel stays yours.
 npm install @midstem/chronous-react
 ```
 
-One package is enough, and it has no dependencies at all. The engine is built
-into this bundle rather than installed beside it, and everything it exports is
-re-exported from here — `buildCalendar`, `formatIso`, `calendarReducer`, the
-error classes and every type — so a React app never installs or imports
+One package is enough. The engine is built into this bundle rather than
+installed beside it, and everything it exports is re-exported from here —
+`buildCalendar`, `formatIso`, `calendarReducer`, `ensureTemporal`, the error
+classes and every type — so a React app never installs or imports
 `@midstem/chronous` by name:
 
 ```tsx
@@ -27,8 +27,30 @@ server, a worker, another framework. Its version never has to line up with this
 one, because nothing here resolves it at runtime. The one thing that does not
 survive that split is `instanceof`: an error thrown by a separately installed
 engine is not an instance of the error classes exported here, so catch it
-against the package that built the calendar. Temporal has to be available before
-the first render either way; see the core README.
+against the package that built the calendar.
+
+## Temporal, and Safari
+
+Await `ensureTemporal()` once before the first render:
+
+```tsx
+import { ensureTemporal } from '@midstem/chronous-react'
+
+await ensureTemporal()
+
+createRoot(container).render(<App />)
+```
+
+Chrome and Edge ship Temporal from 144 and Firefox from 139, and on those the
+call resolves immediately and downloads nothing. Safari still ships none, so
+there it loads `temporal-polyfill` through a dynamic import that every bundler
+splits into its own chunk (~20 kB gzip). You install nothing and pick no
+version: the polyfill is a dependency of this package, and the engine holds the
+implementation itself instead of assigning `globalThis.Temporal`.
+
+Rendering without it throws `MissingTemporalError`, which `useCalendar` catches
+like the other calendar errors, so `renderError` on `Calendar.Root` can show it
+rather than the tree coming down.
 
 ## `useCalendar`
 

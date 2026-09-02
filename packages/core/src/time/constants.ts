@@ -1,7 +1,7 @@
 import type { Disambiguation } from './types'
 
 export const MISSING_TEMPORAL_MESSAGE =
-  'Temporal is not available in this runtime. Load a Temporal polyfill before using @midstem/chronous.'
+  'Temporal is not available in this runtime, and no polyfill has been installed. Await ensureTemporal() once before the first render — Safari still ships no Temporal. See https://github.com/midstem/chronous/tree/main/packages/core#temporal'
 
 export const ABSOLUTE_INSTANT_PATTERN = /(Z|[+-]\d{2}:?\d{2})(\[[^\]]+\])?$/i
 

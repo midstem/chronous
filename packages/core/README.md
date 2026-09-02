@@ -14,36 +14,45 @@ npm install @midstem/chronous
 The engine speaks [Temporal](https://tc39.es/proposal-temporal/docs/) —
 separate types for a moment in a time zone, a date without a time and a
 duration — so that DST transitions, all-day events and cross-zone schedules are
-correct by construction rather than by discipline.
+correct by construction rather than by discipline. There is no `Date` fallback
+and there will not be one: `Date` only ever builds a wall clock in the _host's_
+zone, so a Kyiv schedule opened from Berlin would silently render Berlin's grid.
 
-Temporal is a language feature, not a dependency of this package. Chrome,
-Edge and Firefox ship it; Safari does not yet. Load a polyfill only where the
-runtime lacks one and it costs nothing on browsers that already have it:
+Chrome and Edge ship Temporal from 144, Firefox from 139. Safari still does not.
+Await `ensureTemporal()` once before the first render and every browser is
+covered:
 
-```js
-if (!globalThis.Temporal) {
-  await import('temporal-polyfill/global')
-}
+```ts
+import { ensureTemporal } from '@midstem/chronous'
+
+await ensureTemporal()
 ```
 
-`temporal-polyfill` is an optional peer dependency. Bundlers keep a conditional
-dynamic import in its own chunk, so it is fetched only by browsers that need it
-(~20 kB gzip). `isTemporalAvailable()` reports whether the current runtime has
-Temporal at all.
+It resolves immediately on a runtime that already has Temporal and downloads
+nothing. Where Temporal is missing it loads `temporal-polyfill` through a
+dynamic import, which every bundler splits into its own chunk (~20 kB gzip), so
+only Safari ever fetches it. The engine holds that implementation itself rather
+than assigning `globalThis.Temporal`, so nothing on the page is patched.
+
+`isTemporalAvailable()` reports whether an implementation is in place. Building a
+calendar, stepping a range or formatting a value without one throws
+`MissingTemporalError` — never a misleading `InvalidRangeError` about the time
+zone.
 
 ### Server rendering
 
 Temporal has to be installed before the first render, not inside an effect. In
-Node the polyfill loads once at startup — in Next.js from `instrumentation.ts`:
+Node that means awaiting the same call at startup — in Next.js from
+`instrumentation.ts`:
 
 ```ts
 export const register = async () => {
-  if (!globalThis.Temporal) await import('temporal-polyfill/global')
+  await ensureTemporal()
 }
 ```
 
-On the client, keep the same conditional import at the top of a module that
-loads before hydration.
+On the client, await it before hydration. `main.tsx` in
+[`apps/demo`](../../apps/demo) is the smallest working example.
 
 ## Events
 

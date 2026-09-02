@@ -2,8 +2,10 @@ export {
   InvalidEventError,
   InvalidRangeError,
   InvalidRecurrenceError,
+  MissingTemporalError,
   buildCalendar,
   calendarReducer,
+  ensureTemporal,
   formatIso,
   initialCalendarState,
   isTemporalAvailable

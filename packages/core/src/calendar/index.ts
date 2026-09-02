@@ -4,7 +4,7 @@ import { buildLayout } from '#src/layout'
 import { buildRange } from '#src/range'
 import type { CalendarRange } from '#src/range'
 import { expandEvents } from '#src/recurrence'
-import { toIso } from '#src/time'
+import { requireTemporal, toIso } from '#src/time'
 
 import { dayOf, rowOf } from './helpers'
 import type { CalendarLayout } from './types'
@@ -18,6 +18,8 @@ export const buildCalendar = <TData>(
   range: CalendarRange,
   events: readonly EventInput<TData>[]
 ): CalendarLayout<TData> => {
+  requireTemporal()
+
   const built = buildRange(range)
   const context = contextOf(range)
   const layout = buildLayout(

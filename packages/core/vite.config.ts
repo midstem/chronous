@@ -7,6 +7,8 @@ const FILE_NAME_BY_FORMAT: Record<string, string> = {
   cjs: 'index.cjs'
 }
 
+const POLYFILL_PACKAGE = 'temporal-polyfill'
+
 const NATIVE_TEMPORAL_FLAG = '--harmony-temporal'
 
 const usesNativeTemporal = process.env.CHRONOUS_TEMPORAL === 'native'
@@ -46,6 +48,7 @@ export default defineConfig({
       fileName: (format) => FILE_NAME_BY_FORMAT[format]
     },
     rollupOptions: {
+      external: [POLYFILL_PACKAGE],
       output: { exports: 'named' }
     }
   }
