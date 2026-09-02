@@ -1,8 +1,9 @@
 # `@midstem/chronous-react`
 
 Headless React hooks and primitives on top of
-[`@midstem/chronous`](../core). The engine owns geometry and semantics, the
-hooks own memoization and navigation, and every pixel stays yours.
+[`@midstem/chronous`](https://www.npmjs.com/package/@midstem/chronous). The
+engine owns geometry and semantics, the hooks own memoization and navigation,
+and every pixel stays yours.
 
 ## Installation
 
@@ -10,10 +11,11 @@ hooks own memoization and navigation, and every pixel stays yours.
 npm install @midstem/chronous-react
 ```
 
-One package is enough. The engine comes with it as a dependency, and everything
-it exports is re-exported from here — `buildCalendar`, `formatIso`,
-`calendarReducer`, the error classes and every type — so a React app never
-imports `@midstem/chronous` by name:
+One package is enough, and it has no dependencies at all. The engine is built
+into this bundle rather than installed beside it, and everything it exports is
+re-exported from here — `buildCalendar`, `formatIso`, `calendarReducer`, the
+error classes and every type — so a React app never installs or imports
+`@midstem/chronous` by name:
 
 ```tsx
 import { Calendar, formatIso } from '@midstem/chronous-react'
@@ -21,8 +23,12 @@ import type { CalendarRange, EventInput } from '@midstem/chronous-react'
 ```
 
 Install `@midstem/chronous` on its own only where React is not involved — a
-server, a worker, another framework. Temporal has to be available before the
-first render either way; see the core README.
+server, a worker, another framework. Its version never has to line up with this
+one, because nothing here resolves it at runtime. The one thing that does not
+survive that split is `instanceof`: an error thrown by a separately installed
+engine is not an instance of the error classes exported here, so catch it
+against the package that built the calendar. Temporal has to be available before
+the first render either way; see the core README.
 
 ## `useCalendar`
 
@@ -146,7 +152,7 @@ inside that scope, so nested components resolve:
   {({ dayNumber, inPeriod }) => (
     <div data-outside={!inPeriod}>
       {dayNumber}
-      <Calendar.MonthDots />
+      <Calendar.MonthTimedEvents className="dot" />
     </div>
   )}
 </Calendar.MonthDays>

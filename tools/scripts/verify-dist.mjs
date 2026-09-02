@@ -18,6 +18,12 @@ const TEMPORAL_NAMESPACE = 'Temporal'
 
 const TEMPORAL_PROBE_NAME = 'isTemporalAvailable'
 
+const CORE_PACKAGE = '@midstem/chronous'
+
+const CORE_SPECIFIER_PATTERN = new RegExp(
+  `(from\\s*|require\\()['"]${CORE_PACKAGE}['"]`
+)
+
 const failures = []
 
 const check = (description, condition) => {
@@ -57,6 +63,17 @@ bundles.forEach((content, name) => {
   const subpathLines = findLines(content, (line) =>
     line.includes(SUBPATH_IMPORT_PREFIX)
   )
+
+  if (name.startsWith('packages/react/')) {
+    const coreLines = findLines(content, (line) =>
+      CORE_SPECIFIER_PATTERN.test(line)
+    )
+
+    check(
+      `${name} still resolves ${CORE_PACKAGE} at runtime on lines ${coreLines.join(', ')}, so the engine was not bundled in`,
+      !coreLines.length
+    )
+  }
 
   check(
     `${name} still carries ${SUBPATH_IMPORT_PREFIX} imports on lines ${subpathLines.join(', ')}`,

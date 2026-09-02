@@ -17,11 +17,12 @@ opt-in.</p>
 | [`@midstem/chronous`](packages/core)        | The engine: time model, layout, recurrence. No React, no DOM |
 | [`@midstem/chronous-react`](packages/react) | Hooks and headless primitives for React                      |
 
-A React app installs one package. `@midstem/chronous-react` depends on the
-engine and re-exports all of it, so `buildCalendar`, `formatIso`, the error
-classes and every type come from the same import as the components. Reach for
-`@midstem/chronous` on its own where React is not involved — a server, a
-worker, another framework.
+A React app installs one package, and that package has no dependencies.
+`@midstem/chronous-react` builds the engine into its own bundle and re-exports
+all of it, so `buildCalendar`, `formatIso`, the error classes and every type
+come from the same import as the components — and there is never a question of
+which engine version an app is on. Reach for `@midstem/chronous` on its own
+where React is not involved — a server, a worker, another framework.
 
 The previous generation shipped as `chronous@1.0.2` and stays available under
 the git tag [`1.0.2`](https://github.com/midstem/chronous/tree/1.0.2).
