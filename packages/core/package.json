@@ -1,19 +1,11 @@
 {
   "name": "@midstem/chronous",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "license": "MIT",
   "description": "Headless scheduling engine: time model, layout and recurrence. No React, no DOM",
   "author": "Midstem",
   "sideEffects": false,
-  "peerDependencies": {
-    "temporal-polyfill": ">=0.3.0"
-  },
-  "peerDependenciesMeta": {
-    "temporal-polyfill": {
-      "optional": true
-    }
-  },
   "imports": {
     "#src/*": "./src/*/index.ts"
   },
@@ -34,7 +26,8 @@
     "README.md"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "repository": {
     "type": "git",
@@ -65,6 +58,12 @@
     "bench:save": "vitest bench --run --outputJson=bench.json",
     "bench:compare": "vitest bench --run --compare=bench.json",
     "bench:native": "CHRONOUS_TEMPORAL=native vitest bench --run",
-    "prepack": "node ../../tools/scripts/copy-license.mjs"
+    "prepack": "node ../../tools/scripts/prepack.mjs"
+  },
+  "dependencies": {
+    "temporal-polyfill": "^1.0.4"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

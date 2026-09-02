@@ -16,7 +16,15 @@ const SUBPATH_IMPORT_PREFIX = '#src'
 
 const TEMPORAL_NAMESPACE = 'Temporal'
 
-const TEMPORAL_PROBE_NAME = 'isTemporalAvailable'
+const TEMPORAL_NAMESPACE_PATTERN = new RegExp(
+  `(?<![A-Za-z0-9_$])${TEMPORAL_NAMESPACE}(?![A-Za-z0-9_$])`
+)
+
+const CORE_PACKAGE = '@midstem/chronous'
+
+const CORE_SPECIFIER_PATTERN = new RegExp(
+  `(from\\s*|require\\()['"]${CORE_PACKAGE}['"]`
+)
 
 const failures = []
 
@@ -58,6 +66,17 @@ bundles.forEach((content, name) => {
     line.includes(SUBPATH_IMPORT_PREFIX)
   )
 
+  if (name.startsWith('packages/react/')) {
+    const coreLines = findLines(content, (line) =>
+      CORE_SPECIFIER_PATTERN.test(line)
+    )
+
+    check(
+      `${name} still resolves ${CORE_PACKAGE} at runtime on lines ${coreLines.join(', ')}, so the engine was not bundled in`,
+      !coreLines.length
+    )
+  }
+
   check(
     `${name} still carries ${SUBPATH_IMPORT_PREFIX} imports on lines ${subpathLines.join(', ')}`,
     !subpathLines.length
@@ -66,11 +85,11 @@ bundles.forEach((content, name) => {
   if (!name.endsWith('.d.ts')) return
 
   const temporalLines = findLines(content, (line) =>
-    line.replaceAll(TEMPORAL_PROBE_NAME, '').includes(TEMPORAL_NAMESPACE)
+    TEMPORAL_NAMESPACE_PATTERN.test(line)
   )
 
   check(
-    `${name} names ${TEMPORAL_NAMESPACE} outside ${TEMPORAL_PROBE_NAME} on lines ${temporalLines.join(', ')}`,
+    `${name} names the ${TEMPORAL_NAMESPACE} namespace on lines ${temporalLines.join(', ')}`,
     !temporalLines.length
   )
 })

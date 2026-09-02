@@ -1,4 +1,4 @@
-import { isTemporalAvailable } from '@midstem/chronous-react'
+import { ensureTemporal, isTemporalAvailable } from '@midstem/chronous-react'
 
 import type { RuntimeState } from './types'
 
@@ -17,7 +17,5 @@ export const runtimeState = (): RuntimeState => {
 export const installTemporal = async (): Promise<void> => {
   nativeTemporal = (globalThis as TemporalCarrier).Temporal !== undefined
 
-  if (nativeTemporal) return
-
-  await import('temporal-polyfill/global')
+  await ensureTemporal()
 }

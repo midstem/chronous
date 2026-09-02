@@ -2,6 +2,7 @@ import {
   InvalidEventError,
   InvalidRangeError,
   InvalidRecurrenceError,
+  MissingTemporalError,
   buildCalendar
 } from '@midstem/chronous'
 import type { EventInput, CalendarRange } from '@midstem/chronous'
@@ -11,7 +12,8 @@ import type { CalendarError, CalendarResult } from './types'
 const isCalendarError = (cause: unknown): cause is CalendarError =>
   cause instanceof InvalidEventError ||
   cause instanceof InvalidRangeError ||
-  cause instanceof InvalidRecurrenceError
+  cause instanceof InvalidRecurrenceError ||
+  cause instanceof MissingTemporalError
 
 export const resultOf = <TData>(
   range: CalendarRange,

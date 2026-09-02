@@ -1,8 +1,9 @@
 # `@midstem/chronous-react`
 
 Headless React hooks and primitives on top of
-[`@midstem/chronous`](../core). The engine owns geometry and semantics, the
-hooks own memoization and navigation, and every pixel stays yours.
+[`@midstem/chronous`](https://www.npmjs.com/package/@midstem/chronous). The
+engine owns geometry and semantics, the hooks own memoization and navigation,
+and every pixel stays yours.
 
 ## Installation
 
@@ -10,10 +11,11 @@ hooks own memoization and navigation, and every pixel stays yours.
 npm install @midstem/chronous-react
 ```
 
-One package is enough. The engine comes with it as a dependency, and everything
-it exports is re-exported from here — `buildCalendar`, `formatIso`,
-`calendarReducer`, the error classes and every type — so a React app never
-imports `@midstem/chronous` by name:
+One package is enough. The engine is built into this bundle rather than
+installed beside it, and everything it exports is re-exported from here —
+`buildCalendar`, `formatIso`, `calendarReducer`, `ensureTemporal`, the error
+classes and every type — so a React app never installs or imports
+`@midstem/chronous` by name:
 
 ```tsx
 import { Calendar, formatIso } from '@midstem/chronous-react'
@@ -21,8 +23,34 @@ import type { CalendarRange, EventInput } from '@midstem/chronous-react'
 ```
 
 Install `@midstem/chronous` on its own only where React is not involved — a
-server, a worker, another framework. Temporal has to be available before the
-first render either way; see the core README.
+server, a worker, another framework. Its version never has to line up with this
+one, because nothing here resolves it at runtime. The one thing that does not
+survive that split is `instanceof`: an error thrown by a separately installed
+engine is not an instance of the error classes exported here, so catch it
+against the package that built the calendar.
+
+## Temporal, and Safari
+
+Await `ensureTemporal()` once before the first render:
+
+```tsx
+import { ensureTemporal } from '@midstem/chronous-react'
+
+await ensureTemporal()
+
+createRoot(container).render(<App />)
+```
+
+Chrome and Edge ship Temporal from 144 and Firefox from 139, and on those the
+call resolves immediately and downloads nothing. Safari still ships none, so
+there it loads `temporal-polyfill` through a dynamic import that every bundler
+splits into its own chunk (~20 kB gzip). You install nothing and pick no
+version: the polyfill is a dependency of this package, and the engine holds the
+implementation itself instead of assigning `globalThis.Temporal`.
+
+Rendering without it throws `MissingTemporalError`, which `useCalendar` catches
+like the other calendar errors, so `renderError` on `Calendar.Root` can show it
+rather than the tree coming down.
 
 ## `useCalendar`
 
@@ -146,7 +174,7 @@ inside that scope, so nested components resolve:
   {({ dayNumber, inPeriod }) => (
     <div data-outside={!inPeriod}>
       {dayNumber}
-      <Calendar.MonthDots />
+      <Calendar.MonthTimedEvents className="dot" />
     </div>
   )}
 </Calendar.MonthDays>
@@ -176,6 +204,43 @@ prop you pass wins over the attribute, so you can pin one when you need to:
 the same CSS grid, so `gutterWidth` is one prop on the root rather than three
 that can drift apart. Month and agenda ignore it. What goes _in_ that leading
 column is `gutterCell`, on `Header` and on `AllDayRow`.
+
+### Overflow, and the empty all-day row
+
+Two cut-offs are shared between siblings, so they cannot drift apart.
+
+`MonthRows` takes `maxLanes`. `MonthAllDayEvents` then stops drawing bars past
+that lane, and every `MonthDays` cell is handed the bars that cover _it_ —
+`bars` for all of them, `hiddenBars` for the ones the cut-off dropped, and
+`lanes` counting only what is drawn. That is the whole "+2 more" affordance:
+
+```tsx
+<Calendar.MonthRows maxLanes={3}>
+  <Calendar.MonthDays>
+    {({ dayNumber, hiddenBars }) => (
+      <>
+        {dayNumber}
+        {hiddenBars.length > 0 && <button>+{hiddenBars.length} more</button>}
+      </>
+    )}
+  </Calendar.MonthDays>
+  <Calendar.MonthAllDayEvents className="bar" />
+</Calendar.MonthRows>
+```
+
+Timed events in a month cell need nothing new: `boxes` is already in the same
+scope, so `boxes.slice(0, 3)` and `boxes.length - 3` are yours to write.
+
+`AllDayRow` renders nothing when the range holds no all-day event, which frees
+the space but moves the grid under it as you step between weeks. `minLanes`
+holds the row open instead — `minLanes={1}` keeps one lane's height and the
+`gutterCell` with it, and a row that needs more lanes still gets them:
+
+```tsx
+<Calendar.AllDayRow minLanes={1} gutterCell="all-day">
+  <Calendar.AllDayEvents className="bar" />
+</Calendar.AllDayRow>
+```
 
 `TimeGrid` scrolls to `scrollToHour` on mount by finding the nearest element
 that actually scrolls — itself when nothing else does, the ancestor when your

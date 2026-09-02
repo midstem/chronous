@@ -1,5 +1,7 @@
 export { isTemporalAvailable } from '#src/runtime'
 
+export { MissingTemporalError, ensureTemporal } from '#src/time'
+
 export { buildCalendar } from '#src/calendar'
 
 export type {

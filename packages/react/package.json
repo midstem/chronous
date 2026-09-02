@@ -1,6 +1,6 @@
 {
   "name": "@midstem/chronous-react",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "license": "MIT",
   "description": "Headless React primitives for @midstem/chronous",
@@ -26,7 +26,8 @@
     "README.md"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "repository": {
     "type": "git",
@@ -51,12 +52,18 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "prepack": "node ../../tools/scripts/copy-license.mjs"
+    "prepack": "node ../../tools/scripts/prepack.mjs"
   },
   "peerDependencies": {
     "react": ">=18"
   },
-  "dependencies": {
+  "devDependencies": {
     "@midstem/chronous": "*"
+  },
+  "dependencies": {
+    "temporal-polyfill": "^1.0.4"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

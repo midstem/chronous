@@ -1,14 +1,22 @@
-import { MISSING_TEMPORAL_MESSAGE } from './constants'
+import { MissingTemporalError } from './errors'
 
 type TemporalCarrier = { Temporal?: typeof Temporal }
 
+let installed: typeof Temporal | undefined
+
 export const readTemporal = (): typeof Temporal | undefined =>
-  (globalThis as TemporalCarrier).Temporal
+  installed ?? (globalThis as TemporalCarrier).Temporal
 
 export const requireTemporal = (): typeof Temporal => {
   const temporal = readTemporal()
 
-  if (!temporal) throw new Error(MISSING_TEMPORAL_MESSAGE)
+  if (!temporal) throw new MissingTemporalError()
 
   return temporal
+}
+
+export const ensureTemporal = async (): Promise<void> => {
+  if (readTemporal()) return
+
+  installed = (await import('temporal-polyfill')).Temporal
 }

@@ -17,11 +17,16 @@ opt-in.</p>
 | [`@midstem/chronous`](packages/core)        | The engine: time model, layout, recurrence. No React, no DOM |
 | [`@midstem/chronous-react`](packages/react) | Hooks and headless primitives for React                      |
 
-A React app installs one package. `@midstem/chronous-react` depends on the
-engine and re-exports all of it, so `buildCalendar`, `formatIso`, the error
-classes and every type come from the same import as the components. Reach for
-`@midstem/chronous` on its own where React is not involved — a server, a
-worker, another framework.
+A React app installs one package, and that package has no dependencies.
+`@midstem/chronous-react` builds the engine into its own bundle and re-exports
+all of it, so `buildCalendar`, `formatIso`, the error classes and every type
+come from the same import as the components — and there is never a question of
+which engine version an app is on. Reach for `@midstem/chronous` on its own
+where React is not involved — a server, a worker, another framework.
+
+Temporal itself is handled for you: `await ensureTemporal()` once before the
+first render resolves instantly on Chrome, Edge and Firefox, and loads
+`temporal-polyfill` as a separate chunk only on Safari, which still ships none.
 
 The previous generation shipped as `chronous@1.0.2` and stays available under
 the git tag [`1.0.2`](https://github.com/midstem/chronous/tree/1.0.2).
@@ -77,6 +82,25 @@ npm run bench:compare --workspace @midstem/chronous
 `bench.json` stays out of git. `bench:native` runs the same suite on a runtime
 that already carries `Temporal`; expect it to take considerably longer, so reach
 for it to compare runtimes rather than to gate a change.
+
+## Releasing
+
+[`.github/workflows/release.yml`](.github/workflows/release.yml) is a manual
+run: pick the packages, leave `dryRun` on to pack and verify, turn it off to
+publish. It builds, verifies the build invariants, lints, typechecks and runs
+the suite before it publishes anything, then tags what it published and opens a
+GitHub release.
+
+Tags are `<package name>@<version>` — `@midstem/chronous-react@1.0.0` — because
+the two packages will not stay on one version forever, and because the bare
+`1.0.0` through `1.0.2` tags belong to the previous generation. Publishing needs
+an `NPM_TOKEN` secret; packages carry
+[provenance](https://docs.npmjs.com/generating-provenance-statements), which is
+what `id-token: write` in the workflow is for.
+
+Both packages run the same `prepack`, so `npm pack` and `npm publish` rebuild
+from source and re-check the invariants rather than shipping whatever happened
+to be in `dist`.
 
 ## License
 

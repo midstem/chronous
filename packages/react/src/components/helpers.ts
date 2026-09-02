@@ -95,6 +95,37 @@ export const rowsWithDays = <TData>(
   })
 }
 
+export const rowBarsByDay = <TData>(
+  row: CalendarRow<TData>,
+  dayCount: number
+): CalendarBar<TData>[][] => {
+  const byDay: CalendarBar<TData>[][] = Array.from(
+    { length: dayCount },
+    () => []
+  )
+
+  for (const bar of row.bars)
+    for (let offset = bar.startDay; offset < bar.endDay; offset += 1)
+      byDay[offset]?.push(bar)
+
+  return byDay
+}
+
+export const laneCount = (lanes: number, maxLanes: number | null): number =>
+  maxLanes === null ? lanes : Math.min(lanes, maxLanes)
+
+export const visibleLanes = <TData>(
+  bars: CalendarBar<TData>[],
+  maxLanes: number | null
+): CalendarBar<TData>[] =>
+  maxLanes === null ? bars : bars.filter((bar) => bar.lane < maxLanes)
+
+export const hiddenLanes = <TData>(
+  bars: CalendarBar<TData>[],
+  maxLanes: number | null
+): CalendarBar<TData>[] =>
+  maxLanes === null ? [] : bars.filter((bar) => bar.lane >= maxLanes)
+
 export const barsByDay = <TData>(
   calendar: CalendarLayout<TData>
 ): CalendarBar<TData>[][] => {

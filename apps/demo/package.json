@@ -13,8 +13,7 @@
     "test:run": "vitest run"
   },
   "dependencies": {
-    "@midstem/chronous-react": "*",
-    "temporal-polyfill": "^1.0.4"
+    "@midstem/chronous-react": "*"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",

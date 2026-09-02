@@ -2,11 +2,15 @@ import type {
   CalendarLayout,
   InvalidEventError,
   InvalidRangeError,
-  InvalidRecurrenceError
+  InvalidRecurrenceError,
+  MissingTemporalError
 } from '@midstem/chronous'
 
 export type CalendarError =
-  InvalidEventError | InvalidRangeError | InvalidRecurrenceError
+  | InvalidEventError
+  | InvalidRangeError
+  | InvalidRecurrenceError
+  | MissingTemporalError
 
 export type CalendarResult<TData = unknown> =
   | { calendar: CalendarLayout<TData>; error: null }

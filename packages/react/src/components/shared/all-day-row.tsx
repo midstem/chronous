@@ -7,8 +7,11 @@ import type { OwnProps, PolymorphicProps } from '../types'
 
 const LANE_HEIGHT = 24
 
+const MIN_LANES = 0
+
 export type AllDayRowOwnProps<TData> = OwnProps<AllDayContextValue<TData>> & {
   laneHeight?: number
+  minLanes?: number
   gutterCell?: ReactNode
 }
 
@@ -22,16 +25,18 @@ export const AllDayRow = <TData, TTag extends ElementType = 'div'>({
   children,
   style,
   laneHeight = LANE_HEIGHT,
+  minLanes = MIN_LANES,
   gutterCell = null,
   ...rest
 }: AllDayRowProps<TData, TTag>): ReactNode => {
   const { calendar, gutterWidth } = useCalendarContext<TData>()
   const Tag = tagOf(as, 'div')
   const row = calendar.rows[0]
+  const lanes = Math.max(row.lanes, minLanes)
 
-  if (row.lanes === 0) return null
+  if (lanes === 0) return null
 
-  const scope: AllDayContextValue<TData> = { row, laneHeight }
+  const scope: AllDayContextValue<TData> = { row, laneHeight, lanes }
 
   return (
     <AllDayProvider value={scope}>
@@ -50,7 +55,7 @@ export const AllDayRow = <TData, TTag extends ElementType = 'div'>({
           style={{
             gridColumn: '2 / -1',
             position: 'relative',
-            height: row.lanes * laneHeight
+            height: lanes * laneHeight
           }}
         >
           {renderChildren(children, scope, null)}

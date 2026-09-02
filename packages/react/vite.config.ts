@@ -7,12 +7,16 @@ const FILE_NAME_BY_FORMAT: Record<string, string> = {
   cjs: 'index.cjs'
 }
 
+const CORE_PACKAGE = '@midstem/chronous'
+
+const POLYFILL_PACKAGE = 'temporal-polyfill'
+
 export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     alias: {
-      '@midstem/chronous': resolve('..', 'core', 'src', 'index.ts')
+      [CORE_PACKAGE]: resolve('..', 'core', 'src', 'index.ts')
     },
     coverage: {
       provider: 'v8',
@@ -23,7 +27,7 @@ export default defineConfig({
   },
   plugins: [
     dts({
-      bundleTypes: true,
+      bundleTypes: { bundledPackages: [CORE_PACKAGE] },
       compilerOptions: { paths: { '#src/*': ['./src/*/index.ts'] } },
       include: ['src'],
       exclude: ['src/test', 'src/**/__test__/**', 'src/**/*.test.{ts,tsx}']
@@ -36,7 +40,7 @@ export default defineConfig({
       fileName: (format) => FILE_NAME_BY_FORMAT[format]
     },
     rollupOptions: {
-      external: ['@midstem/chronous', 'react', 'react/jsx-runtime'],
+      external: ['react', 'react/jsx-runtime', POLYFILL_PACKAGE],
       output: { exports: 'named' }
     }
   }

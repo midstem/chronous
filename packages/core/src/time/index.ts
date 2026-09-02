@@ -24,7 +24,7 @@ import {
   toFormattable,
   wallDay
 } from './helpers'
-import { requireTemporal } from './temporal'
+import { ensureTemporal, requireTemporal } from './temporal'
 import type {
   CalendarDate,
   CompareResult,
@@ -220,3 +220,7 @@ export { timeZoneOf, wallDay } from './helpers'
 export { DAYS_IN_WEEK, MINUTES_IN_DAY } from './constants'
 
 export type * from './types'
+
+export { ensureTemporal, requireTemporal }
+
+export { MissingTemporalError } from './errors'

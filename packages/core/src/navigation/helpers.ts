@@ -1,6 +1,13 @@
 import { InvalidRangeError, readAnchor, spanLength } from '#src/range'
 import type { CalendarRange } from '#src/range'
-import { add, startOfMonth, toCalendarDate, toIso, zoned } from '#src/time'
+import {
+  add,
+  requireTemporal,
+  startOfMonth,
+  toCalendarDate,
+  toIso,
+  zoned
+} from '#src/time'
 import type { IsoDate, IsoDateTime, TimeZoneId } from '#src/time'
 
 import {
@@ -16,6 +23,8 @@ export const shiftedDate = (
   range: CalendarRange,
   direction: number
 ): IsoDate => {
+  requireTemporal()
+
   const anchor = readAnchor(range.date)
 
   if (range.view === MONTH_VIEW)
@@ -25,6 +34,8 @@ export const shiftedDate = (
 }
 
 export const dateAt = (now: IsoDateTime, timeZone: TimeZoneId): IsoDate => {
+  requireTemporal()
+
   try {
     return toIso(toCalendarDate(zoned(now, timeZone)))
   } catch (cause) {

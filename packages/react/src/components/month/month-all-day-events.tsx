@@ -2,7 +2,13 @@ import type { CalendarBar, CalendarEntry } from '@midstem/chronous'
 import type { ElementType, ReactNode } from 'react'
 
 import { useMonthRowContext } from '../context'
-import { percentOf, renderChildren, styleOf, tagOf } from '../helpers'
+import {
+  percentOf,
+  renderChildren,
+  styleOf,
+  tagOf,
+  visibleLanes
+} from '../helpers'
 import type { OwnProps, PolymorphicProps } from '../types'
 
 const LANE_HEIGHT = 20
@@ -40,12 +46,12 @@ export const MonthAllDayEvents = <TData, TTag extends ElementType = 'div'>({
   topOffset = TOP_OFFSET,
   ...rest
 }: MonthAllDayEventsProps<TData, TTag>): ReactNode => {
-  const { row } = useMonthRowContext<TData>()
+  const { row, maxLanes } = useMonthRowContext<TData>()
   const Tag = tagOf(as, 'div')
 
   return (
     <>
-      {row.bars.map((bar) => (
+      {visibleLanes(row.bars, maxLanes).map((bar) => (
         <Tag
           key={`${bar.event.id}-${bar.startDay}`}
           data-event-id={bar.event.id}
