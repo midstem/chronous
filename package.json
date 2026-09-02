@@ -28,7 +28,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint --cache ./packages --quiet --fix",
     "lint:format": "prettier --write --log-level warn \"./**/*.{js,mjs,ts,tsx,css,md,json}\"",
-    "lint-tsc": "npm run build && npm run lint:format && npm run lint:fix && npm run typecheck"
+    "lint-tsc": "npm run build && npm run lint:format && npm run lint:fix && npm run typecheck",
+    "release": "node tools/release/index.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.0",
