@@ -1,3 +1,4 @@
+import { useTemporalStatus } from '@midstem/chronous-react'
 import { useId, useRef } from 'react'
 import type { MouseEvent, ReactElement } from 'react'
 
@@ -11,7 +12,7 @@ import {
   SUPPORT,
   SUPPORT_TITLE
 } from './constants'
-import { runtimeState } from './helpers'
+import { runtimeStateOf } from './helpers'
 
 const dismissed = (
   event: MouseEvent<HTMLDialogElement>,
@@ -21,7 +22,7 @@ const dismissed = (
 export const Runtime = (): ReactElement => {
   const dialog = useRef<HTMLDialogElement>(null)
   const titleId = useId()
-  const copy = COPY[runtimeState()]
+  const copy = COPY[runtimeStateOf(useTemporalStatus())]
 
   return (
     <>
@@ -102,5 +103,3 @@ export const Runtime = (): ReactElement => {
     </>
   )
 }
-
-export { installTemporal } from './helpers'

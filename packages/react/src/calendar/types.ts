@@ -13,5 +13,5 @@ export type CalendarError =
   | MissingTemporalError
 
 export type CalendarResult<TData = unknown> =
-  | { calendar: CalendarLayout<TData>; error: null }
-  | { calendar: null; error: CalendarError }
+  | { calendar: CalendarLayout<TData>; error: null; pending: false }
+  | { calendar: null; error: CalendarError; pending: boolean }

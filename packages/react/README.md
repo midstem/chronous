@@ -31,24 +31,35 @@ against the package that built the calendar.
 
 ## Temporal, and Safari
 
-Await `ensureTemporal()` once before the first render:
-
-```tsx
-import { ensureTemporal } from '@midstem/chronous-react'
-
-await ensureTemporal()
-
-createRoot(container).render(<App />)
-```
+There is nothing to set up. Render a calendar and the engine is there.
 
 Chrome and Edge ship Temporal from 144 and Firefox from 139, and on those the
-call resolves immediately and downloads nothing. Safari still ships none, so
-there it loads `temporal-polyfill` through a dynamic import that every bundler
-splits into its own chunk (~20 kB gzip). You install nothing and pick no
-version: the polyfill is a dependency of this package, and the engine holds the
-implementation itself instead of assigning `globalThis.Temporal`.
+first render draws the calendar and downloads nothing — the hooks read the
+engine straight off `globalThis`, with no extra render and no effect. Safari
+still ships none, so there the first render that needs Temporal loads
+`temporal-polyfill` through a dynamic import that every bundler splits into its
+own chunk (~20 kB gzip), and re-renders once it lands. You install nothing and
+pick no version: the polyfill is a dependency of this package, and the engine
+holds the implementation itself instead of assigning `globalThis.Temporal`.
 
-Rendering without it throws `MissingTemporalError`, which `useCalendar` catches
+That one waiting render is the whole cost, and it is a Safari-only cost.
+`useCalendar` reports it as `pending`, and `Calendar.Root` draws its
+`renderPending` slot — the container and its styles are already in place, so
+nothing jumps when the calendar arrives:
+
+```tsx
+<Calendar.Root range={range} events={events} renderPending={() => <Skeleton />}>
+```
+
+`useTemporalStatus()` is the same signal on its own — `'ready'`, `'pending'` or
+`'failed'` — for a component that wants to gate on it directly.
+
+`ensureTemporal()` is still exported and still does what it did: awaiting it
+before the first render removes the pending state entirely. Reach for it on the
+server, in a worker, or wherever a render cannot be allowed to arrive empty.
+Nothing in a browser app needs it any more.
+
+A load that fails settles on `MissingTemporalError`, which `useCalendar` catches
 like the other calendar errors, so `renderError` on `Calendar.Root` can show it
 rather than the tree coming down.
 
@@ -60,7 +71,7 @@ router, a query string or `useState`. A `CalendarRange` names what to draw —
 the view, the anchor date and the time zone.
 
 ```tsx
-const { calendar, error } = useCalendar(range, events)
+const { calendar, error, pending } = useCalendar(range, events)
 ```
 
 The memo is keyed on the fields of the range rather than on its identity, so an
@@ -72,6 +83,11 @@ on a recurrence rule it cannot read, and a throw during render takes the whole
 tree down. The hook catches `InvalidEventError`, `InvalidRangeError` and
 `InvalidRecurrenceError` and hands them back instead: `calendar` is null exactly
 when `error` is set. Anything else is a bug and is left to propagate.
+
+`pending` is set only while the polyfill is in flight, and it comes alongside a
+`MissingTemporalError` rather than in place of one — so code written against
+`calendar` and `error` alone still reads correctly, and code that wants to draw
+a skeleton instead of an error can check `pending` first.
 
 ## `useCalendarNavigation`
 
@@ -93,7 +109,9 @@ first — so a long month never drags the anchor backwards. The weekday of the
 anchor survives a week step, which is what makes switching to `day` afterwards
 land where the reader was looking.
 
-`next` and `prev` are null when the range itself cannot be stepped: an anchor
+`next` and `prev` are also null while Temporal is still loading, and become
+steppable on their own once it lands. Beyond that they are null when the range
+itself cannot be stepped: an anchor
 date that cannot be read, or a `dayCount` that is not a whole number of days.
 An unreadable time zone does not stop a step — it stops the calendar, not the
 arithmetic — so the buttons keep working while the zone is being fixed.

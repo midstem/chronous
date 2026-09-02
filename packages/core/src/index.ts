@@ -1,6 +1,11 @@
 export { isTemporalAvailable } from '#src/runtime'
 
-export { MissingTemporalError, ensureTemporal } from '#src/time'
+export {
+  MissingTemporalError,
+  ensureTemporal,
+  subscribeTemporal,
+  temporalStatus
+} from '#src/time'
 
 export { buildCalendar } from '#src/calendar'
 
@@ -48,6 +53,7 @@ export type {
   IsoDate,
   IsoDateTime,
   LocaleId,
+  TemporalStatus,
   TimeZoneId,
   WeekStartsOn
 } from '#src/time'

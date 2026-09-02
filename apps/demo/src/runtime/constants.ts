@@ -23,15 +23,15 @@ export const COPY: Record<RuntimeState, RuntimeCopy> = {
   },
   polyfill: {
     badge: 'Temporal: polyfill',
-    summary: 'This browser has no Temporal, so the playground loaded one.',
+    summary: 'This browser has no Temporal, so Chronous loaded one.',
     detail:
-      'The playground imported temporal-polyfill before the first render. Chronous itself never bundles it — installing the engine is the app’s call, which is why the same build runs on both kinds of browser.'
+      'The first calendar render found no engine on globalThis and pulled temporal-polyfill in through a dynamic import — its own chunk, fetched only here. The playground calls nothing to make that happen, and the same build runs on both kinds of browser.'
   },
   missing: {
     badge: 'Temporal: missing',
-    summary: 'Temporal is not on globalThis and no polyfill loaded.',
+    summary: 'The engine is not here yet — loading, or the load failed.',
     detail:
-      'Chronous needs the engine before the first render. Nothing can be built until it is installed — check that the polyfill import ran, or open the playground in a browser from the list below.'
+      'Chronous fetches temporal-polyfill on the first render that needs it, and draws nothing until the chunk lands. Seeing this badge settle here means the request never resolved — check the network panel, or open the playground in a browser from the list below.'
   }
 }
 

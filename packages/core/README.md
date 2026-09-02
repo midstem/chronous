@@ -19,8 +19,8 @@ and there will not be one: `Date` only ever builds a wall clock in the _host's_
 zone, so a Kyiv schedule opened from Berlin would silently render Berlin's grid.
 
 Chrome and Edge ship Temporal from 144, Firefox from 139. Safari still does not.
-Await `ensureTemporal()` once before the first render and every browser is
-covered:
+This package is synchronous end to end, so where Temporal is missing it has to
+be installed before the first call:
 
 ```ts
 import { ensureTemporal } from '@midstem/chronous'
@@ -34,16 +34,21 @@ dynamic import, which every bundler splits into its own chunk (~20 kB gzip), so
 only Safari ever fetches it. The engine holds that implementation itself rather
 than assigning `globalThis.Temporal`, so nothing on the page is patched.
 
-`isTemporalAvailable()` reports whether an implementation is in place. Building a
-calendar, stepping a range or formatting a value without one throws
-`MissingTemporalError` — never a misleading `InvalidRangeError` about the time
-zone.
+React apps call none of this: `@midstem/chronous-react` runs the load itself on
+the first render that needs it, and draws a pending state until it lands.
+
+`isTemporalAvailable()` reports whether an implementation is in place, and
+`temporalStatus()` distinguishes `'ready'` from `'pending'` and `'failed'`.
+`subscribeTemporal(listener)` starts the load if it has not started and calls
+back when it settles — it is what the React package builds on, and it fits any
+other framework's store the same way. Building a calendar, stepping a range or
+formatting a value with no engine in place throws `MissingTemporalError` — never
+a misleading `InvalidRangeError` about the time zone.
 
 ### Server rendering
 
-Temporal has to be installed before the first render, not inside an effect. In
-Node that means awaiting the same call at startup — in Next.js from
-`instrumentation.ts`:
+A server render cannot await anything mid-render, so install Temporal at
+startup — in Next.js from `instrumentation.ts`:
 
 ```ts
 export const register = async () => {
@@ -51,8 +56,8 @@ export const register = async () => {
 }
 ```
 
-On the client, await it before hydration. `main.tsx` in
-[`apps/demo`](../../apps/demo) is the smallest working example.
+Do the same before hydration if an empty first paint is not acceptable;
+otherwise the React package resolves it on its own, one render later.
 
 ## Events
 

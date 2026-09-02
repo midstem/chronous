@@ -78,6 +78,48 @@ describe('a runtime with no Temporal', () => {
   })
 })
 
+describe('subscribeTemporal', () => {
+  it('loads the polyfill without anyone calling ensureTemporal', async () => {
+    await withoutTemporal(async (engine) => {
+      const seen: string[] = []
+
+      const stop = engine.subscribeTemporal(() =>
+        seen.push(engine.temporalStatus())
+      )
+
+      expect(engine.temporalStatus()).toBe('pending')
+
+      await vi.waitFor(() => expect(seen).toEqual(['ready']))
+
+      expect(engine.isTemporalAvailable()).toBe(true)
+      expect(carrier.Temporal).toBeUndefined()
+
+      stop()
+    })
+  })
+
+  it('stops notifying a listener that unsubscribed', async () => {
+    await withoutTemporal(async (engine) => {
+      let calls = 0
+
+      engine.subscribeTemporal(() => (calls += 1))()
+
+      await engine.ensureTemporal()
+
+      expect(calls).toBe(0)
+      expect(engine.temporalStatus()).toBe('ready')
+    })
+  })
+
+  it('reports a runtime that already has Temporal as ready', async () => {
+    vi.resetModules()
+
+    const engine = await import('../../index')
+
+    expect(engine.temporalStatus()).toBe('ready')
+  })
+})
+
 describe('ensureTemporal on a runtime that already has Temporal', () => {
   it('keeps the engine already in place', async () => {
     vi.resetModules()

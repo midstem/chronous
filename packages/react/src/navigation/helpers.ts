@@ -1,5 +1,10 @@
 import { calendarReducer, initialCalendarState } from '@midstem/chronous'
-import type { CalendarAction, CalendarRange, ViewKind } from '@midstem/chronous'
+import type {
+  CalendarAction,
+  CalendarRange,
+  TemporalStatus,
+  ViewKind
+} from '@midstem/chronous'
 
 import type { CalendarNavigation } from './types'
 
@@ -22,11 +27,24 @@ const todayAction = (): CalendarAction => ({
   now: new Date().toISOString()
 })
 
-export const navigationOf = (range: CalendarRange): CalendarNavigation => ({
-  next: attempted(range, { type: 'next' }),
-  prev: attempted(range, { type: 'prev' }),
-  today: attempted(range, todayAction())
-    ? () => applied(range, todayAction())
-    : null,
-  withView: (view: ViewKind) => applied(range, { type: 'view', view })
-})
+const viewer =
+  (range: CalendarRange) =>
+  (view: ViewKind): CalendarRange =>
+    applied(range, { type: 'view', view })
+
+export const navigationOf = (
+  range: CalendarRange,
+  status: TemporalStatus
+): CalendarNavigation => {
+  if (status !== 'ready')
+    return { next: null, prev: null, today: null, withView: viewer(range) }
+
+  return {
+    next: attempted(range, { type: 'next' }),
+    prev: attempted(range, { type: 'prev' }),
+    today: attempted(range, todayAction())
+      ? () => applied(range, todayAction())
+      : null,
+    withView: viewer(range)
+  }
+}

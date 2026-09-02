@@ -223,4 +223,6 @@ export type * from './types'
 
 export { ensureTemporal, requireTemporal }
 
+export { subscribeTemporal, temporalStatus } from './temporal'
+
 export { MissingTemporalError } from './errors'
