@@ -18,7 +18,7 @@ const DISAMBIGUATIONS: Disambiguation[] = [
 ]
 
 const dayOf = (timeZone: string, date: string, slotMinutes = 60): RangeDay =>
-  buildRange({ view: 'day', date, timeZone, slotMinutes }).days[0]
+  buildRange({ view: 'day', currentDate: date, timeZone, slotMinutes }).days[0]
 
 const TRANSITIONS: [string, string, number][] = [
   ['Europe/Kyiv', '2026-10-25', 25],
@@ -116,7 +116,7 @@ describe('spans crossing a transition', () => {
   it('keeps every day 24 rows across the week', () => {
     const range = buildRange({
       view: 'week',
-      date: '2026-03-29',
+      currentDate: '2026-03-29',
       timeZone: 'Europe/Kyiv'
     })
 
@@ -133,7 +133,7 @@ describe('the grid ignores the disambiguation events are read with', () => {
   const startsUnder = (disambiguation: Disambiguation): string[] =>
     buildRange({
       view: 'day',
-      date: '2026-03-29',
+      currentDate: '2026-03-29',
       timeZone: 'Europe/Kyiv',
       disambiguation
     }).days[0].slots.map((slot) => toIso(slot.start))

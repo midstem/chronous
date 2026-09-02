@@ -40,17 +40,18 @@ export const Month = ({ today }: MonthProps): ReactElement => (
     <Calendar.MonthRows
       className="border-b border-line last:border-b-0"
       maxLanes={MAX_LANES}
+      laneHeight={LANE_HEIGHT}
       style={{ minHeight: CELL_MIN_HEIGHT }}
     >
-      <Calendar.MonthDays className="flex flex-col border-l border-hair px-1 pb-1 first:border-l-0 data-[in-period=false]:bg-sunken data-[in-period=false]:text-faint">
-        {({ day, dayNumber, lanes, hiddenBars }) => (
+      <Calendar.MonthDays className="flex flex-col border-l border-hair px-1 pb-1 first:border-l-0 data-[in-current-period=false]:bg-sunken data-[in-current-period=false]:text-faint">
+        {({ day, dayLabel, lanes, hiddenBars }) => (
           <>
             <span
               className="flex items-center justify-center"
               style={{ height: NUMBER_HEIGHT }}
             >
               <span className={numberClass(day.date === today)}>
-                {dayNumber}
+                {dayLabel}
               </span>
             </span>
 
@@ -86,11 +87,7 @@ export const Month = ({ today }: MonthProps): ReactElement => (
         )}
       </Calendar.MonthDays>
 
-      <Calendar.MonthAllDayEvents
-        laneHeight={LANE_HEIGHT}
-        gap={BAR_GAP}
-        topOffset={NUMBER_HEIGHT}
-      >
+      <Calendar.MonthAllDayEvents gap={BAR_GAP} lanesTopOffset={NUMBER_HEIGHT}>
         {({ event, bar }) => (
           <span
             className={`flex h-full items-center truncate rounded px-1.5 text-[11px] font-medium ${toneOf(event.id)}`}

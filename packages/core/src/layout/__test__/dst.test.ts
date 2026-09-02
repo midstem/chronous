@@ -26,7 +26,7 @@ const placedOn = (
   inputs: readonly EventInput[],
   disambiguation?: 'earlier' | 'later'
 ): PlacedEvent[] => {
-  const range = buildRange({ view: 'day', date, timeZone })
+  const range = buildRange({ view: 'day', currentDate: date, timeZone })
 
   return buildLayout(
     range,
@@ -37,8 +37,11 @@ const placedOn = (
 describe('boxes are placed by the wall clock', () => {
   it('lines an event up with its grid row across a gap', () => {
     const date = '2026-03-29'
-    const day = buildRange({ view: 'day', date, timeZone: 'Europe/Kyiv' })
-      .days[0]
+    const day = buildRange({
+      view: 'day',
+      currentDate: date,
+      timeZone: 'Europe/Kyiv'
+    }).days[0]
     const [placed] = placedOn('Europe/Kyiv', date, [
       { id: 'a', start: `${date}T04:00`, end: `${date}T05:00` }
     ])
@@ -62,7 +65,7 @@ describe('boxes are placed by the wall clock', () => {
     const date = '2026-09-06'
     const range = buildRange({
       view: 'day',
-      date,
+      currentDate: date,
       timeZone: 'America/Santiago'
     })
     const [placed] = placedOn('America/Santiago', date, [
@@ -98,7 +101,12 @@ describe('the repeated hour never runs backwards', () => {
 
 describe.each(SLOT_STEPS)('a grid of %d minute events', (slotMinutes) => {
   it.each(TRANSITIONS)('holds its shape in %s on %s', (timeZone, date) => {
-    const range = buildRange({ view: 'day', date, timeZone, slotMinutes })
+    const range = buildRange({
+      view: 'day',
+      currentDate: date,
+      timeZone,
+      slotMinutes
+    })
     const inputs = range.days[0].slots.map((slot, index) => ({
       id: `slot-${index}`,
       start: toIso(slot.start),

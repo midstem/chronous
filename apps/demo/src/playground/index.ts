@@ -39,7 +39,7 @@ export const usePlayground = (): Playground => {
       ...held,
       preset: id,
       view: preset.view,
-      date: preset.date,
+      currentDate: preset.date,
       timeZone: preset.timeZone
     }))
     setSource(sourceOf(preset.events))
@@ -48,7 +48,11 @@ export const usePlayground = (): Playground => {
   }
 
   const applyRange = (next: CalendarRange): void =>
-    update({ view: next.view, date: next.date, timeZone: next.timeZone })
+    update({
+      view: next.view,
+      currentDate: next.currentDate,
+      timeZone: next.timeZone
+    })
 
   const reset = (): void => {
     setState(INITIAL_STATE)

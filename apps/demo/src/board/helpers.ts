@@ -5,12 +5,12 @@ import type {
   ViewKind
 } from '@midstem/chronous-react'
 
-import { monthLabel, shortLabel, titleLabel } from '../labels'
+import { formatMonth, formatShort, formatTitle } from '../labels'
 
 import { SLOTTED_VIEWS } from './constants'
 
 export const periodDate = <TData>(calendar: CalendarLayout<TData>): IsoDate =>
-  (calendar.days.find((day) => day.inPeriod) ?? calendar.days[0]).date
+  (calendar.days.find((day) => day.inCurrentPeriod) ?? calendar.days[0]).date
 
 export const isSlotted = (view: ViewKind): boolean =>
   SLOTTED_VIEWS.includes(view)
@@ -24,9 +24,9 @@ export const titleOf = <TData>(
 ): string => {
   const anchor = periodDate(calendar)
 
-  if (calendar.view === 'day') return titleLabel(anchor, locale)
+  if (calendar.view === 'day') return formatTitle(anchor, locale)
 
-  if (calendar.view === 'month') return monthLabel(anchor, locale)
+  if (calendar.view === 'month') return formatMonth(anchor, locale)
 
-  return `${shortLabel(calendar.days[0].date, locale)} – ${titleLabel(lastDate(calendar), locale)}`
+  return `${formatShort(calendar.days[0].date, locale)} – ${formatTitle(lastDate(calendar), locale)}`
 }

@@ -8,6 +8,28 @@ unscoped `chronous` package and stays available under
 
 ## Unreleased
 
+### Renames across both packages
+
+A naming pass before the first scoped release, while there is nothing published
+to break. Every name below says what it is rather than what it happens to hold.
+
+- `CalendarRange.date` is now **`currentDate`** — the date the calendar is on,
+  and the one whose period is drawn. `date` never said whether it meant today,
+  a selection or the window, and every reader had to look it up.
+- `CalendarDay.inPeriod` is now **`inCurrentPeriod`**, and the attribute the
+  React components put on day elements is `data-in-current-period`.
+- Every render-prop value that is already a formatted string ends in `Label`:
+  `dayNumber` → **`dayLabel`** (it was typed `string` while its name promised a
+  number), `weekday` → **`weekdayLabel`**, `month` → **`monthLabel`**,
+  `time` → **`timeLabel`**, `timeRange` → **`timeRangeLabel`**. Anything
+  without the suffix is data, not a label.
+- `Calendar.AgendaDays` takes **`showEmptyDays`** rather than `showEmpty`.
+- `Calendar.MonthAllDayEvents` takes **`lanesTopOffset`** rather than
+  `topOffset`, and no longer takes `laneHeight`: that moved up to
+  `Calendar.MonthRows` beside `maxLanes`, so the two lane settings sit together
+  on the parent the way `AllDayRow` already had them.
+- The `Now` type is now **`CalendarNow`**. `useNow` is unchanged.
+
 ### `@midstem/chronous-react`
 
 - Temporal now installs itself. The first render of `useCalendar`,

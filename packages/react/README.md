@@ -36,7 +36,7 @@ const Calendar = createCalendarComponents<EventData>()
 
 const RANGE: CalendarRange = {
   view: 'week',
-  date: '2026-03-18',
+  currentDate: '2026-03-18',
   timeZone: 'Europe/Kyiv'
 }
 

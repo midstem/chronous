@@ -14,7 +14,7 @@ import type { EventData } from '../types'
 
 export type PlaygroundState = {
   view: ViewKind
-  date: IsoDate
+  currentDate: IsoDate
   timeZone: TimeZoneId
   weekStartsOn: string
   dayCount: string

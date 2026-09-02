@@ -11,7 +11,7 @@ export type ViewKind = 'day' | 'week' | 'days' | 'month' | 'agenda'
 
 export type CalendarRange = {
   view: ViewKind
-  date: IsoDate
+  currentDate: IsoDate
   timeZone: TimeZoneId
   weekStartsOn?: WeekStartsOn
   dayCount?: number
@@ -38,7 +38,7 @@ export type RangeDay = {
   start: Moment
   end: Moment
   minutes: number
-  inPeriod: boolean
+  inCurrentPeriod: boolean
   slots: DaySlot[]
 }
 

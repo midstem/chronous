@@ -77,7 +77,7 @@ const monthDays = (
 
 export const buildRange = (range: CalendarRange): DateRange => {
   const resolved = resolveRange(range)
-  const anchor = readAnchor(range.date)
+  const anchor = readAnchor(range.currentDate)
   const days =
     range.view === 'month'
       ? monthDays(anchor, resolved)

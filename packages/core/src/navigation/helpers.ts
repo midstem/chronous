@@ -25,7 +25,7 @@ export const shiftedDate = (
 ): IsoDate => {
   requireTemporal()
 
-  const anchor = readAnchor(range.date)
+  const anchor = readAnchor(range.currentDate)
 
   if (range.view === MONTH_VIEW)
     return toIso(add(startOfMonth(anchor), { months: direction }))

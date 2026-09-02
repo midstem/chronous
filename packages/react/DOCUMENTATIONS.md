@@ -77,7 +77,7 @@ rather than the tree coming down.
 `useCalendar(range, events)` is a memoized projection of `buildCalendar`. It
 holds no state and runs no effects: the range is yours, so it can live in a
 router, a query string or `useState`. A `CalendarRange` names what to draw —
-the view, the anchor date and the time zone.
+the view, the date it is currently on and the time zone.
 
 ```tsx
 const { calendar, error, pending } = useCalendar(range, events)
@@ -160,9 +160,9 @@ import { Calendar } from '@midstem/chronous-react'
 ;<Calendar.Root range={range} events={events} locale="en-GB">
   <Calendar.Header className="grid-header">
     <Calendar.DayHeadings className="heading">
-      {({ weekday, dayNumber }) => (
+      {({ weekdayLabel, dayLabel }) => (
         <>
-          <span>{weekday}</span> <strong>{dayNumber}</strong>
+          <span>{weekdayLabel}</span> <strong>{dayLabel}</strong>
         </>
       )}
     </Calendar.DayHeadings>
@@ -200,7 +200,7 @@ same function reaches its render prop as `goTo`, so a toolbar of your own reads
 `goTo(navigation.next)`. `useNow` reads the wall clock in the calendar's own
 zone when you want to mark today yourself.
 
-Five rules cover the whole surface.
+Six rules cover the whole surface.
 
 **A plural name iterates.** `DayColumns` renders one element per day,
 `TimedEvents` one per box, `TimeSlots` one per slot. This is the one place the
@@ -214,9 +214,9 @@ inside that scope, so nested components resolve:
 
 ```tsx
 <Calendar.MonthDays>
-  {({ dayNumber, inPeriod }) => (
-    <div data-outside={!inPeriod}>
-      {dayNumber}
+  {({ dayLabel, inCurrentPeriod }) => (
+    <div data-outside={!inCurrentPeriod}>
+      {dayLabel}
       <Calendar.MonthTimedEvents className="dot" />
     </div>
   )}
@@ -233,14 +233,21 @@ outside its parent throws and names the parent it wants.
 the layout it computed underneath the `style` you pass — so an event can be a
 `<button>`, and a `top` of your own overrides the one the engine placed.
 
+**A formatted string ends in `Label`.** `weekdayLabel`, `dayLabel`,
+`monthLabel`, `timeLabel` and `timeRangeLabel` have already been through
+`formatIso` in the calendar's locale and are ready to render. Everything without
+the suffix is data: `day` is a `CalendarDay`, `box` a `CalendarBox`, `bar` a
+`CalendarBar`, and `minuteOfDay` a number.
+
 **Per-item state arrives as data attributes**, because `className` is shared by
-every element a component renders. `data-date` and `data-in-period` land on
+every element a component renders. `data-date` and `data-in-current-period`
+land on
 `DayHeadings`, `DayColumns`, `MonthDays` and `AgendaDays`; `data-event-id` and
 `data-continues-before` / `data-continues-after` land on the event components. A
 prop you pass wins over the attribute, so you can pin one when you need to:
 
 ```tsx
-<Calendar.MonthDays className="data-[in-period=false]:bg-zinc-50" />
+<Calendar.MonthDays className="data-[in-current-period=false]:bg-zinc-50" />
 ```
 
 **The gutter lives on `Root`.** `Header`, `AllDayRow` and `TimeGrid` lay out
@@ -252,17 +259,20 @@ column is `gutterCell`, on `Header` and on `AllDayRow`.
 
 Two cut-offs are shared between siblings, so they cannot drift apart.
 
-`MonthRows` takes `maxLanes`. `MonthAllDayEvents` then stops drawing bars past
-that lane, and every `MonthDays` cell is handed the bars that cover _it_ —
+`MonthRows` takes `maxLanes`, and the `laneHeight` its bars are drawn at, for
+the same reason the gutter lives on `Root`: both are shared with siblings, so
+they sit on the parent rather than on one child that could drift from another.
+`MonthAllDayEvents` then stops drawing bars past that lane, and every
+`MonthDays` cell is handed the bars that cover _it_ —
 `bars` for all of them, `hiddenBars` for the ones the cut-off dropped, and
 `lanes` counting only what is drawn. That is the whole "+2 more" affordance:
 
 ```tsx
 <Calendar.MonthRows maxLanes={3}>
   <Calendar.MonthDays>
-    {({ dayNumber, hiddenBars }) => (
+    {({ dayLabel, hiddenBars }) => (
       <>
-        {dayNumber}
+        {dayLabel}
         {hiddenBars.length > 0 && <button>+{hiddenBars.length} more</button>}
       </>
     )}

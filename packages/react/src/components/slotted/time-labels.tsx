@@ -15,7 +15,7 @@ import type { OwnProps, PolymorphicProps } from '../types'
 export type TimeLabelScope = {
   slot: CalendarSlot
   minuteOfDay: number
-  time: string
+  timeLabel: string
 }
 
 export type TimeLabelsProps<TTag extends ElementType = 'div'> =
@@ -34,7 +34,7 @@ export const TimeLabels = <TTag extends ElementType = 'div'>({
   return (
     <>
       {day.slots.map((slot) => {
-        const time = labelOf(slot.start, locale, CLOCK)
+        const timeLabel = labelOf(slot.start, locale, CLOCK)
 
         return (
           <Tag
@@ -51,8 +51,8 @@ export const TimeLabels = <TTag extends ElementType = 'div'>({
           >
             {renderChildren(
               children,
-              { slot, minuteOfDay: slot.minuteOfDay, time },
-              time
+              { slot, minuteOfDay: slot.minuteOfDay, timeLabel },
+              timeLabel
             )}
           </Tag>
         )

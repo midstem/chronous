@@ -50,7 +50,7 @@ describe('the toolbar', () => {
     screen.getByLabelText('Previous period').click()
 
     expect(onNavigate).toHaveBeenCalledWith(
-      expect.objectContaining({ date: '2026-03-11' })
+      expect.objectContaining({ currentDate: '2026-03-11' })
     )
   })
 

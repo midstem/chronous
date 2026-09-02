@@ -8,9 +8,9 @@ import type { OwnProps, PolymorphicProps } from '../types'
 export type DayHeadingScope<TData> = {
   day: CalendarDay<TData>
   date: IsoDate
-  weekday: string
-  dayNumber: string
-  inPeriod: boolean
+  weekdayLabel: string
+  dayLabel: string
+  inCurrentPeriod: boolean
 }
 
 export type DayHeadingsProps<
@@ -30,14 +30,14 @@ export const DayHeadings = <TData, TTag extends ElementType = 'div'>({
   return (
     <>
       {calendar.days.map((day) => {
-        const weekday = labelOf(day.date, locale, WEEKDAY)
-        const dayNumber = labelOf(day.date, locale, DAY_NUMBER)
+        const weekdayLabel = labelOf(day.date, locale, WEEKDAY)
+        const dayLabel = labelOf(day.date, locale, DAY_NUMBER)
 
         return (
           <Tag
             key={day.date}
             data-date={day.date}
-            data-in-period={day.inPeriod}
+            data-in-current-period={day.inCurrentPeriod}
             {...rest}
             style={style}
           >
@@ -46,11 +46,11 @@ export const DayHeadings = <TData, TTag extends ElementType = 'div'>({
               {
                 day,
                 date: day.date,
-                weekday,
-                dayNumber,
-                inPeriod: day.inPeriod
+                weekdayLabel,
+                dayLabel,
+                inCurrentPeriod: day.inCurrentPeriod
               },
-              `${weekday} ${dayNumber}`
+              `${weekdayLabel} ${dayLabel}`
             )}
           </Tag>
         )

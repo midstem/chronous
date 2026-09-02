@@ -36,17 +36,17 @@ describe('normalization', () => {
 
 describe('the range', () => {
   bench('a week of hourly slots', () => {
-    buildRange({ view: 'week', date: ANCHOR, timeZone: KYIV })
+    buildRange({ view: 'week', currentDate: ANCHOR, timeZone: KYIV })
   })
 
   bench('a month grid', () => {
-    buildRange({ view: 'month', date: ANCHOR, timeZone: KYIV })
+    buildRange({ view: 'month', currentDate: ANCHOR, timeZone: KYIV })
   })
 
   bench('a week of quarter-hour slots', () => {
     buildRange({
       view: 'week',
-      date: ANCHOR,
+      currentDate: ANCHOR,
       timeZone: KYIV,
       slotMinutes: 15
     })

@@ -70,7 +70,7 @@ export type CalendarDay<TData = unknown> = {
   start: IsoDateTime
   end: IsoDateTime
   minutes: number
-  inPeriod: boolean
+  inCurrentPeriod: boolean
   slots: CalendarSlot[]
   boxes: CalendarBox<TData>[]
 }

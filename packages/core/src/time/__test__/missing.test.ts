@@ -21,7 +21,7 @@ const withoutTemporal = async <TResult>(
 
 const RANGE = {
   view: 'week',
-  date: '2026-03-25',
+  currentDate: '2026-03-25',
   timeZone: 'Europe/Kyiv'
 } as const
 

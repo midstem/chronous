@@ -20,9 +20,9 @@ describe('the month view', () => {
         <Calendar.MonthWeekdays data-testid="weekday" />
         <Calendar.MonthRows data-testid="row">
           <Calendar.MonthDays data-testid="day">
-            {({ dayNumber, lanes }) => (
+            {({ dayLabel, lanes }) => (
               <>
-                <span>{dayNumber}</span>
+                <span>{dayLabel}</span>
                 <span data-testid="lanes">{lanes}</span>
                 <Calendar.MonthTimedEvents data-testid="entry" />
               </>
@@ -72,13 +72,17 @@ describe('the month view', () => {
 })
 
 describe('the agenda view', () => {
-  const Agenda = ({ showEmpty }: { showEmpty?: boolean }): React.ReactNode => (
+  const Agenda = ({
+    showEmptyDays
+  }: {
+    showEmptyDays?: boolean
+  }): React.ReactNode => (
     <Calendar.Root range={AGENDA} events={EVENTS} locale={LOCALE}>
       <Calendar.AgendaList data-testid="list">
-        <Calendar.AgendaDays data-testid="day" showEmpty={showEmpty}>
-          {({ month, dayNumber }) => (
+        <Calendar.AgendaDays data-testid="day" showEmptyDays={showEmptyDays}>
+          {({ monthLabel, dayLabel }) => (
             <>
-              <span data-testid="heading">{`${dayNumber} ${month}`}</span>
+              <span data-testid="heading">{`${dayLabel} ${monthLabel}`}</span>
               <Calendar.AgendaAllDayEvents data-testid="bar" />
               <Calendar.AgendaTimedEvents data-testid="box" />
             </>
@@ -97,7 +101,7 @@ describe('the agenda view', () => {
   })
 
   it('keeps the empty days when it is asked to', () => {
-    render(<Agenda showEmpty />)
+    render(<Agenda showEmptyDays />)
 
     expect(screen.getAllByTestId('day').length).toBeGreaterThan(2)
   })
@@ -109,7 +113,7 @@ describe('the agenda view', () => {
   })
 
   it('names the month a floating date falls in', () => {
-    render(<Agenda showEmpty />)
+    render(<Agenda showEmptyDays />)
 
     expect(textsOf('heading')).toContain('1 Apr')
   })
@@ -122,7 +126,7 @@ describe('the now marker', () => {
 
   const DayAt = (): React.ReactNode => (
     <Calendar.Root
-      range={{ view: 'day', date: '2026-03-18', timeZone: ZONE }}
+      range={{ view: 'day', currentDate: '2026-03-18', timeZone: ZONE }}
       events={EVENTS}
     >
       <Calendar.TimeGrid>
@@ -171,7 +175,7 @@ describe('the toolbar', () => {
     screen.getByLabelText('Next period').click()
 
     expect(onNavigate).toHaveBeenCalledWith(
-      expect.objectContaining({ date: '2026-03-25', view: 'week' })
+      expect.objectContaining({ currentDate: '2026-03-25', view: 'week' })
     )
   })
 

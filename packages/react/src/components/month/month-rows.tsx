@@ -13,8 +13,11 @@ import type { OwnProps, PolymorphicProps } from '../types'
 
 const MAX_LANES = null
 
+const LANE_HEIGHT = 20
+
 export type MonthRowsOwnProps<TData> = OwnProps<MonthRowContextValue<TData>> & {
   maxLanes?: number | null
+  laneHeight?: number
 }
 
 export type MonthRowsProps<
@@ -27,6 +30,7 @@ export const MonthRows = <TData, TTag extends ElementType = 'div'>({
   children,
   style,
   maxLanes = MAX_LANES,
+  laneHeight = LANE_HEIGHT,
   ...rest
 }: MonthRowsProps<TData, TTag>): ReactNode => {
   const { calendar } = useCalendarContext<TData>()
@@ -35,7 +39,12 @@ export const MonthRows = <TData, TTag extends ElementType = 'div'>({
   return (
     <>
       {rowsWithDays(calendar).map(({ row, days }) => {
-        const scope: MonthRowContextValue<TData> = { row, days, maxLanes }
+        const scope: MonthRowContextValue<TData> = {
+          row,
+          days,
+          maxLanes,
+          laneHeight
+        }
 
         return (
           <MonthRowProvider key={row.start} value={scope}>

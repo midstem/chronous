@@ -108,7 +108,7 @@ const buildSlots = (
 export const buildDay = (
   date: CalendarDate,
   resolved: ResolvedRange,
-  inPeriod: boolean
+  inCurrentPeriod: boolean
 ): RangeDay => {
   const start = dayStart(date, resolved.timeZone)
   const end = dayStart(add(date, SINGLE_DAY), resolved.timeZone)
@@ -118,7 +118,7 @@ export const buildDay = (
     start,
     end,
     minutes: minutesBetween(start, end),
-    inPeriod,
+    inCurrentPeriod,
     slots: resolved.slotted ? buildSlots(date, end, resolved) : []
   }
 }

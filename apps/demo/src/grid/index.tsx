@@ -4,7 +4,7 @@ import type { ReactElement } from 'react'
 import { AllDay } from '../allday'
 import { Calendar } from '../calendar'
 import { CONTINUES } from '../constants'
-import { dayLabel, timeLabel } from '../labels'
+import { formatDay, formatTime } from '../labels'
 import { toneOf } from '../tone'
 
 import {
@@ -37,16 +37,16 @@ export const Slotted = ({
     <div className="sticky top-0 z-30 bg-surface">
       <Calendar.Header className="border-b border-line">
         <Calendar.DayHeadings className="border-l border-hair py-2">
-          {({ day, weekday, dayNumber }) => (
+          {({ day, weekdayLabel, dayLabel }) => (
             <div
               className="flex flex-col items-center gap-0.5"
-              title={dayLabel(day.date, locale)}
+              title={formatDay(day.date, locale)}
             >
               <span className="text-[10px] font-medium tracking-wide text-muted uppercase">
-                {weekday}
+                {weekdayLabel}
               </span>
               <span className={numberClass(day.date === today)}>
-                {dayNumber}
+                {dayLabel}
               </span>
             </div>
           )}
@@ -59,7 +59,7 @@ export const Slotted = ({
     <Calendar.TimeGrid hourHeight={hourHeight} scrollToHour={SCROLL_TO_HOUR}>
       <Calendar.TimeAxis>
         <Calendar.TimeLabels className="right-2 text-[10px] tabular-nums text-faint">
-          {({ minuteOfDay, time }) => (minuteOfDay > 0 ? time : null)}
+          {({ minuteOfDay, timeLabel }) => (minuteOfDay > 0 ? timeLabel : null)}
         </Calendar.TimeLabels>
       </Calendar.TimeAxis>
 
@@ -77,8 +77,8 @@ export const Slotted = ({
         >
           {({ event, box }) => {
             const title = event.data?.title ?? event.id
-            const from = timeLabel(box.start, locale)
-            const to = timeLabel(box.end, locale)
+            const from = formatTime(box.start, locale)
+            const to = formatTime(box.end, locale)
             const roomy = box.height * hourHeight * HOURS_IN_DAY
 
             return (

@@ -33,7 +33,7 @@ const spansOn = (
 
 describe('all-day bars ignore the clock', () => {
   it.each(TRANSITIONS)('covers one day in %s on %s', (timeZone, date) => {
-    const [span] = spansOn({ view: 'day', date, timeZone }, [
+    const [span] = spansOn({ view: 'day', currentDate: date, timeZone }, [
       { id: 'a', start: date }
     ])
 
@@ -49,8 +49,8 @@ describe('all-day bars ignore the clock', () => {
   })
 
   it.each(TRANSITIONS)('fills a week in %s over %s', (timeZone, date) => {
-    const built = buildRange({ view: 'week', date, timeZone })
-    const [span] = spansOn({ view: 'week', date, timeZone }, [
+    const built = buildRange({ view: 'week', currentDate: date, timeZone })
+    const [span] = spansOn({ view: 'week', currentDate: date, timeZone }, [
       {
         id: 'a',
         start: built.days[0].date.toString(),
@@ -69,7 +69,7 @@ describe('all-day bars ignore the clock', () => {
   it('lands on the day whose midnight the zone skips', () => {
     const range: CalendarRange = {
       view: 'days',
-      date: '2026-09-05',
+      currentDate: '2026-09-05',
       timeZone: SANTIAGO,
       dayCount: THREE_DAYS
     }
@@ -82,7 +82,7 @@ describe('all-day bars ignore the clock', () => {
 describe('a day is measured by the wall clock', () => {
   const week: CalendarRange = {
     view: 'week',
-    date: '2026-03-25',
+    currentDate: '2026-03-25',
     timeZone: KYIV
   }
 
@@ -95,7 +95,7 @@ describe('a day is measured by the wall clock', () => {
   })
 
   it('lifts the same wall span on a week without a transition', () => {
-    const [span] = spansOn({ ...week, date: '2026-03-18' }, [
+    const [span] = spansOn({ ...week, currentDate: '2026-03-18' }, [
       { id: 'a', start: '2026-03-18T09:00', end: '2026-03-19T09:00' }
     ])
 
@@ -103,7 +103,7 @@ describe('a day is measured by the wall clock', () => {
   })
 
   it('lifts twenty-five elapsed hours that fill a long day', () => {
-    const [span] = spansOn({ ...week, date: '2026-10-21' }, [
+    const [span] = spansOn({ ...week, currentDate: '2026-10-21' }, [
       { id: 'a', start: '2026-10-24T09:00', end: '2026-10-25T09:00' }
     ])
 
@@ -112,7 +112,7 @@ describe('a day is measured by the wall clock', () => {
 
   it('leaves twenty-three elapsed hours inside a long day in the grid', () => {
     expect(
-      spansOn({ ...week, date: '2026-10-21' }, [
+      spansOn({ ...week, currentDate: '2026-10-21' }, [
         { id: 'a', start: '2026-10-24T09:00', duration: 'PT23H' }
       ])
     ).toEqual([])

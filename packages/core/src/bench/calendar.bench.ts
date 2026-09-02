@@ -9,11 +9,19 @@ const KYIV = 'Europe/Kyiv'
 
 const ANCHOR = '2026-03-23'
 
-const day: CalendarRange = { view: 'day', date: ANCHOR, timeZone: KYIV }
+const day: CalendarRange = { view: 'day', currentDate: ANCHOR, timeZone: KYIV }
 
-const week: CalendarRange = { view: 'week', date: ANCHOR, timeZone: KYIV }
+const week: CalendarRange = {
+  view: 'week',
+  currentDate: ANCHOR,
+  timeZone: KYIV
+}
 
-const month: CalendarRange = { view: 'month', date: ANCHOR, timeZone: KYIV }
+const month: CalendarRange = {
+  view: 'month',
+  currentDate: ANCHOR,
+  timeZone: KYIV
+}
 
 const thousand = timedEvents(1_000, 1, ANCHOR)
 

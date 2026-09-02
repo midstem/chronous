@@ -36,7 +36,7 @@ const renderNavigation = (
   )
 
 const anchorOf = (range: CalendarRange | null): string | undefined =>
-  range?.date
+  range?.currentDate
 
 describe('useCalendarNavigation', () => {
   afterEach(() => {
@@ -46,7 +46,7 @@ describe('useCalendarNavigation', () => {
   it('steps a week to either side of the one on screen', () => {
     const { result } = renderNavigation({
       view: 'week',
-      date: ANCHOR,
+      currentDate: ANCHOR,
       timeZone: ZONE
     })
 
@@ -57,13 +57,15 @@ describe('useCalendarNavigation', () => {
   it('keeps the weekday of the anchor while stepping weeks', () => {
     const { result, rerender } = renderNavigation({
       view: 'week',
-      date: ANCHOR,
+      currentDate: ANCHOR,
       timeZone: ZONE
     })
 
     rerender({ at: result.current.navigation.next as CalendarRange })
 
-    const shown = result.current.calendar?.days.filter((day) => day.inPeriod)
+    const shown = result.current.calendar?.days.filter(
+      (day) => day.inCurrentPeriod
+    )
 
     expect(shown?.[0].date).toBe('2026-03-23')
     expect(shown?.[shown.length - 1].date).toBe('2026-03-29')
@@ -72,7 +74,7 @@ describe('useCalendarNavigation', () => {
   it('steps a month onto the first of the neighbouring month', () => {
     const { result } = renderNavigation({
       view: 'month',
-      date: ANCHOR,
+      currentDate: ANCHOR,
       timeZone: ZONE
     })
 
@@ -83,13 +85,15 @@ describe('useCalendarNavigation', () => {
   it('lands the previous month on the month before the one on screen', () => {
     const { result, rerender } = renderNavigation({
       view: 'month',
-      date: ANCHOR,
+      currentDate: ANCHOR,
       timeZone: ZONE
     })
 
     rerender({ at: result.current.navigation.prev as CalendarRange })
 
-    const shown = result.current.calendar?.days.filter((day) => day.inPeriod)
+    const shown = result.current.calendar?.days.filter(
+      (day) => day.inCurrentPeriod
+    )
 
     expect(shown?.[0].date).toBe('2026-02-01')
     expect(shown?.[shown.length - 1].date).toBe('2026-02-28')
@@ -98,7 +102,7 @@ describe('useCalendarNavigation', () => {
   it('steps a span by its own length', () => {
     const { result } = renderNavigation({
       view: 'days',
-      date: ANCHOR,
+      currentDate: ANCHOR,
       timeZone: ZONE,
       dayCount: 3
     })
@@ -110,7 +114,7 @@ describe('useCalendarNavigation', () => {
   it('steps an agenda by the length the range resolved to', () => {
     const { result } = renderNavigation({
       view: 'agenda',
-      date: ANCHOR,
+      currentDate: ANCHOR,
       timeZone: ZONE
     })
     const length = result.current.calendar?.days.length
@@ -123,7 +127,7 @@ describe('useCalendarNavigation', () => {
   it('keeps the days consecutive across a fall back transition', () => {
     const { result } = renderNavigation({
       view: 'day',
-      date: '2026-10-25',
+      currentDate: '2026-10-25',
       timeZone: ZONE
     })
 
@@ -134,7 +138,7 @@ describe('useCalendarNavigation', () => {
   it('steps over a day that has no midnight', () => {
     const { result } = renderNavigation({
       view: 'day',
-      date: '2026-09-06',
+      currentDate: '2026-09-06',
       timeZone: 'America/Santiago'
     })
 
@@ -149,17 +153,21 @@ describe('useCalendarNavigation', () => {
 
     const ahead = renderNavigation({
       view: 'day',
-      date: ANCHOR,
+      currentDate: ANCHOR,
       timeZone: 'Pacific/Kiritimati'
     })
     const behind = renderNavigation({
       view: 'day',
-      date: ANCHOR,
+      currentDate: ANCHOR,
       timeZone: 'Pacific/Honolulu'
     })
 
-    expect(ahead.result.current.navigation.today?.().date).toBe('2026-08-22')
-    expect(behind.result.current.navigation.today?.().date).toBe('2026-08-21')
+    expect(ahead.result.current.navigation.today?.().currentDate).toBe(
+      '2026-08-22'
+    )
+    expect(behind.result.current.navigation.today?.().currentDate).toBe(
+      '2026-08-21'
+    )
   })
 
   it('reads today at the moment it is called, not at the last render', () => {
@@ -168,21 +176,21 @@ describe('useCalendarNavigation', () => {
 
     const { result } = renderNavigation({
       view: 'day',
-      date: ANCHOR,
+      currentDate: ANCHOR,
       timeZone: ZONE
     })
 
-    expect(result.current.navigation.today?.().date).toBe('2026-08-21')
+    expect(result.current.navigation.today?.().currentDate).toBe('2026-08-21')
 
     vi.setSystemTime(new Date('2026-08-22T09:00:00Z'))
 
-    expect(result.current.navigation.today?.().date).toBe('2026-08-22')
+    expect(result.current.navigation.today?.().currentDate).toBe('2026-08-22')
   })
 
   it('carries the rest of the range into every move', () => {
     const range: CalendarRange = {
       view: 'week',
-      date: ANCHOR,
+      currentDate: ANCHOR,
       timeZone: ZONE,
       weekStartsOn: 0,
       slotMinutes: 30
@@ -191,7 +199,7 @@ describe('useCalendarNavigation', () => {
 
     expect(result.current.navigation.next).toEqual({
       ...range,
-      date: '2026-03-25'
+      currentDate: '2026-03-25'
     })
     expect(result.current.navigation.withView('month')).toEqual({
       ...range,
@@ -202,7 +210,7 @@ describe('useCalendarNavigation', () => {
   it('has no today to read when the zone cannot be read', () => {
     const range: CalendarRange = {
       view: 'day',
-      date: ANCHOR,
+      currentDate: ANCHOR,
       timeZone: 'Not/AZone'
     }
     const { result } = renderNavigation(range)
@@ -218,19 +226,19 @@ describe('useCalendarNavigation', () => {
 
     const range: CalendarRange = {
       view: 'day',
-      date: 'not a date',
+      currentDate: 'not a date',
       timeZone: ZONE
     }
     const { result } = renderNavigation(range)
 
     expect(result.current.calendar).toBeNull()
-    expect(result.current.navigation.today?.().date).toBe('2026-08-21')
+    expect(result.current.navigation.today?.().currentDate).toBe('2026-08-21')
   })
 
   it('has nowhere to step when the anchor cannot be read', () => {
     const range: CalendarRange = {
       view: 'day',
-      date: 'not a date',
+      currentDate: 'not a date',
       timeZone: ZONE
     }
     const { result } = renderHook(() => useCalendarNavigation(range))
@@ -243,7 +251,7 @@ describe('useCalendarNavigation', () => {
   it('has nowhere to step when the span is not a whole number of days', () => {
     const range: CalendarRange = {
       view: 'days',
-      date: ANCHOR,
+      currentDate: ANCHOR,
       timeZone: ZONE,
       dayCount: 2.5
     }
@@ -256,7 +264,7 @@ describe('useCalendarNavigation', () => {
   it('steps on a range the calendar itself refuses', () => {
     const range: CalendarRange = {
       view: 'day',
-      date: ANCHOR,
+      currentDate: ANCHOR,
       timeZone: 'Not/AZone'
     }
     const { result } = renderNavigation(range)
@@ -268,12 +276,12 @@ describe('useCalendarNavigation', () => {
   it('holds its identity while the range holds its own', () => {
     const { result, rerender } = renderNavigation({
       view: 'week',
-      date: ANCHOR,
+      currentDate: ANCHOR,
       timeZone: ZONE
     })
     const first = result.current.navigation
 
-    rerender({ at: { view: 'week', date: ANCHOR, timeZone: ZONE } })
+    rerender({ at: { view: 'week', currentDate: ANCHOR, timeZone: ZONE } })
 
     expect(result.current.navigation).toBe(first)
   })

@@ -60,7 +60,7 @@ export const VIEW_HINT =
   'day, week and days draw a slotted grid; month and agenda only draw lanes.'
 
 export const DATE_HINT =
-  'The anchor. week snaps to the containing week, month to the containing month.'
+  'The date the calendar is on. The period drawn is the one containing it: week snaps to the containing week, month to the containing month.'
 
 export const TIME_ZONE_HINT =
   'Any IANA id. Not/AZone is in the list on purpose — it raises InvalidRangeError.'
@@ -75,7 +75,7 @@ export const SLOT_MINUTES_HINT =
   'Reads only in the slotted views. Leave empty for 60. Anything outside 1…1440 raises InvalidRangeError.'
 
 export const DISAMBIGUATION_HINT =
-  'How a wall time the zone skips or repeats is read on an event. reject raises InvalidEventError; the grid rows never read it.'
+  'Which real moment a wall time means when DST repeated it or skipped it. compatible takes the earlier of a repeated pair and pushes a skipped time forward; reject raises InvalidEventError. Read on events only — the grid rows never read it.'
 
 export const LOCALE_HINT =
   'Passed to formatIso for every heading, gutter label and cell number. The engine never reads it.'

@@ -6,9 +6,9 @@ import { dateAt, shiftedDate } from './helpers'
 import type { CalendarAction, CalendarState } from './types'
 
 const withDate = (state: CalendarState, date: IsoDate): CalendarState =>
-  date === state.range.date
+  date === state.range.currentDate
     ? state
-    : { ...state, range: { ...state.range, date } }
+    : { ...state, range: { ...state.range, currentDate: date } }
 
 export const initialCalendarState = (range: CalendarRange): CalendarState => ({
   range,
