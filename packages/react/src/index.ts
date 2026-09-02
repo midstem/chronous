@@ -8,7 +8,9 @@ export {
   ensureTemporal,
   formatIso,
   initialCalendarState,
-  isTemporalAvailable
+  isTemporalAvailable,
+  subscribeTemporal,
+  temporalStatus
 } from '@midstem/chronous'
 
 export type {
@@ -34,11 +36,14 @@ export type {
   LocaleId,
   RecurrenceInput,
   RecurrenceOverride,
+  TemporalStatus,
   TimeZoneId,
   TimedEntry,
   ViewKind,
   WeekStartsOn
 } from '@midstem/chronous'
+
+export { useTemporalStatus } from '#src/temporal'
 
 export { useCalendar } from '#src/calendar'
 

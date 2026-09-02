@@ -6,6 +6,39 @@ Both packages are versioned together for now, and each release is tagged
 unscoped `chronous` package and stays available under
 [`1.0.2`](https://github.com/midstem/chronous/tree/1.0.2).
 
+## Unreleased
+
+### `@midstem/chronous-react`
+
+- Temporal now installs itself. The first render of `useCalendar`,
+  `useCalendarNavigation` or any `Calendar` component loads
+  `temporal-polyfill` where the browser has none, and re-renders once it
+  lands — no `ensureTemporal()` call at the top of an app, nothing to await
+  before `createRoot`. Browsers that ship Temporal draw on the first render as
+  before: the engine is read synchronously, with no extra render and no effect.
+- `useCalendar` reports the wait as `pending`, added to both arms of
+  `CalendarResult` rather than as a third arm, so existing code that reads
+  `calendar` and `error` keeps compiling and behaving. It comes alongside a
+  `MissingTemporalError`, which is what it is until the chunk lands.
+- `Calendar.Root` takes `renderPending`, drawn in place of the calendar for that
+  one render. Its container and styles are already in place, so nothing jumps.
+- `useCalendarNavigation` no longer freezes with dead arrows when it first
+  renders without Temporal — the steps come back once the engine is in place.
+- `useTemporalStatus()` is the raw signal for components that want to gate on it
+  themselves.
+- `ensureTemporal()` is unchanged and still exported. It is now an optimisation
+  for server rendering and workers rather than a setup step.
+
+### `@midstem/chronous`
+
+- `temporalStatus()` reports `'ready'`, `'pending'` or `'failed'`, and
+  `subscribeTemporal(listener)` starts the load if it has not started and calls
+  back when it settles — the store the React package renders from, and the seam
+  any other framework can bind to.
+- A polyfill import that fails now rejects and throws `MissingTemporalError`
+  with the original failure as its `cause`, instead of surfacing the raw module
+  error.
+
 ## 1.0.0
 
 The first release of the scoped line: a rewritten engine plus a React adapter,

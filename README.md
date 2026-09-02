@@ -24,9 +24,10 @@ come from the same import as the components — and there is never a question of
 which engine version an app is on. Reach for `@midstem/chronous` on its own
 where React is not involved — a server, a worker, another framework.
 
-Temporal itself is handled for you: `await ensureTemporal()` once before the
-first render resolves instantly on Chrome, Edge and Firefox, and loads
-`temporal-polyfill` as a separate chunk only on Safari, which still ships none.
+Temporal itself is handled for you, with nothing to call: the React package
+loads `temporal-polyfill` on the first render that needs it, as a separate chunk
+that only Safari ever fetches. Chrome, Edge and Firefox ship Temporal and draw
+on the first render, downloading none of it.
 
 The previous generation shipped as `chronous@1.0.2` and stays available under
 the git tag [`1.0.2`](https://github.com/midstem/chronous/tree/1.0.2).
