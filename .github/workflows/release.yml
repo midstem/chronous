@@ -1,0 +1,86 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      packages:
+        description: Which packages to publish
+        type: choice
+        default: both
+        options:
+          - both
+          - '@midstem/chronous'
+          - '@midstem/chronous-react'
+      dryRun:
+        description: Build, verify and pack without publishing
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.x
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build the packages
+        run: npm run build
+
+      - name: Verify the build invariants
+        run: npm run verify:dist
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm run test
+
+      - name: Choose the packages
+        id: targets
+        run: node tools/scripts/release-targets.mjs "${{ inputs.packages }}" >> "$GITHUB_OUTPUT"
+
+      - name: Publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          TARGETS: ${{ steps.targets.outputs.names }}
+          DRY_RUN: ${{ inputs.dryRun }}
+        run: |
+          for name in $TARGETS; do
+            if [ "$DRY_RUN" = "true" ]; then
+              npm publish --workspace "$name" --dry-run
+            else
+              npm publish --workspace "$name"
+            fi
+          done
+
+      - name: Tag and release
+        if: ${{ !inputs.dryRun }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAGS: ${{ steps.targets.outputs.tags }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          for tag in $TAGS; do
+            git tag -a "$tag" -m "$tag"
+            git push origin "$tag"
+            gh release create "$tag" --title "$tag" --notes-file CHANGELOG.md --verify-tag
+          done

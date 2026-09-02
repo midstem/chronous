@@ -205,6 +205,43 @@ the same CSS grid, so `gutterWidth` is one prop on the root rather than three
 that can drift apart. Month and agenda ignore it. What goes _in_ that leading
 column is `gutterCell`, on `Header` and on `AllDayRow`.
 
+### Overflow, and the empty all-day row
+
+Two cut-offs are shared between siblings, so they cannot drift apart.
+
+`MonthRows` takes `maxLanes`. `MonthAllDayEvents` then stops drawing bars past
+that lane, and every `MonthDays` cell is handed the bars that cover _it_ —
+`bars` for all of them, `hiddenBars` for the ones the cut-off dropped, and
+`lanes` counting only what is drawn. That is the whole "+2 more" affordance:
+
+```tsx
+<Calendar.MonthRows maxLanes={3}>
+  <Calendar.MonthDays>
+    {({ dayNumber, hiddenBars }) => (
+      <>
+        {dayNumber}
+        {hiddenBars.length > 0 && <button>+{hiddenBars.length} more</button>}
+      </>
+    )}
+  </Calendar.MonthDays>
+  <Calendar.MonthAllDayEvents className="bar" />
+</Calendar.MonthRows>
+```
+
+Timed events in a month cell need nothing new: `boxes` is already in the same
+scope, so `boxes.slice(0, 3)` and `boxes.length - 3` are yours to write.
+
+`AllDayRow` renders nothing when the range holds no all-day event, which frees
+the space but moves the grid under it as you step between weeks. `minLanes`
+holds the row open instead — `minLanes={1}` keeps one lane's height and the
+`gutterCell` with it, and a row that needs more lanes still gets them:
+
+```tsx
+<Calendar.AllDayRow minLanes={1} gutterCell="all-day">
+  <Calendar.AllDayEvents className="bar" />
+</Calendar.AllDayRow>
+```
+
 `TimeGrid` scrolls to `scrollToHour` on mount by finding the nearest element
 that actually scrolls — itself when nothing else does, the ancestor when your
 layout puts a sticky header above it. Pass `null` to leave the scroll alone.

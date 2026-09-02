@@ -9,6 +9,7 @@ import {
   BAR_GAP,
   CELL_MIN_HEIGHT,
   LANE_HEIGHT,
+  MAX_LANES,
   NUMBER_HEIGHT,
   WEEK_COLUMNS
 } from './constants'
@@ -38,10 +39,11 @@ export const Month = ({ today }: MonthProps): ReactElement => (
 
     <Calendar.MonthRows
       className="border-b border-line last:border-b-0"
+      maxLanes={MAX_LANES}
       style={{ minHeight: CELL_MIN_HEIGHT }}
     >
       <Calendar.MonthDays className="flex flex-col border-l border-hair px-1 pb-1 first:border-l-0 data-[in-period=false]:bg-sunken data-[in-period=false]:text-faint">
-        {({ day, dayNumber, lanes }) => (
+        {({ day, dayNumber, lanes, hiddenBars }) => (
           <>
             <span
               className="flex items-center justify-center"
@@ -53,6 +55,12 @@ export const Month = ({ today }: MonthProps): ReactElement => (
             </span>
 
             <span className="block" style={{ height: lanes * LANE_HEIGHT }} />
+
+            {hiddenBars.length > 0 && (
+              <span className="px-1 text-[10px] font-medium text-muted">
+                +{hiddenBars.length} more
+              </span>
+            )}
 
             <span className="flex flex-col gap-0.5">
               <Calendar.MonthTimedEvents

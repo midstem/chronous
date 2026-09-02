@@ -27,16 +27,20 @@ export type DayColumnContextValue<TData = unknown> = {
 export type AllDayContextValue<TData = unknown> = {
   row: CalendarRow<TData>
   laneHeight: number
+  lanes: number
 }
 
 export type MonthRowContextValue<TData = unknown> = {
   row: CalendarRow<TData>
   days: CalendarDay<TData>[]
+  maxLanes: number | null
 }
 
 export type MonthDayContextValue<TData = unknown> = {
   day: CalendarDay<TData>
   boxes: CalendarBox<TData>[]
+  bars: CalendarBar<TData>[]
+  hiddenBars: CalendarBar<TData>[]
 }
 
 export type AgendaDayContextValue<TData = unknown> = {
