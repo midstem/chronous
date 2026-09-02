@@ -85,11 +85,21 @@ for it to compare runtimes rather than to gate a change.
 
 ## Releasing
 
-[`.github/workflows/release.yml`](.github/workflows/release.yml) is a manual
-run: pick the packages, leave `dryRun` on to pack and verify, turn it off to
-publish. It builds, verifies the build invariants, lints, typechecks and runs
-the suite before it publishes anything, then tags what it published and opens a
-GitHub release.
+```bash
+npm run release
+```
+
+[`tools/release`](tools/release) is the interactive CLI: it lists the
+publishable packages with their local and published versions, and takes
+whichever half of the release is due — bumping the version in `package.json` and
+`package-lock.json`, or, once that bump is on `main`, creating the tagged GitHub
+release. `npm run release -- --dry-run` walks the same path and writes nothing.
+
+Publishing the release starts
+[`.github/workflows/release.yml`](.github/workflows/release.yml), which reads
+the package out of the tag, builds, verifies the build invariants, lints,
+typechecks and runs the suite, then publishes that one package —
+`latest` for a plain version, `next` for a prerelease.
 
 Tags are `<package name>@<version>` — `@midstem/chronous-react@1.0.0` — because
 the two packages will not stay on one version forever, and because the bare
@@ -101,6 +111,8 @@ what `id-token: write` in the workflow is for.
 Both packages run the same `prepack`, so `npm pack` and `npm publish` rebuild
 from source and re-check the invariants rather than shipping whatever happened
 to be in `dist`.
+
+[PUBLISH.md](PUBLISH.md) is the whole flow, including doing it by hand.
 
 ## License
 
