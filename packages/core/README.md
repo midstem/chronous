@@ -17,40 +17,130 @@ npm install @midstem/chronous
 
 ## Basic usage
 
-`buildCalendar` is the front door. A range says what to draw, the events say
-what goes on it, and what comes back is plain JSON — strings and numbers only,
-so it survives `JSON.stringify` and a server-to-client payload unchanged.
+`buildCalendar` is the front door: a range and a list of events in, one plain
+object out. It draws nothing — it hands back the days, the slots and the
+geometry of every event as fractions, and the DOM is yours to build.
 
-```ts
-import { buildCalendar } from '@midstem/chronous'
+### The markup
+
+One element to fill. Everything under it is created from what the engine
+returned.
+
+```html
+<div class="calendar" id="calendar"></div>
+```
+
+### The engine
+
+```js
+import { buildCalendar, ensureTemporal, formatIso } from '@midstem/chronous'
+
+await ensureTemporal()
 
 const calendar = buildCalendar(
   { view: 'week', date: '2026-03-18', timeZone: 'Europe/Kyiv' },
   [
-    { id: 'standup', start: '2026-03-18T09:00', duration: 'PT30M' },
-    { id: 'offsite', start: '2026-03-19', end: '2026-03-21', allDay: true }
+    {
+      id: 'standup',
+      start: '2026-03-18T09:00',
+      duration: 'PT30M',
+      data: { title: 'Standup' }
+    },
+    {
+      id: 'review',
+      start: '2026-03-18T09:15',
+      duration: 'PT45M',
+      data: { title: 'Review' }
+    }
   ]
 )
 
-const [box] = calendar.days.flatMap((day) => day.boxes)
+const root = document.querySelector('#calendar')
 
-box.top // 0.375 — 09:00 as a fraction of the day, ready for a `top` style
-box.height // 0.0208… — the thirty minutes it runs
-box.column // which column of its overlap cluster it took
+for (const day of calendar.days) {
+  const column = document.createElement('div')
+  column.className = 'day'
 
-const [bar] = calendar.rows.flatMap((row) => row.bars)
+  const heading = document.createElement('div')
+  heading.className = 'heading'
+  heading.textContent = formatIso(day.date, {
+    locale: 'en-GB',
+    options: { weekday: 'short', day: 'numeric' }
+  })
 
-bar.left // where the all-day bar starts across the row
-bar.width // and how far it reaches
+  const grid = document.createElement('div')
+  grid.className = 'grid'
+
+  for (const box of day.boxes) {
+    const event = document.createElement('div')
+    event.className = 'event'
+    event.textContent = box.event.data.title
+
+    event.style.top = `${box.top * 100}%`
+    event.style.height = `${box.height * 100}%`
+    event.style.left = `${box.left * 100}%`
+    event.style.width = `${box.width * 100}%`
+
+    grid.append(event)
+  }
+
+  column.append(heading, grid)
+  root.append(column)
+}
 ```
 
-`days` are the days of the grid, each with its slots and its packed `boxes`;
-`rows` are the bands of all-day bars above them. Every geometry field is a
-fraction, so the CSS is yours to write.
+`top`, `height`, `left` and `width` are fractions of the day the box sits on, so
+they go straight into percentages. The two overlapping meetings above end up
+side by side without any measuring: the engine packed them into columns first.
+
+### The styles
+
+```css
+.calendar {
+  display: flex;
+}
+
+.day {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.grid {
+  position: relative;
+  height: 960px;
+}
+
+.event {
+  position: absolute;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #1d4ed8;
+  color: #fff;
+}
+```
+
+Two of these rules are a contract, not decoration — `.grid` is what the
+percentages are measured against, so it needs `position: relative` and a height
+of its own, and `.event` has to be `position: absolute` to use them. Its height
+is yours: 960px is forty pixels an hour. Everything else on the page is styling
+you own.
+
+### The rest of the object
+
+- `day.slots` are the wall-clock rows of that day — twenty-four by default, each
+  with its own `minuteOfDay` and real length — which is what hour lines and the
+  time gutter are drawn from.
+- `calendar.rows` are the bands above the grid, and `row.bars` the all-day
+  events on them, placed with `left` and `width` across the row and stacked by
+  `lane`. Events long enough to cover a whole day move up there too.
+- Everything crossing the boundary is a string or a number, so a calendar is
+  plain JSON: it survives `JSON.stringify` and a server-to-client payload
+  unchanged.
 
 Building a calendar in React? Install
 [`@midstem/chronous-react`](https://www.npmjs.com/package/@midstem/chronous-react)
-instead — it bundles this engine and re-exports all of it.
+instead — it bundles this engine and re-exports all of it, and the components
+do the loop above for you.
 
 ## Temporal
 
