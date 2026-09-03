@@ -1,5 +1,12 @@
 # Сhronous
 
+[![NPM version][npm-image]][npm-url] [![bundle size][size-image]][size-url]
+
+[npm-image]: https://img.shields.io/npm/v/%40midstem%2Fchronous.svg
+[npm-url]: https://npmjs.org/package/@midstem/chronous
+[size-image]: https://img.shields.io/bundlephobia/minzip/@midstem/chronous
+[size-url]: https://bundlephobia.com/package/@midstem/chronous@1.0.0
+
 <a href='https://midstem.net'>
   <img src='https://raw.githubusercontent.com/midstem/chronous/main/images/midstem.png' height='60'>
 </a>
