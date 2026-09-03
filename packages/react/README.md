@@ -18,8 +18,9 @@ npm install @midstem/chronous-react
 
 One package is enough: the engine is built into this bundle, and `buildCalendar`,
 `formatIso`, the error classes and every type come from this same import.
-Temporal is handled for you — nothing to call, and only Safari ever downloads
-the polyfill.
+Temporal is handled for you as well — nothing to install and nothing to call,
+and only the browsers that lack it ever download the polyfill. See
+[Temporal](#temporal) for the one call that makes it seamless.
 
 ## Basic usage
 
@@ -85,6 +86,44 @@ plain CSS works exactly the same way.
 `MonthGrid` and `AgendaList` cover the other two views, `Calendar.AllDayRow`
 adds the all-day strip, and `useCalendar` / `useCalendarNavigation` are there
 when you would rather walk the layout yourself.
+
+## Temporal
+
+The engine speaks [Temporal](https://tc39.es/proposal-temporal/docs/), which
+Chrome, Edge and Firefox ship and Safari, for now, does not. Where it is
+missing, `temporal-polyfill` is imported automatically; where it is already
+there that import never runs, so the polyfill is never downloaded and never
+enters your bundle.
+
+The components cover the wait on their own. Until the polyfill lands
+`useCalendar` reports `pending: true` with `calendar: null`, and
+`Calendar.Root` renders its own tag around whatever `renderPending` returns —
+nothing, unless you pass one. The moment Temporal is ready the tree re-renders
+with the real layout. Nothing breaks, but on Safari the first paint is an empty
+calendar.
+
+To skip that frame entirely, await `ensureTemporal` before the tree mounts:
+
+```tsx
+import { ensureTemporal } from '@midstem/chronous-react'
+import { createRoot } from 'react-dom/client'
+
+import { App } from './app'
+
+await ensureTemporal()
+
+createRoot(document.querySelector('#root')!).render(<App />)
+```
+
+It resolves immediately and downloads nothing on a runtime that already has
+Temporal, so it costs nothing to await unconditionally. If you would rather not
+hold up the mount, `useTemporalStatus` reports the same state from inside the
+tree, and `renderPending` on `Calendar.Root` gives you somewhere to put a
+skeleton while it is `'pending'`.
+
+The dependency is a stopgap, not part of the design. It is already dead weight
+on every browser that ships Temporal, and once Safari joins them it will be
+dropped from the package altogether.
 
 ## Documentation
 

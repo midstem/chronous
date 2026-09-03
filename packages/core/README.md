@@ -145,8 +145,16 @@ do the loop above for you.
 ## Temporal
 
 The engine speaks [Temporal](https://tc39.es/proposal-temporal/docs/), which
-Chrome, Edge and Firefox ship and Safari does not. Where it is missing, install
-it once before the first call:
+Chrome, Edge and Firefox ship and Safari, for now, does not. There is nothing
+for you to install: where Temporal is missing, `temporal-polyfill` is imported
+automatically, and where it is already there that import never runs, so the
+polyfill is never downloaded and never enters your bundle.
+
+That automatic import is asynchronous, which leaves one seam. On a runtime
+without Temporal the polyfill may still be in flight when your first
+`buildCalendar` runs, and a call that lands in that window throws
+`MissingTemporalError` rather than waiting. Awaiting `ensureTemporal` once,
+before anything that needs a calendar, closes it:
 
 ```ts
 import { ensureTemporal } from '@midstem/chronous'
@@ -155,7 +163,12 @@ await ensureTemporal()
 ```
 
 It resolves immediately and downloads nothing on a runtime that already has
-Temporal.
+Temporal, so it is safe to await unconditionally wherever your app does its
+bootstrapping — an entry module, a route loader, a server handler.
+
+The dependency is a stopgap, not part of the design. It is already dead weight
+on every browser that ships Temporal, and once Safari joins them it will be
+dropped from the package altogether.
 
 ## Documentation
 
