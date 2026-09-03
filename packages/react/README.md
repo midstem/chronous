@@ -4,7 +4,7 @@
 
 [npm-image]: https://img.shields.io/npm/v/%40midstem%2Fchronous-react.svg
 [npm-url]: https://npmjs.org/package/@midstem/chronous-react
-[size-image]: https://img.shields.io/bundlephobia/minzip/@midstem/chronous-react
+[size-image]: https://deno.bundlejs.com/badge?q=@midstem/chronous-react&config=%7B%22esbuild%22%3A%7B%22external%22%3A%5B%22react%22%2C%22react-dom%22%2C%22temporal-polyfill%22%5D%7D%7D
 [size-url]: https://bundlephobia.com/package/@midstem/chronous-react@1.0.0
 
 <a href='https://midstem.net'>
