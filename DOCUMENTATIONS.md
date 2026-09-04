@@ -4,26 +4,30 @@ Everything here stays in the repository: it is the source for
 [https://chronous.midstem.net/](https://chronous.midstem.net/), and none of it
 is published to npm.
 
-The engine and the React package document themselves:
+The engine and the adapters document themselves:
 
 - [`packages/core/DOCUMENTATIONS.md`](packages/core/DOCUMENTATIONS.md) — the
   engine: Temporal, events, recurrence, views, navigation, calendars, layout,
   lanes and labels
 - [`packages/react/DOCUMENTATIONS.md`](packages/react/DOCUMENTATIONS.md) — the
   React surface: the one install, Safari, the hooks, every component
+- [`packages/angular/DOCUMENTATIONS.md`](packages/angular/DOCUMENTATIONS.md) —
+  the Angular surface: the one install, Safari, the signal functions, every
+  directive
 
 What follows is the repository itself — how it is laid out, how the playground
 runs, how the benchmarks are read and how a release is cut.
 
 ## Layout
 
-| Path             | What it is                                        |
-| ---------------- | ------------------------------------------------- |
-| `packages/core`  | `@midstem/chronous` — the engine                  |
-| `packages/react` | `@midstem/chronous-react` — hooks and primitives  |
-| `apps/demo`      | the playground, private, deployed to GitHub Pages |
-| `tools/release`  | the interactive release CLI                       |
-| `tools/scripts`  | `prepack` and the build invariants                |
+| Path               | What it is                                           |
+| ------------------ | ---------------------------------------------------- |
+| `packages/core`    | `@midstem/chronous` — the engine                     |
+| `packages/react`   | `@midstem/chronous-react` — hooks and primitives     |
+| `packages/angular` | `@midstem/chronous-angular` — signals and directives |
+| `apps/demo`        | the playground, private, deployed to GitHub Pages    |
+| `tools/release`    | the interactive release CLI                          |
+| `tools/scripts`    | `prepack` and the build invariants                   |
 
 ```bash
 npm install
@@ -37,18 +41,33 @@ first, and why CI builds before it lints or typechecks.
 
 ## One install, and Temporal
 
-A React app installs one package, and that package has no dependencies of its
-own to reason about. `@midstem/chronous-react` builds the engine into its own
-bundle and re-exports all of it, so `buildCalendar`, `formatIso`, the error
-classes and every type come from the same import as the components — and there
-is never a question of which engine version an app is on. Reach for
-`@midstem/chronous` on its own where React is not involved — a server, a worker,
-another framework.
+An app installs one package, and that package re-exports the whole engine, so
+`buildCalendar`, `formatIso`, the error classes and every type come from the
+same import as the components — and there is never a question of which engine
+version an app is on. Reach for `@midstem/chronous` on its own where no
+framework is involved — a server, a worker, another adapter.
 
-Temporal itself is handled for you, with nothing to call: the React package
-loads `temporal-polyfill` on the first render that needs it, as a separate chunk
-that only Safari ever fetches. Chrome, Edge and Firefox ship Temporal and draw
-on the first render, downloading none of it.
+The two adapters carry the engine differently, because their toolchains do.
+`@midstem/chronous-react` builds it into its own bundle, so its only runtime
+dependency is the polyfill; `verify-dist.mjs` fails the build if a
+`@midstem/chronous` specifier survives into `packages/react/dist`.
+`@midstem/chronous-angular` ships Angular's partial declarations, which are
+linked rather than bundled, so it depends on the engine the ordinary way and
+resolves it at runtime — the same one install for a consumer, and `instanceof`
+on the error classes holds across a direct engine import.
+
+Temporal itself is handled for you, with nothing to call: an adapter loads
+`temporal-polyfill` on the first render that needs it, as a separate chunk that
+only Safari ever fetches. Chrome, Edge and Firefox ship Temporal and draw on the
+first render, downloading none of it.
+
+`packages/angular` builds with `ngc` in `compilationMode: 'partial'` rather than
+with vite, because a published Angular library has to carry `ɵɵngDeclare*`
+declarations for the consumer's linker; `verify-dist.mjs` checks one emitted
+file for them. Its tests run under vitest with
+`@analogjs/vite-plugin-angular`, which compiles the templates ahead of time —
+signal inputs do not exist in Angular's JIT compiler, so a plain esbuild
+transform would silently leave every input unbound.
 
 ## Playground
 
@@ -113,13 +132,13 @@ typechecks and runs the suite, then publishes that one package —
 `latest` for a plain version, `next` for a prerelease.
 
 Tags are `<package name>@<version>` — `@midstem/chronous-react@1.0.0` — because
-the two packages will not stay on one version forever, and because the bare
+the packages will not stay on one version forever, and because the bare
 `1.0.0` through `1.0.2` tags belong to the previous generation. Publishing needs
 an `NPM_TOKEN` secret; packages carry
 [provenance](https://docs.npmjs.com/generating-provenance-statements), which is
 what `id-token: write` in the workflow is for.
 
-Both packages run the same `prepack`, so `npm pack` and `npm publish` rebuild
+Every package runs the same `prepack`, so `npm pack` and `npm publish` rebuild
 from source and re-check the invariants rather than shipping whatever happened
 to be in `dist`.
 

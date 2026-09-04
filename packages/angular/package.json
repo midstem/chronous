@@ -1,0 +1,61 @@
+{
+  "name": "@midstem/chronous-angular",
+  "version": "1.0.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Headless Angular directives for @midstem/chronous",
+  "author": "Midstem",
+  "sideEffects": false,
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/midstem/chronous.git",
+    "directory": "packages/angular"
+  },
+  "bugs": {
+    "url": "https://github.com/midstem/chronous/issues"
+  },
+  "homepage": "https://github.com/midstem/chronous#readme",
+  "keywords": [
+    "angular",
+    "calendar",
+    "scheduler",
+    "headless",
+    "signals",
+    "typescript"
+  ],
+  "scripts": {
+    "build": "ngc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "prepack": "node ../../tools/scripts/prepack.mjs"
+  },
+  "peerDependencies": {
+    "@angular/core": ">=18"
+  },
+  "dependencies": {
+    "@midstem/chronous": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

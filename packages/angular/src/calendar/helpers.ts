@@ -1,0 +1,41 @@
+import {
+  InvalidEventError,
+  InvalidRangeError,
+  InvalidRecurrenceError,
+  MissingTemporalError,
+  buildCalendar
+} from '@midstem/chronous'
+import type {
+  EventInput,
+  CalendarRange,
+  TemporalStatus
+} from '@midstem/chronous'
+
+import type { CalendarError, CalendarResult } from './types'
+
+const isCalendarError = (cause: unknown): cause is CalendarError =>
+  cause instanceof InvalidEventError ||
+  cause instanceof InvalidRangeError ||
+  cause instanceof InvalidRecurrenceError ||
+  cause instanceof MissingTemporalError
+
+export const resultOf = <TData>(
+  range: CalendarRange,
+  events: readonly EventInput<TData>[],
+  status: TemporalStatus
+): CalendarResult<TData> => {
+  if (status === 'pending')
+    return { calendar: null, error: new MissingTemporalError(), pending: true }
+
+  try {
+    return {
+      calendar: buildCalendar(range, events),
+      error: null,
+      pending: false
+    }
+  } catch (cause) {
+    if (!isCalendarError(cause)) throw cause
+
+    return { calendar: null, error: cause, pending: false }
+  }
+}
