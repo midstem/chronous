@@ -65,7 +65,10 @@ export default [
         }
       ],
       '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-unused-vars': [1, { ignoreRestSiblings: true }],
+      '@typescript-eslint/no-unused-vars': [
+        1,
+        { ignoreRestSiblings: true, argsIgnorePattern: '^_' }
+      ],
       '@typescript-eslint/no-use-before-define': 'off',
       'no-redeclare': 'off',
       'no-undef': 'off',

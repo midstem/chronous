@@ -1,6 +1,6 @@
 # Changelog
 
-Both packages are versioned together for now, and each release is tagged
+The packages are versioned together for now, and each release is tagged
 `<package name>@<version>` — `@midstem/chronous@1.0.0`. The bare `1.0.0`,
 `1.0.1` and `1.0.2` tags belong to the previous generation, which shipped as the
 unscoped `chronous` package and stays available under
@@ -8,7 +8,34 @@ unscoped `chronous` package and stays available under
 
 ## Unreleased
 
-### Renames across both packages
+### `@midstem/chronous-angular`
+
+New package: the same calendar as the React one, as headless Angular
+directives. Standalone, signal-based and zoneless-friendly, `@angular/core`
+from 18 up its only peer dependency.
+
+- `CALENDAR_DIRECTIVES` is the whole set for a standalone component's
+  `imports`. A repeating part is a structural directive on the element you
+  wrote — `*chronousDayColumns="let day"`, `*chronousTimedEvents="day; let
+  event"` — and a singular one is an attribute directive that styles the
+  element it sits on. `<chronous-time-grid>` and `<chronous-all-day-row>` are
+  the two components, because both wrap their content in a gutter cell and a
+  grid.
+- `injectCalendar`, `injectCalendarNavigation`, `injectNow` and
+  `injectTemporalStatus` are the signal-returning counterparts of the React
+  hooks, and read their arguments as getters so a signal or a plain function
+  both work.
+- `injectCalendarContext`, `injectTimeGridContext` and `injectAllDayContext`
+  hand a component of your own the scope it sits inside. Per-item scopes travel
+  as template variables instead, because one directive instance renders every
+  iteration.
+- The engine is re-exported whole, so an Angular app imports
+  `buildCalendar`, `formatIso`, the error classes and every type from this one
+  specifier. Unlike the React package it depends on `@midstem/chronous` rather
+  than inlining it: an Angular library ships linkable partial declarations, not
+  a bundle.
+
+### Renames across the adapters
 
 A naming pass before the first scoped release, while there is nothing published
 to break. Every name below says what it is rather than what it happens to hold.

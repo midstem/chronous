@@ -6,19 +6,20 @@
 
 <p><b>Chronous</b> is a headless scheduling engine. The core owns time zones,
 DST, recurrence and the layout of overlapping events; a thin adapter hands it to
-your framework as hooks and headless primitives. The markup, the CSS and the
-accessibility hooks stay yours — geometry is computed for you, cosmetics are
+your framework as hooks, signals and headless primitives. The markup, the CSS
+and the accessibility hooks stay yours — geometry is computed for you, cosmetics are
 opt-in.</p>
 
 ## Packages
 
-The React package bundles the engine, so you install one package and nothing
+An adapter brings the engine with it, so you install one package and nothing
 else.
 
-| Package                                     | Description                                                  |
-| ------------------------------------------- | ------------------------------------------------------------ |
-| [`@midstem/chronous`](packages/core)        | The engine: time model, layout, recurrence. No React, no DOM |
-| [`@midstem/chronous-react`](packages/react) | Hooks and headless primitives for React                      |
+| Package                                         | Description                                                      |
+| ----------------------------------------------- | ---------------------------------------------------------------- |
+| [`@midstem/chronous`](packages/core)            | The engine: time model, layout, recurrence. No framework, no DOM |
+| [`@midstem/chronous-react`](packages/react)     | Hooks and headless primitives for React                          |
+| [`@midstem/chronous-angular`](packages/angular) | Signals and headless directives for Angular                      |
 
 Follow a package link for its own README — installation and the shortest example
 that draws a calendar.
@@ -44,7 +45,9 @@ The full documentation lives at
 Its source is kept in the repository and is never published to npm:
 [`packages/core/DOCUMENTATIONS.md`](packages/core/DOCUMENTATIONS.md) for the
 engine, [`packages/react/DOCUMENTATIONS.md`](packages/react/DOCUMENTATIONS.md)
-for React, and [DOCUMENTATIONS.md](DOCUMENTATIONS.md) for the repository
+for React,
+[`packages/angular/DOCUMENTATIONS.md`](packages/angular/DOCUMENTATIONS.md) for
+Angular, and [DOCUMENTATIONS.md](DOCUMENTATIONS.md) for the repository
 itself — layout, the playground, benchmarks and how a release is cut.
 
 ## License

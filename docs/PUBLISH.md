@@ -1,24 +1,33 @@
 # Publishing
 
-This repository publishes two packages under the `@midstem` scope —
-`@midstem/chronous` from `packages/core` and `@midstem/chronous-react` from
-`packages/react` — and each one is released on its own.
+This repository publishes three packages under the `@midstem` scope —
+`@midstem/chronous` from `packages/core`, `@midstem/chronous-react` from
+`packages/react` and `@midstem/chronous-angular` from `packages/angular` — and
+each one is released on its own.
 
 `@midstem/chronous` is the engine itself: the scheduling model, layout and
-recurrence, with no React and no DOM. `@midstem/chronous-react` is built on it
-and **inlines it at build time** rather than declaring it as a dependency, so a
-consumer installs one package and never ends up with two copies of the engine or
-two versions that have to line up. `verify:dist` is what holds that: it fails the
-build if the React bundle still resolves `@midstem/chronous` at runtime, if
-either bundle still carries `#src` imports, or if a public `.d.ts` names the
-`Temporal` namespace.
+recurrence, with no framework and no DOM. Both adapters are built on it and
+re-export all of it, so a consumer installs one package.
+
+`@midstem/chronous-react` **inlines the engine at build time** rather than
+declaring it as a dependency, so a React app never ends up with two versions
+that have to line up. `verify:dist` is what holds that: it fails the build if
+the React bundle still resolves `@midstem/chronous` at runtime, if a bundle
+still carries `#src` imports, or if a public `.d.ts` names the `Temporal`
+namespace.
+
+`@midstem/chronous-angular` cannot do the same, because a published Angular
+library ships linkable partial declarations rather than a rolled-up bundle. It
+depends on `^1.0.0` of the engine the ordinary way, so npm installs it
+transitively and an engine patch reaches Angular users without an Angular
+release. `verify:dist` checks instead that its output carries the
+`ɵɵngDeclare*` declarations the consumer's linker needs.
 
 An engine change therefore reaches React users only through a React release, and
 reaches the engine's own users through an engine release.
 
-**Versions are independent.** A bug in the React package is a
-`@midstem/chronous-react` patch and leaves the engine alone. The numbers are free
-to drift, and they will.
+**Versions are independent.** A bug in an adapter is that adapter's patch and
+leaves the engine alone. The numbers are free to drift, and they will.
 
 ## The tag names the package
 
@@ -27,11 +36,12 @@ A release tag is the npm coordinate of exactly one package:
 ```
 @midstem/chronous@1.0.0
 @midstem/chronous-react@1.0.1
+@midstem/chronous-angular@1.0.0
 ```
 
 This is the convention Lerna's independent mode and Changesets use in a
-monorepo, and the reason a bare `1.0.1` does not work: with two packages in the
-tree it does not say what was released. The bare `1.0.0` through `1.0.2` tags
+monorepo, and the reason a bare `1.0.1` does not work: with three packages in
+the tree it does not say what was released. The bare `1.0.0` through `1.0.2` tags
 that already exist belong to the previous generation, which shipped as the
 unscoped `chronous` package; leave them alone.
 
@@ -69,15 +79,15 @@ by hand or need to fix something it refuses to touch.
 
 ## 1. Prepare the release branch
 
-- bump `version` in the package you are releasing — either
-  `packages/core/package.json` or `packages/react/package.json`, never both in
-  one tag;
+- bump `version` in the package you are releasing — one of
+  `packages/core/package.json`, `packages/react/package.json` or
+  `packages/angular/package.json`, never two in one tag;
 - keep `package-lock.json` in step: the `packages/<dir>` entry repeats that
   version, and `npm ci` fails when the two disagree. `npm run release` edits that
   one line for you;
 - update the package's `README.md` and `CHANGELOG.md` if the public API moved.
 
-Releasing both packages after an engine change is one bump, one tag and one
+Releasing the adapters after an engine change is one bump, one tag and one
 release each. They are independent, so the order does not matter.
 
 ## 2. Check it locally
@@ -105,8 +115,8 @@ gh release create @midstem/chronous-react@1.0.1 --target main \
 
 The CLI writes those notes for you: it reads the package's previous tag from
 `git tag --list "<package>@*"` and lists the commits since it that touched the
-package — plus `packages/core`, for the React package, because the engine is
-inlined into it.
+package — plus `packages/core`, for an adapter, because the engine ships with
+it.
 
 A prerelease version (anything with a hyphen, `1.0.0-beta.1`) is published on
 npm's `next` dist-tag instead of `latest`, so `npm install @midstem/chronous`

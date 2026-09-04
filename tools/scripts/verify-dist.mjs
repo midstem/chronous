@@ -8,9 +8,18 @@ const REPOSITORY_ROOT = resolve(
   '..'
 )
 
-const PACKAGE_NAMES = ['core', 'react']
+const MODULE_FILE_NAMES = ['index.js', 'index.d.ts']
 
-const BUNDLE_FILE_NAMES = ['index.js', 'index.cjs', 'index.d.ts']
+const PACKAGES = [
+  { name: 'core', fileNames: [...MODULE_FILE_NAMES, 'index.cjs'] },
+  { name: 'react', fileNames: [...MODULE_FILE_NAMES, 'index.cjs'] },
+  { name: 'angular', fileNames: MODULE_FILE_NAMES }
+]
+
+const PARTIAL_IVY_FILE_NAME =
+  'packages/angular/dist/directives/shared/header.js'
+
+const PARTIAL_IVY_DECLARATION = 'ngDeclareDirective'
 
 const SUBPATH_IMPORT_PREFIX = '#src'
 
@@ -46,8 +55,8 @@ const findLines = (content, isLeak) => {
 
 const bundles = new Map()
 
-PACKAGE_NAMES.forEach((packageName) =>
-  BUNDLE_FILE_NAMES.forEach((fileName) => {
+PACKAGES.forEach(({ name: packageName, fileNames }) =>
+  fileNames.forEach((fileName) => {
     const name = `packages/${packageName}/dist/${fileName}`
     const path = resolve(REPOSITORY_ROOT, name)
 
@@ -93,6 +102,20 @@ bundles.forEach((content, name) => {
     !temporalLines.length
   )
 })
+
+const partialIvy = resolve(REPOSITORY_ROOT, PARTIAL_IVY_FILE_NAME)
+
+check(
+  `${PARTIAL_IVY_FILE_NAME} is missing, so the Angular package did not build`,
+  existsSync(partialIvy)
+)
+
+if (existsSync(partialIvy)) {
+  check(
+    `${PARTIAL_IVY_FILE_NAME} carries no ${PARTIAL_IVY_DECLARATION}, so the Angular package was not compiled for publishing`,
+    readFileSync(partialIvy, 'utf8').includes(PARTIAL_IVY_DECLARATION)
+  )
+}
 
 if (failures.length) {
   console.error('Build invariants failed:')
