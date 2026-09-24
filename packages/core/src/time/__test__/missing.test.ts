@@ -37,9 +37,11 @@ describe('a runtime with no Temporal', () => {
     })
   })
 
-  it('names the polyfill and the setup call in the message', async () => {
+  it('names the polyfill import in the message', async () => {
     await withoutTemporal(({ buildCalendar }) => {
-      expect(() => buildCalendar(RANGE, [])).toThrow(/ensureTemporal/)
+      expect(() => buildCalendar(RANGE, [])).toThrow(
+        /temporal-polyfill\/global/
+      )
     })
   })
 
@@ -67,68 +69,11 @@ describe('a runtime with no Temporal', () => {
     })
   })
 
-  it('is repaired by ensureTemporal, which leaves globalThis alone', async () => {
-    await withoutTemporal(async (engine) => {
-      await engine.ensureTemporal()
-
-      expect(engine.isTemporalAvailable()).toBe(true)
-      expect(carrier.Temporal).toBeUndefined()
-      expect(engine.buildCalendar(RANGE, []).days).toHaveLength(7)
+  it('works after the consumer installs a global Temporal implementation', async () => {
+    await withoutTemporal(({ buildCalendar }) => {
+      expect(() => buildCalendar(RANGE, [])).toThrow()
+      carrier.Temporal = held
+      expect(buildCalendar(RANGE, []).days).toHaveLength(7)
     })
-  })
-})
-
-describe('subscribeTemporal', () => {
-  it('loads the polyfill without anyone calling ensureTemporal', async () => {
-    await withoutTemporal(async (engine) => {
-      const seen: string[] = []
-
-      const stop = engine.subscribeTemporal(() =>
-        seen.push(engine.temporalStatus())
-      )
-
-      expect(engine.temporalStatus()).toBe('pending')
-
-      await vi.waitFor(() => expect(seen).toEqual(['ready']))
-
-      expect(engine.isTemporalAvailable()).toBe(true)
-      expect(carrier.Temporal).toBeUndefined()
-
-      stop()
-    })
-  })
-
-  it('stops notifying a listener that unsubscribed', async () => {
-    await withoutTemporal(async (engine) => {
-      let calls = 0
-
-      engine.subscribeTemporal(() => (calls += 1))()
-
-      await engine.ensureTemporal()
-
-      expect(calls).toBe(0)
-      expect(engine.temporalStatus()).toBe('ready')
-    })
-  })
-
-  it('reports a runtime that already has Temporal as ready', async () => {
-    vi.resetModules()
-
-    const engine = await import('../../index')
-
-    expect(engine.temporalStatus()).toBe('ready')
-  })
-})
-
-describe('ensureTemporal on a runtime that already has Temporal', () => {
-  it('keeps the engine already in place', async () => {
-    vi.resetModules()
-
-    const engine = await import('../../index')
-
-    await engine.ensureTemporal()
-
-    expect(engine.isTemporalAvailable()).toBe(true)
-    expect(engine.buildCalendar(RANGE, []).days).toHaveLength(7)
   })
 })

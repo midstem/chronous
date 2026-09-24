@@ -4,8 +4,8 @@
 
 [npm-image]: https://img.shields.io/npm/v/%40midstem%2Fchronous-react.svg
 [npm-url]: https://npmjs.org/package/@midstem/chronous-react
-[size-image]: https://deno.bundlejs.com/badge?q=@midstem/chronous-react&config=%7B%22esbuild%22%3A%7B%22external%22%3A%5B%22react%22%2C%22react-dom%22%2C%22temporal-polyfill%22%5D%7D%7D
-[size-url]: https://bundlejs.com/?q=%40midstem%2Fchronous-react&config=%7B%22esbuild%22%3A%7B%22external%22%3A%5B%22react%22%2C%22react-dom%22%2C%22temporal-polyfill%22%5D%7D%7D
+[size-image]: https://deno.bundlejs.com/badge?q=@midstem/chronous-react&config=%7B%22esbuild%22%3A%7B%22external%22%3A%5B%22react%22%2C%22react-dom%22%5D%7D%7D
+[size-url]: https://bundlejs.com/?q=%40midstem%2Fchronous-react&config=%7B%22esbuild%22%3A%7B%22external%22%3A%5B%22react%22%2C%22react-dom%22%5D%7D%7D
 
 <a href='https://midstem.net'>
   <img src='https://raw.githubusercontent.com/midstem/chronous/main/images/midstem.png' height='60'>
@@ -25,9 +25,8 @@ npm install @midstem/chronous-react
 
 One package is enough: the engine is built into this bundle, and `buildCalendar`,
 `formatIso`, the error classes and every type come from this same import.
-Temporal is handled for you as well — nothing to install and nothing to call,
-and only the browsers that lack it ever download the polyfill. See
-[Temporal](#temporal) for the one call that makes it seamless.
+Temporal must be available before using the calendar. See [Temporal](#temporal)
+for setup on browsers without native support.
 
 ## Basic usage
 
@@ -96,41 +95,21 @@ when you would rather walk the layout yourself.
 
 ## Temporal
 
-The engine speaks [Temporal](https://tc39.es/proposal-temporal/docs/), which
-Chrome, Edge and Firefox ship and Safari, for now, does not. Where it is
-missing, `temporal-polyfill` is imported automatically; where it is already
-there that import never runs, so the polyfill is never downloaded and never
-enters your bundle.
+Chronous requires `Temporal`. If your target browser does not have it, install
+the polyfill in your application and import it before rendering:
 
-The components cover the wait on their own. Until the polyfill lands
-`useCalendar` reports `pending: true` with `calendar: null`, and
-`Calendar.Root` renders its own tag around whatever `renderPending` returns —
-nothing, unless you pass one. The moment Temporal is ready the tree re-renders
-with the real layout. Nothing breaks, but on Safari the first paint is an empty
-calendar.
-
-To skip that frame entirely, await `ensureTemporal` before the tree mounts:
-
-```tsx
-import { ensureTemporal } from '@midstem/chronous-react'
-import { createRoot } from 'react-dom/client'
-
-import { App } from './app'
-
-await ensureTemporal()
-
-createRoot(document.querySelector('#root')!).render(<App />)
+```bash
+npm install @midstem/chronous-react temporal-polyfill
 ```
 
-It resolves immediately and downloads nothing on a runtime that already has
-Temporal, so it costs nothing to await unconditionally. If you would rather not
-hold up the mount, `useTemporalStatus` reports the same state from inside the
-tree, and `renderPending` on `Calendar.Root` gives you somewhere to put a
-skeleton while it is `'pending'`.
+```ts
+import 'temporal-polyfill/global'
+```
 
-The dependency is a stopgap, not part of the design. It is already dead weight
-on every browser that ships Temporal, and once Safari joins them it will be
-dropped from the package altogether.
+In browsers with native Temporal, the extra import is unnecessary. Chronous does
+not download a polyfill or wait for one. Without Temporal, calendar results
+contain `MissingTemporalError` immediately. The `pending` result field remains
+for compatibility and is always `false`.
 
 ## Documentation
 

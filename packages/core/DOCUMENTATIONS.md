@@ -28,46 +28,18 @@ correct by construction rather than by discipline. There is no `Date` fallback
 and there will not be one: `Date` only ever builds a wall clock in the _host's_
 zone, so a Kyiv schedule opened from Berlin would silently render Berlin's grid.
 
-Chrome and Edge ship Temporal from 144, Firefox from 139. Safari still does not.
-This package is synchronous end to end, so where Temporal is missing it has to
-be installed before the first call:
+Chronous reads `globalThis.Temporal` synchronously. On browsers without native
+Temporal, install `temporal-polyfill` in your app and import its global entry
+before using the engine:
 
 ```ts
-import { ensureTemporal } from '@midstem/chronous'
-
-await ensureTemporal()
+import 'temporal-polyfill/global'
+import { buildCalendar } from '@midstem/chronous'
 ```
 
-It resolves immediately on a runtime that already has Temporal and downloads
-nothing. Where Temporal is missing it loads `temporal-polyfill` through a
-dynamic import, which every bundler splits into its own chunk (~20 kB gzip), so
-only Safari ever fetches it. The engine holds that implementation itself rather
-than assigning `globalThis.Temporal`, so nothing on the page is patched.
-
-React apps call none of this: `@midstem/chronous-react` runs the load itself on
-the first render that needs it, and draws a pending state until it lands.
-
-`isTemporalAvailable()` reports whether an implementation is in place, and
-`temporalStatus()` distinguishes `'ready'` from `'pending'` and `'failed'`.
-`subscribeTemporal(listener)` starts the load if it has not started and calls
-back when it settles — it is what the React package builds on, and it fits any
-other framework's store the same way. Building a calendar, stepping a range or
-formatting a value with no engine in place throws `MissingTemporalError` — never
-a misleading `InvalidRangeError` about the time zone.
-
-### Server rendering
-
-A server render cannot await anything mid-render, so install Temporal at
-startup — in Next.js from `instrumentation.ts`:
-
-```ts
-export const register = async () => {
-  await ensureTemporal()
-}
-```
-
-Do the same before hydration if an empty first paint is not acceptable;
-otherwise the React package resolves it on its own, one render later.
+`isTemporalAvailable()` reports whether Temporal is present. Calendar operations
+without it throw `MissingTemporalError`. For server rendering, import the
+polyfill in your server entry module before rendering.
 
 ## Events
 

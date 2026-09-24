@@ -60,9 +60,6 @@
     "bench:native": "CHRONOUS_TEMPORAL=native vitest bench --run",
     "prepack": "node ../../tools/scripts/prepack.mjs"
   },
-  "dependencies": {
-    "temporal-polyfill": "^1.0.4"
-  },
   "engines": {
     "node": ">=18"
   }

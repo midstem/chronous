@@ -15,23 +15,17 @@ export const DOCS_URL =
   'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal'
 
 export const COPY: Record<RuntimeState, RuntimeCopy> = {
-  native: {
-    badge: 'Temporal: native',
-    summary: 'This browser ships Temporal. Nothing was downloaded.',
+  ready: {
+    badge: 'Temporal: ready',
+    summary: 'Temporal is available in this browser.',
     detail:
-      'Chronous reads the engine straight off globalThis. The polyfill was never fetched, so none of it is in the page — this is what a modern browser costs you: nothing.'
-  },
-  polyfill: {
-    badge: 'Temporal: polyfill',
-    summary: 'This browser has no Temporal, so Chronous loaded one.',
-    detail:
-      'The first calendar render found no engine on globalThis and pulled temporal-polyfill in through a dynamic import — its own chunk, fetched only here. The playground calls nothing to make that happen, and the same build runs on both kinds of browser.'
+      'Chronous reads Temporal from globalThis. This demo imports temporal-polyfill/global at startup so it also works where Temporal is not native.'
   },
   missing: {
     badge: 'Temporal: missing',
-    summary: 'The engine is not here yet — loading, or the load failed.',
+    summary: 'Temporal is unavailable.',
     detail:
-      'Chronous fetches temporal-polyfill on the first render that needs it, and draws nothing until the chunk lands. Seeing this badge settle here means the request never resolved — check the network panel, or open the playground in a browser from the list below.'
+      'Install temporal-polyfill and import temporal-polyfill/global before rendering the calendar.'
   }
 }
 

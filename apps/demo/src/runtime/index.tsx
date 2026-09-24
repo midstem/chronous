@@ -1,4 +1,3 @@
-import { useTemporalStatus } from '@midstem/chronous-react'
 import { useId, useRef } from 'react'
 import type { MouseEvent, ReactElement } from 'react'
 
@@ -22,7 +21,7 @@ const dismissed = (
 export const Runtime = (): ReactElement => {
   const dialog = useRef<HTMLDialogElement>(null)
   const titleId = useId()
-  const copy = COPY[runtimeStateOf(useTemporalStatus())]
+  const copy = COPY[runtimeStateOf()]
 
   return (
     <>

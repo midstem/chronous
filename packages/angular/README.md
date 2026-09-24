@@ -4,8 +4,8 @@
 
 [npm-image]: https://img.shields.io/npm/v/%40midstem%2Fchronous-angular.svg
 [npm-url]: https://npmjs.org/package/@midstem/chronous-angular
-[size-image]: https://deno.bundlejs.com/badge?q=@midstem/chronous-angular&config=%7B%22esbuild%22%3A%7B%22external%22%3A%5B%22%40angular%2Fcore%22%2C%22temporal-polyfill%22%5D%7D%7D
-[size-url]: https://bundlejs.com/?q=%40midstem%2Fchronous-angular&config=%7B%22esbuild%22%3A%7B%22external%22%3A%5B%22%40angular%2Fcore%22%2C%22temporal-polyfill%22%5D%7D%7D
+[size-image]: https://deno.bundlejs.com/badge?q=@midstem/chronous-angular&config=%7B%22esbuild%22%3A%7B%22external%22%3A%5B%22%40angular%2Fcore%22%5D%7D%7D
+[size-url]: https://bundlejs.com/?q=%40midstem%2Fchronous-angular&config=%7B%22esbuild%22%3A%7B%22external%22%3A%5B%22%40angular%2Fcore%22%5D%7D%7D
 
 <a href='https://midstem.net'>
   <img src='https://raw.githubusercontent.com/midstem/chronous/main/images/midstem.png' height='60'>
@@ -25,9 +25,8 @@ npm install @midstem/chronous-angular
 
 One install is enough: the engine arrives with it, and `buildCalendar`,
 `formatIso`, the error classes and every type are re-exported from this same
-specifier. Temporal is handled for you as well — nothing to install and nothing
-to call, and only the browsers that lack it ever download the polyfill. See
-[Temporal](#temporal) for the one call that makes it seamless.
+specifier. Temporal must be available before using the calendar. See
+[Temporal](#temporal) for setup on browsers without native support.
 
 Standalone, signal-based and zoneless-friendly. Angular 18 or newer.
 
@@ -144,46 +143,21 @@ and the period title, and you set your own `range` signal from it.
 
 ## Temporal
 
-The engine speaks [Temporal](https://tc39.es/proposal-temporal/docs/), which
-Chrome, Edge and Firefox ship and Safari, for now, does not. Where it is
-missing, `temporal-polyfill` is imported automatically; where it is already
-there that import never runs, so the polyfill is never downloaded and never
-enters your bundle.
+Chronous requires `Temporal`. If your target browser does not have it, install
+the polyfill in your application and import it before rendering:
 
-The directives cover the wait on their own. Until the polyfill lands
-`injectCalendar` reports `pending: true` with `calendar: null`, and
-`*chronousCalendar` renders the template you passed as `pending` — nothing,
-unless you pass one. The moment Temporal is ready the tree renders with the real
-layout. Nothing breaks, but on Safari the first paint is an empty calendar.
-
-```html
-<div *chronousCalendar="range(); events: events(); pending: waiting">…</div>
-
-<ng-template #waiting><p>Loading…</p></ng-template>
+```bash
+npm install @midstem/chronous-angular temporal-polyfill
 ```
-
-To skip that frame entirely, await `ensureTemporal` before the application
-bootstraps:
 
 ```ts
-import { ensureTemporal } from '@midstem/chronous-angular'
-import { bootstrapApplication } from '@angular/platform-browser'
-
-import { AppComponent } from './app.component'
-
-await ensureTemporal()
-
-await bootstrapApplication(AppComponent)
+import 'temporal-polyfill/global'
 ```
 
-It resolves immediately and downloads nothing on a runtime that already has
-Temporal, so it costs nothing to await unconditionally. If you would rather not
-hold up the bootstrap, `injectTemporalStatus` reports the same state as a
-signal.
-
-The dependency is a stopgap, not part of the design. It is already dead weight
-on every browser that ships Temporal, and once Safari joins them it will be
-dropped from the package altogether.
+In browsers with native Temporal, the extra import is unnecessary. Chronous does
+not download a polyfill or wait for one. Without Temporal, calendar results
+contain `MissingTemporalError` immediately. The `pending` result field remains
+for compatibility and is always `false`.
 
 ## Documentation
 
