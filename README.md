@@ -15,12 +15,12 @@ opt-in.</p>
 An adapter brings the engine with it, so you install one package and nothing
 else.
 
-| Package                                         | Description                                                      |
-| ----------------------------------------------- | ---------------------------------------------------------------- |
-| [`@midstem/chronous`](packages/core)                      | The engine: time model, layout, recurrence. No framework, no DOM |
-| [`@midstem/chronous-react`](packages/react)               | Hooks and headless primitives for React                          |
-| [`@midstem/chronous-angular`](packages/angular)           | Signals and headless directives for Angular                      |
-| [`@midstem/playground-core`](packages/playground-core)    | Shared logic and styles for Chronous playgrounds                 |
+| Package                                                | Description                                                      |
+| ------------------------------------------------------ | ---------------------------------------------------------------- |
+| [`@midstem/chronous`](packages/core)                   | The engine: time model, layout, recurrence. No framework, no DOM |
+| [`@midstem/chronous-react`](packages/react)            | Hooks and headless primitives for React                          |
+| [`@midstem/chronous-angular`](packages/angular)        | Signals and headless directives for Angular                      |
+| [`@midstem/playground-core`](packages/playground-core) | Shared logic and styles for Chronous playgrounds                 |
 
 Follow a package link for its own README — installation and the shortest example
 that draws a calendar.

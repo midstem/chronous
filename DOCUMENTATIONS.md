@@ -20,16 +20,16 @@ runs, how the benchmarks are read and how a release is cut.
 
 ## Layout
 
-| Path                      | What it is                                           |
-| ------------------------- | ---------------------------------------------------- |
-| `packages/core`           | `@midstem/chronous` — the engine                     |
-| `packages/react`          | `@midstem/chronous-react` — hooks and primitives     |
-| `packages/angular`        | `@midstem/chronous-angular` — signals and directives |
-| `packages/playground-core`| `@midstem/playground-core` — shared playground logic  |
-| `apps/playground-react`   | React playground, deployed to GitHub Pages           |
-| `apps/playground-angular` | Angular playground                                   |
-| `tools/release`           | the interactive release CLI                          |
-| `tools/scripts`           | `prepack` and the build invariants                   |
+| Path                       | What it is                                           |
+| -------------------------- | ---------------------------------------------------- |
+| `packages/core`            | `@midstem/chronous` — the engine                     |
+| `packages/react`           | `@midstem/chronous-react` — hooks and primitives     |
+| `packages/angular`         | `@midstem/chronous-angular` — signals and directives |
+| `packages/playground-core` | `@midstem/playground-core` — shared playground logic |
+| `apps/playground-react`    | React playground, deployed to GitHub Pages           |
+| `apps/playground-angular`  | Angular playground                                   |
+| `tools/release`            | the interactive release CLI                          |
+| `tools/scripts`            | `prepack` and the build invariants                   |
 
 ```bash
 npm install
