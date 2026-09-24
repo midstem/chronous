@@ -22,7 +22,7 @@ and stays in the repository — it is not part of the published package.
 
 One package is enough. The engine is built into this bundle rather than
 installed beside it, and everything it exports is re-exported from here —
-`buildCalendar`, `formatIso`, `calendarReducer`, `ensureTemporal`, the error
+`buildCalendar`, `formatIso`, `calendarReducer`, the error
 classes and every type — so a React app never installs or imports
 `@midstem/chronous` by name:
 
@@ -40,37 +40,16 @@ against the package that built the calendar.
 
 ## Temporal, and Safari
 
-There is nothing to set up. Render a calendar and the engine is there.
+The host application must provide Temporal before rendering. On browsers without
+native Temporal, install `temporal-polyfill` and import its global entry from
+your application entry module:
 
-Chrome and Edge ship Temporal from 144 and Firefox from 139, and on those the
-first render draws the calendar and downloads nothing — the hooks read the
-engine straight off `globalThis`, with no extra render and no effect. Safari
-still ships none, so there the first render that needs Temporal loads
-`temporal-polyfill` through a dynamic import that every bundler splits into its
-own chunk (~20 kB gzip), and re-renders once it lands. You install nothing and
-pick no version: the polyfill is a dependency of this package, and the engine
-holds the implementation itself instead of assigning `globalThis.Temporal`.
-
-That one waiting render is the whole cost, and it is a Safari-only cost.
-`useCalendar` reports it as `pending`, and `Calendar.Root` draws its
-`renderPending` slot — the container and its styles are already in place, so
-nothing jumps when the calendar arrives:
-
-```tsx
-<Calendar.Root range={range} events={events} renderPending={() => <Skeleton />}>
+```ts
+import 'temporal-polyfill/global'
 ```
 
-`useTemporalStatus()` is the same signal on its own — `'ready'`, `'pending'` or
-`'failed'` — for a component that wants to gate on it directly.
-
-`ensureTemporal()` is still exported and still does what it did: awaiting it
-before the first render removes the pending state entirely. Reach for it on the
-server, in a worker, or wherever a render cannot be allowed to arrive empty.
-Nothing in a browser app needs it any more.
-
-A load that fails settles on `MissingTemporalError`, which `useCalendar` catches
-like the other calendar errors, so `renderError` on `Calendar.Root` can show it
-rather than the tree coming down.
+Chronous reads `globalThis.Temporal` synchronously. If it is absent, calendar
+results report `MissingTemporalError` immediately.
 
 ## `useCalendar`
 
@@ -80,7 +59,7 @@ router, a query string or `useState`. A `CalendarRange` names what to draw —
 the view, the date it is currently on and the time zone.
 
 ```tsx
-const { calendar, error, pending } = useCalendar(range, events)
+const { calendar, error } = useCalendar(range, events)
 ```
 
 The memo is keyed on the fields of the range rather than on its identity, so an
@@ -92,27 +71,6 @@ on a recurrence rule it cannot read, and a throw during render takes the whole
 tree down. The hook catches `InvalidEventError`, `InvalidRangeError` and
 `InvalidRecurrenceError` and hands them back instead: `calendar` is null exactly
 when `error` is set. Anything else is a bug and is left to propagate.
-
-`pending` is set only while the polyfill is in flight, and it comes alongside a
-`MissingTemporalError` rather than in place of one — so code written against
-`calendar` and `error` alone keeps reading correctly. Check it before the error
-to draw a skeleton instead, which is what `Calendar.Root` does with
-`renderPending`:
-
-```tsx
-const { calendar, error, pending } = useCalendar(range, events)
-
-if (pending) return <Skeleton />
-if (error) return <Failed error={error} />
-
-return <Board calendar={calendar} />
-```
-
-The order is the whole trick: without the first line the error branch draws for
-that one render, and with it nothing does. `pending` never arrives on its own —
-an engine that is not here yet is still an engine that is not here, and saying
-so as `error: null` would drop code that only checks `error` straight into a
-null `calendar`.
 
 ## `useCalendarNavigation`
 

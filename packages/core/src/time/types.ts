@@ -44,5 +44,3 @@ export type FormatOptions = {
   timeZone?: TimeZoneId
   options?: DateTimeFormatOptions
 }
-
-export type TemporalStatus = 'ready' | 'pending' | 'failed'

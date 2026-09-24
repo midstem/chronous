@@ -1,8 +1,4 @@
-import {
-  Component,
-  provideZonelessChangeDetection,
-  signal
-} from '@angular/core'
+import { Component, signal } from '@angular/core'
 import { TestBed } from '@angular/core/testing'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -25,17 +21,15 @@ const RANGE: CalendarRange = {
 }
 
 @Component({
-  selector: 'chronous-pending-host',
+  selector: 'chronous-temporal-host',
   imports: [CALENDAR_DIRECTIVES],
   template: `
-    <div *chronousCalendar="range; events: events; pending: waiting">
+    <div *chronousCalendar="range; events: events">
       <p data-testid="state">drawn</p>
     </div>
-
-    <ng-template #waiting><p data-testid="state">loading</p></ng-template>
   `
 })
-class PendingHostComponent {
+class TemporalHostComponent {
   readonly range = RANGE
 
   readonly events = []
@@ -60,67 +54,22 @@ afterEach(() => {
 })
 
 describe('a browser with no Temporal', () => {
-  it('loads the polyfill from the first read, with no setup call', async () => {
-    await withoutTemporal(async ({ injectCalendar, MissingTemporalError }) => {
+  it('reports an immediate missing Temporal error', async () => {
+    await withoutTemporal(({ injectCalendar, MissingTemporalError }) => {
       const result = TestBed.runInInjectionContext(() =>
         injectCalendar(
           () => RANGE,
           () => []
         )
       )
-
-      expect(result().pending).toBe(true)
       expect(result().calendar).toBeNull()
       expect(result().error).toBeInstanceOf(MissingTemporalError)
-
-      await vi.waitFor(() => expect(result().pending).toBe(false))
-
-      expect(result().error).toBeNull()
-      expect(result().calendar?.days).toHaveLength(1)
-    })
-  })
-
-  it('draws the pending template until the chunk lands', async () => {
-    await withoutTemporal(async ({ CALENDAR_DIRECTIVES: fresh }) => {
-      TestBed.configureTestingModule({
-        providers: [provideZonelessChangeDetection()]
-      })
-      TestBed.overrideComponent(PendingHostComponent, {
-        set: { imports: [...fresh] }
-      })
-
-      const fixture = TestBed.createComponent(PendingHostComponent)
-
-      fixture.detectChanges()
-
-      expect(oneOf(fixture, 'state').textContent).toBe('loading')
-
-      await vi.waitFor(() => {
-        fixture.detectChanges()
-
-        expect(oneOf(fixture, 'state').textContent).toBe('drawn')
-      })
-    })
-  })
-
-  it('revives navigation once the engine is in place', async () => {
-    await withoutTemporal(async ({ injectCalendarNavigation }) => {
-      const navigation = TestBed.runInInjectionContext(() =>
-        injectCalendarNavigation(() => RANGE)
-      )
-
-      expect(navigation().next).toBeNull()
-
-      await vi.waitFor(() => expect(navigation().next).not.toBeNull())
-
-      expect(navigation().prev?.currentDate).toBe('2026-03-17')
-      expect(navigation().today).not.toBeNull()
     })
   })
 })
 
 describe('a browser that ships Temporal', () => {
-  it('draws the calendar on the first read, with no pending frame', () => {
+  it('draws the calendar on the first read', () => {
     const result = TestBed.runInInjectionContext(() =>
       injectCalendarNative(
         () => RANGE,
@@ -128,12 +77,11 @@ describe('a browser that ships Temporal', () => {
       )
     )
 
-    expect(result().pending).toBe(false)
     expect(result().calendar?.days).toHaveLength(1)
   })
 
-  it('draws the calendar rather than the pending template', () => {
-    const fixture = mount(PendingHostComponent)
+  it('draws the calendar through the directive', () => {
+    const fixture = mount(TemporalHostComponent)
 
     expect(oneOf(fixture, 'state').textContent).toBe('drawn')
   })

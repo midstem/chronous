@@ -40,9 +40,8 @@ Then run it:
 npm run dev --workspace @midstem/chronous-demo
 ```
 
-`Temporal` is loaded on demand: the app installs `temporal-polyfill/global`
-before the first render only when the browser does not carry `Temporal` itself,
-so the polyfill lands in its own chunk and native runtimes never download it.
+The app imports `temporal-polyfill/global` from its entry module before the first
+render, showing how a consumer supplies Temporal on browsers without native support.
 
 The app is private and is never published to npm. It is the page GitHub Pages
 serves.

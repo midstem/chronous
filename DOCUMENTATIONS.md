@@ -39,27 +39,25 @@ npm run start
 output the way an outside consumer would — which is why `npm run build` comes
 first, and why CI builds before it lints or typechecks.
 
-## One install, and Temporal
+## Installing Chronous and Temporal
 
-An app installs one package, and that package re-exports the whole engine, so
+An app installs one Chronous package, which re-exports the whole engine, so
 `buildCalendar`, `formatIso`, the error classes and every type come from the
 same import as the components — and there is never a question of which engine
 version an app is on. Reach for `@midstem/chronous` on its own where no
 framework is involved — a server, a worker, another adapter.
 
 The two adapters carry the engine differently, because their toolchains do.
-`@midstem/chronous-react` builds it into its own bundle, so its only runtime
-dependency is the polyfill; `verify-dist.mjs` fails the build if a
-`@midstem/chronous` specifier survives into `packages/react/dist`.
+`@midstem/chronous-react` builds it into its own bundle; `verify-dist.mjs`
+fails the build if a `@midstem/chronous` specifier survives into `packages/react/dist`.
 `@midstem/chronous-angular` ships Angular's partial declarations, which are
 linked rather than bundled, so it depends on the engine the ordinary way and
 resolves it at runtime — the same one install for a consumer, and `instanceof`
 on the error classes holds across a direct engine import.
 
-Temporal itself is handled for you, with nothing to call: an adapter loads
-`temporal-polyfill` on the first render that needs it, as a separate chunk that
-only Safari ever fetches. Chrome, Edge and Firefox ship Temporal and draw on the
-first render, downloading none of it.
+The application must supply Temporal before using the calendar. Where it is not
+native, install `temporal-polyfill` and import `temporal-polyfill/global` from
+the application entry module. Chronous reads `globalThis.Temporal` synchronously.
 
 `packages/angular` builds with `ngc` in `compilationMode: 'partial'` rather than
 with vite, because a published Angular library has to carry `ɵɵngDeclare*`

@@ -1,4 +1,4 @@
-export type RuntimeState = 'native' | 'polyfill' | 'missing'
+export type RuntimeState = 'ready' | 'missing'
 
 export type RuntimeCopy = {
   badge: string

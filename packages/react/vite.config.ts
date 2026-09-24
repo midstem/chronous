@@ -9,8 +9,6 @@ const FILE_NAME_BY_FORMAT: Record<string, string> = {
 
 const CORE_PACKAGE = '@midstem/chronous'
 
-const POLYFILL_PACKAGE = 'temporal-polyfill'
-
 export default defineConfig({
   test: {
     environment: 'jsdom',
@@ -40,7 +38,7 @@ export default defineConfig({
       fileName: (format) => FILE_NAME_BY_FORMAT[format]
     },
     rollupOptions: {
-      external: ['react', 'react/jsx-runtime', POLYFILL_PACKAGE],
+      external: ['react', 'react/jsx-runtime'],
       output: { exports: 'named' }
     }
   }

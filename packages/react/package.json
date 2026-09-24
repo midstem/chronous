@@ -60,9 +60,6 @@
   "devDependencies": {
     "@midstem/chronous": "*"
   },
-  "dependencies": {
-    "temporal-polyfill": "^1.0.4"
-  },
   "engines": {
     "node": ">=18"
   }

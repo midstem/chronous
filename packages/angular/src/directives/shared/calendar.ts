@@ -70,10 +70,6 @@ export class CalendarDirective<TData> implements CalendarContext<TData> {
     alias: 'chronousCalendarGutterWidth'
   })
 
-  readonly pendingTemplate = input<TemplateRef<object> | null>(null, {
-    alias: 'chronousCalendarPending'
-  })
-
   readonly errorTemplate = input<TemplateRef<CalendarErrorContext> | null>(
     null,
     { alias: 'chronousCalendarError' }
@@ -97,13 +93,7 @@ export class CalendarDirective<TData> implements CalendarContext<TData> {
   }
 
   #render(): void {
-    const { calendar, error, pending } = this.result()
-
-    if (pending) {
-      syncSlot(this.#slot, this.#container, this.pendingTemplate(), {})
-
-      return
-    }
+    const { calendar, error } = this.result()
 
     if (error) {
       const template = this.errorTemplate()

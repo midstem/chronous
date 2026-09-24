@@ -3,7 +3,6 @@ import { computed } from '@angular/core'
 import type { Signal } from '@angular/core'
 
 import { stableRange } from '../range'
-import { injectTemporalStatus } from '../temporal'
 
 import { resultOf } from './helpers'
 import type { CalendarResult } from './types'
@@ -13,9 +12,8 @@ export const injectCalendar = <TData>(
   events: () => readonly EventInput<TData>[]
 ): Signal<CalendarResult<TData>> => {
   const held = stableRange(range)
-  const status = injectTemporalStatus()
 
-  return computed(() => resultOf(held(), events(), status()))
+  return computed(() => resultOf(held(), events()))
 }
 
 export type * from './types'

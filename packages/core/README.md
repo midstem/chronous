@@ -4,8 +4,8 @@
 
 [npm-image]: https://img.shields.io/npm/v/%40midstem%2Fchronous.svg
 [npm-url]: https://npmjs.org/package/@midstem/chronous
-[size-image]: https://deno.bundlejs.com/badge?q=@midstem/chronous&config=%7B%22esbuild%22%3A%7B%22external%22%3A%5B%22temporal-polyfill%22%5D%7D%7D
-[size-url]: https://bundlejs.com/?q=%40midstem%2Fchronous&config=%7B%22esbuild%22%3A%7B%22external%22%3A%5B%22temporal-polyfill%22%5D%7D%7D
+[size-image]: https://deno.bundlejs.com/badge?q=@midstem/chronous
+[size-url]: https://bundlejs.com/?q=%40midstem%2Fchronous
 
 <a href='https://midstem.net'>
   <img src='https://raw.githubusercontent.com/midstem/chronous/main/images/midstem.png' height='60'>
@@ -20,6 +20,8 @@ React, no DOM, no stylesheet: the markup and the CSS stay yours.</p>
 
 ```bash
 npm install @midstem/chronous
+# If the runtime lacks Temporal:
+npm install temporal-polyfill
 ```
 
 ## Basic usage
@@ -40,9 +42,8 @@ returned.
 ### The engine
 
 ```js
-import { buildCalendar, ensureTemporal, formatIso } from '@midstem/chronous'
-
-await ensureTemporal()
+import 'temporal-polyfill/global'
+import { buildCalendar, formatIso } from '@midstem/chronous'
 
 const calendar = buildCalendar(
   { view: 'week', currentDate: '2026-03-18', timeZone: 'Europe/Kyiv' },
@@ -151,31 +152,19 @@ do the loop above for you.
 
 ## Temporal
 
-The engine speaks [Temporal](https://tc39.es/proposal-temporal/docs/), which
-Chrome, Edge and Firefox ship and Safari, for now, does not. There is nothing
-for you to install: where Temporal is missing, `temporal-polyfill` is imported
-automatically, and where it is already there that import never runs, so the
-polyfill is never downloaded and never enters your bundle.
-
-That automatic import is asynchronous, which leaves one seam. On a runtime
-without Temporal the polyfill may still be in flight when your first
-`buildCalendar` runs, and a call that lands in that window throws
-`MissingTemporalError` rather than waiting. Awaiting `ensureTemporal` once,
-before anything that needs a calendar, closes it:
+Chronous requires `Temporal` when it builds a calendar. On runtimes without native
+Temporal, install `temporal-polyfill` in your application and import its global
+entry before the first calendar operation:
 
 ```ts
-import { ensureTemporal } from '@midstem/chronous'
-
-await ensureTemporal()
+import 'temporal-polyfill/global'
+import { buildCalendar } from '@midstem/chronous'
 ```
 
-It resolves immediately and downloads nothing on a runtime that already has
-Temporal, so it is safe to await unconditionally wherever your app does its
-bootstrapping — an entry module, a route loader, a server handler.
-
-The dependency is a stopgap, not part of the design. It is already dead weight
-on every browser that ships Temporal, and once Safari joins them it will be
-dropped from the package altogether.
+Chronous does not load the polyfill. Without either native Temporal or that
+import, calendar operations throw `MissingTemporalError`. All-day dates,
+recurrence and time-zone transitions use Temporal's explicit calendar and zone
+semantics.
 
 ## Documentation
 

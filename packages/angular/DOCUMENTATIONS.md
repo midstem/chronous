@@ -26,7 +26,7 @@ and stays in the repository — it is not part of the published package.
 
 One package is enough. The engine comes along as a dependency of this one and
 everything it exports is re-exported from here — `buildCalendar`, `formatIso`,
-`calendarReducer`, `ensureTemporal`, the error classes and every type — so an
+`calendarReducer`, the error classes and every type — so an
 Angular app never installs or imports `@midstem/chronous` by name:
 
 ```ts
@@ -48,39 +48,16 @@ both imports.
 
 ## Temporal, and Safari
 
-There is nothing to set up. Render a calendar and the engine is there.
+The host application must provide Temporal before rendering. On browsers without
+native Temporal, install `temporal-polyfill` and import its global entry from
+your application entry module:
 
-Chrome and Edge ship Temporal from 144 and Firefox from 139, and on those the
-first render draws the calendar and downloads nothing — the engine is read
-straight off `globalThis`. Safari still ships none, so there the first read that
-needs Temporal loads `temporal-polyfill` through a dynamic import that every
-bundler splits into its own chunk (~20 kB gzip). The signal it feeds updates
-when the chunk lands, and Angular redraws that subtree — you install nothing and
-pick no version, and the engine holds the implementation itself instead of
-assigning `globalThis.Temporal`.
-
-That one waiting frame is the whole cost, and it is a Safari-only cost.
-`injectCalendar` reports it as `pending`, and `*chronousCalendar` renders the
-template you hand it as `pending`:
-
-```html
-<div *chronousCalendar="range(); events: events(); pending: waiting">…</div>
-
-<ng-template #waiting><app-skeleton /></ng-template>
+```ts
+import 'temporal-polyfill/global'
 ```
 
-`injectTemporalStatus()` is the same state as a signal — `'ready'`, `'pending'`
-or `'failed'` — for a component that wants to gate on it directly.
-
-`ensureTemporal()` is still exported and still does what it did: awaiting it
-before `bootstrapApplication` removes the pending state entirely. Reach for it
-on the server, in a worker, or wherever a first render cannot be allowed to
-arrive empty.
-
-A load that fails settles on `MissingTemporalError`, which `injectCalendar`
-catches like the other calendar errors, so the `error` template on
-`*chronousCalendar` can show it rather than the error reaching the error
-handler.
+Chronous reads `globalThis.Temporal` synchronously. If it is absent, calendar
+results report `MissingTemporalError` immediately.
 
 ## `injectCalendar`
 
@@ -94,7 +71,7 @@ readonly calendar = injectCalendar(this.range, this.events)
 ```
 
 ```ts
-const { calendar, error, pending } = this.calendar()
+const { calendar, error } = this.calendar()
 ```
 
 The computed is keyed on the fields of the range rather than on its identity, so
@@ -106,16 +83,6 @@ on a recurrence rule it cannot read. The signal catches `InvalidEventError`,
 `InvalidRangeError` and `InvalidRecurrenceError` and hands them back instead:
 `calendar` is null exactly when `error` is set. Anything else is a bug and is
 left to propagate.
-
-`pending` is set only while the polyfill is in flight, and it comes alongside a
-`MissingTemporalError` rather than in place of one — so code written against
-`calendar` and `error` alone keeps reading correctly. Check it before the error
-to draw a skeleton instead, which is what `*chronousCalendar` does with its
-`pending` template.
-
-Call it from an injection context: a field initializer, a constructor, or
-`runInInjectionContext`. It subscribes to the Temporal loader and releases that
-subscription on destroy, which is what ties it to an injector.
 
 ## `injectCalendarNavigation`
 

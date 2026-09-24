@@ -42,7 +42,7 @@
     "typescript"
   ],
   "scripts": {
-    "build": "ngc -p tsconfig.build.json",
+    "build": "node ../../tools/scripts/clean-dist.mjs && ngc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:run": "vitest run",
