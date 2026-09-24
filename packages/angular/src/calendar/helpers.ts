@@ -22,12 +22,11 @@ export const resultOf = <TData>(
   try {
     return {
       calendar: buildCalendar(range, events),
-      error: null,
-      pending: false
+      error: null
     }
   } catch (cause) {
     if (!isCalendarError(cause)) throw cause
 
-    return { calendar: null, error: cause, pending: false }
+    return { calendar: null, error: cause }
   }
 }

@@ -156,8 +156,7 @@ import 'temporal-polyfill/global'
 
 In browsers with native Temporal, the extra import is unnecessary. Chronous does
 not download a polyfill or wait for one. Without Temporal, calendar results
-contain `MissingTemporalError` immediately. The `pending` result field remains
-for compatibility and is always `false`.
+contain `MissingTemporalError` immediately.
 
 ## Documentation
 

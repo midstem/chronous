@@ -17,7 +17,6 @@ export type RootOwnProps<TData> = OwnProps<CalendarContextValue<TData>> & {
   locale?: LocaleId
   gutterWidth?: string
   renderError?: (error: CalendarError) => ReactNode
-  renderPending?: () => ReactNode
 }
 
 export type RootProps<
@@ -34,18 +33,10 @@ export const Root = <TData, TTag extends ElementType = 'div'>({
   children,
   style,
   renderError,
-  renderPending,
   ...rest
 }: RootProps<TData, TTag>): ReactNode => {
-  const { calendar, error, pending } = useCalendar(range, events)
+  const { calendar, error } = useCalendar(range, events)
   const Tag = tagOf(as, 'div')
-
-  if (pending)
-    return (
-      <Tag {...rest} style={style}>
-        {renderPending?.()}
-      </Tag>
-    )
 
   if (error) {
     if (!renderError) throw error

@@ -21,17 +21,15 @@ const RANGE: CalendarRange = {
 }
 
 @Component({
-  selector: 'chronous-pending-host',
+  selector: 'chronous-temporal-host',
   imports: [CALENDAR_DIRECTIVES],
   template: `
-    <div *chronousCalendar="range; events: events; pending: waiting">
+    <div *chronousCalendar="range; events: events">
       <p data-testid="state">drawn</p>
     </div>
-
-    <ng-template #waiting><p data-testid="state">loading</p></ng-template>
   `
 })
-class PendingHostComponent {
+class TemporalHostComponent {
   readonly range = RANGE
 
   readonly events = []
@@ -64,7 +62,6 @@ describe('a browser with no Temporal', () => {
           () => []
         )
       )
-      expect(result().pending).toBe(false)
       expect(result().calendar).toBeNull()
       expect(result().error).toBeInstanceOf(MissingTemporalError)
     })
@@ -72,7 +69,7 @@ describe('a browser with no Temporal', () => {
 })
 
 describe('a browser that ships Temporal', () => {
-  it('draws the calendar on the first read, with no pending frame', () => {
+  it('draws the calendar on the first read', () => {
     const result = TestBed.runInInjectionContext(() =>
       injectCalendarNative(
         () => RANGE,
@@ -80,12 +77,11 @@ describe('a browser that ships Temporal', () => {
       )
     )
 
-    expect(result().pending).toBe(false)
     expect(result().calendar?.days).toHaveLength(1)
   })
 
-  it('draws the calendar rather than the pending template', () => {
-    const fixture = mount(PendingHostComponent)
+  it('draws the calendar through the directive', () => {
+    const fixture = mount(TemporalHostComponent)
 
     expect(oneOf(fixture, 'state').textContent).toBe('drawn')
   })

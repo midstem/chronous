@@ -49,8 +49,7 @@ import 'temporal-polyfill/global'
 ```
 
 Chronous reads `globalThis.Temporal` synchronously. If it is absent, calendar
-results report `MissingTemporalError` immediately. The `pending` result field
-remains for compatibility and is always `false`.
+results report `MissingTemporalError` immediately.
 
 ## `useCalendar`
 
@@ -60,7 +59,7 @@ router, a query string or `useState`. A `CalendarRange` names what to draw —
 the view, the date it is currently on and the time zone.
 
 ```tsx
-const { calendar, error, pending } = useCalendar(range, events)
+const { calendar, error } = useCalendar(range, events)
 ```
 
 The memo is keyed on the fields of the range rather than on its identity, so an

@@ -57,8 +57,7 @@ import 'temporal-polyfill/global'
 ```
 
 Chronous reads `globalThis.Temporal` synchronously. If it is absent, calendar
-results report `MissingTemporalError` immediately. The `pending` result field
-remains for compatibility and is always `false`.
+results report `MissingTemporalError` immediately.
 
 ## `injectCalendar`
 
@@ -72,7 +71,7 @@ readonly calendar = injectCalendar(this.range, this.events)
 ```
 
 ```ts
-const { calendar, error, pending } = this.calendar()
+const { calendar, error } = this.calendar()
 ```
 
 The computed is keyed on the fields of the range rather than on its identity, so

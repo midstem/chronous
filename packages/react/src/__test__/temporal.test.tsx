@@ -38,7 +38,6 @@ describe('a browser with no Temporal', () => {
   it('reports an immediate missing Temporal error', async () => {
     await withoutTemporal(({ useCalendar, MissingTemporalError }) => {
       const { result } = renderHook(() => useCalendar(RANGE, []))
-      expect(result.current.pending).toBe(false)
       expect(result.current.calendar).toBeNull()
       expect(result.current.error).toBeInstanceOf(MissingTemporalError)
     })
@@ -46,7 +45,7 @@ describe('a browser with no Temporal', () => {
 })
 
 describe('a browser that ships Temporal', () => {
-  it('draws the calendar on the first render, with no pending frame', () => {
+  it('draws the calendar on the first render', () => {
     let renders = 0
 
     const { result } = renderHook(() => {
@@ -56,7 +55,6 @@ describe('a browser that ships Temporal', () => {
     })
 
     expect(renders).toBe(1)
-    expect(result.current.pending).toBe(false)
     expect(result.current.calendar?.days).toHaveLength(1)
   })
 })
