@@ -92,7 +92,7 @@ release each. They are independent, so the order does not matter.
 
 ## 2. Check it locally
 
-The build comes first — `apps/demo` resolves the packages through their `dist`,
+The build comes first — `apps/playground-react` resolves the packages through their `dist`,
 so lint and typecheck need it:
 
 ```bash

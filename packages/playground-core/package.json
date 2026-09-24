@@ -1,0 +1,20 @@
+{
+  "name": "@midstem/playground-core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared logic, fixtures, helpers, and styles for Chronous playgrounds",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*",
+    "./styles.css": "./src/styles.css"
+  },
+  "dependencies": {
+    "@midstem/chronous": "^1.0.0"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:run": "vitest run"
+  }
+}

@@ -1,0 +1,4 @@
+@import '@midstem/playground-core/styles.css';
+
+@source '.';
+@source '../../packages/playground-core';

@@ -38,5 +38,5 @@ jobs:
       - name: Test
         run: npm run test
 
-      - name: Build the playground
-        run: npm run build --workspace @midstem/chronous-demo
+      - name: Build the playgrounds
+        run: npm run build --workspace @midstem/chronous-playground-react && npm run build --workspace @midstem/chronous-playground-angular

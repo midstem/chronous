@@ -1,5 +1,5 @@
 {
-  "name": "@midstem/chronous-demo",
+  "name": "@midstem/chronous-playground-react",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -13,7 +13,8 @@
     "test:run": "vitest run"
   },
   "dependencies": {
-    "@midstem/chronous-react": "*"
+    "@midstem/chronous-react": "*",
+    "@midstem/playground-core": "*"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
