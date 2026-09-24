@@ -20,14 +20,16 @@ runs, how the benchmarks are read and how a release is cut.
 
 ## Layout
 
-| Path               | What it is                                           |
-| ------------------ | ---------------------------------------------------- |
-| `packages/core`    | `@midstem/chronous` — the engine                     |
-| `packages/react`   | `@midstem/chronous-react` — hooks and primitives     |
-| `packages/angular` | `@midstem/chronous-angular` — signals and directives |
-| `apps/demo`        | the playground, private, deployed to GitHub Pages    |
-| `tools/release`    | the interactive release CLI                          |
-| `tools/scripts`    | `prepack` and the build invariants                   |
+| Path                       | What it is                                           |
+| -------------------------- | ---------------------------------------------------- |
+| `packages/core`            | `@midstem/chronous` — the engine                     |
+| `packages/react`           | `@midstem/chronous-react` — hooks and primitives     |
+| `packages/angular`         | `@midstem/chronous-angular` — signals and directives |
+| `packages/playground-core` | `@midstem/playground-core` — shared playground logic |
+| `apps/playground-react`    | React playground, deployed to GitHub Pages           |
+| `apps/playground-angular`  | Angular playground                                   |
+| `tools/release`            | the interactive release CLI                          |
+| `tools/scripts`            | `prepack` and the build invariants                   |
 
 ```bash
 npm install
@@ -35,9 +37,9 @@ npm run build
 npm run start
 ```
 
-`apps/demo` imports `@midstem/chronous-react` by name, so it resolves the built
-output the way an outside consumer would — which is why `npm run build` comes
-first, and why CI builds before it lints or typechecks.
+`apps/playground-react` and `apps/playground-angular` consume the packages by name,
+so they resolve the built output the way an outside consumer would — which is why
+`npm run build` comes first, and why CI builds before it lints or typechecks.
 
 ## Installing Chronous and Temporal
 
@@ -69,8 +71,9 @@ transform would silently leave every input unbound.
 
 ## Playground
 
-[`apps/demo`](apps/demo) is an interactive playground: every field of
-`CalendarRange` in the left rail, next to the events as editable JSON, and
+[`apps/playground-react`](apps/playground-react) (React) and
+[`apps/playground-angular`](apps/playground-angular) (Angular) are interactive playgrounds:
+every field of `CalendarRange` in the left rail, next to the events as editable JSON, and
 beside them a full-width board that is nothing but what `buildCalendar`
 returned — plus the raw result under it. A switch in the masthead trades the
 board for the one file that draws it, range, events and all, ready to paste —
@@ -78,12 +81,13 @@ in full, or stripped down to the shortest thing that still draws a calendar. It
 carries a light and a dark theme.
 
 ```bash
-npm run start
+npm run start # starts React playground
+npm run start:angular # starts Angular playground
 ```
 
-Every push to `main` publishes it to GitHub Pages through
+Every push to `main` publishes the React playground to GitHub Pages through
 [`.github/workflows/pages.yml`](.github/workflows/pages.yml), which runs
-`npm run build:pages` and uploads `apps/demo/dist`.
+`npm run build:pages` and uploads `apps/playground-react/dist`.
 
 ## Benchmarks
 

@@ -12,7 +12,15 @@
     "noUnusedParameters": true,
     "moduleResolution": "bundler",
     "paths": {
-      "@midstem/chronous": ["./packages/core/src/index.ts"]
+      "@midstem/chronous": ["./packages/core/src/index.ts"],
+      "@midstem/playground-core": ["./packages/playground-core/src/index.ts"],
+      "@midstem/playground-core/*": ["./packages/playground-core/src/*"],
+      "@midstem/chronous-playground-core": [
+        "./packages/playground-core/src/index.ts"
+      ],
+      "@midstem/chronous-playground-core/*": [
+        "./packages/playground-core/src/*"
+      ]
     },
     "jsx": "react-jsx",
     "esModuleInterop": true,

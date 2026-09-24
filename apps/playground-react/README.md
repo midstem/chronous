@@ -1,6 +1,6 @@
-# `@midstem/chronous-demo`
+# `@midstem/chronous-playground-react`
 
-The Chronous playground. The left rail carries the props — every field of
+The Chronous React playground. The left rail carries the props — every field of
 `CalendarRange` as a control, and the events as editable JSON. The masthead
 switches what fills the rest of the window.
 
@@ -37,7 +37,7 @@ npm run build
 Then run it:
 
 ```bash
-npm run dev --workspace @midstem/chronous-demo
+npm run dev --workspace @midstem/chronous-playground-react
 ```
 
 The app imports `temporal-polyfill/global` from its entry module before the first
