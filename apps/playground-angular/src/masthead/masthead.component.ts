@@ -6,12 +6,14 @@ import {
 } from '@angular/core'
 import {
   DOCS_LABEL,
+  FRAMEWORK_NAV_LABEL,
   HEADLINE,
   MODES,
   MODE_LABEL,
   REPOSITORY_URL,
   RESET_LABEL,
-  TAGLINE
+  TAGLINE,
+  getFrameworkLinks
 } from '@midstem/playground-core'
 import type { Mode } from '@midstem/playground-core'
 
@@ -32,8 +34,28 @@ import { ThemeToggleComponent } from '../theme/theme-toggle.component'
         <span class="text-xs font-normal text-faint">{{ tagline }}</span>
       </h1>
 
+      <nav
+        class="ml-2 flex items-center gap-0.5 rounded-md border border-line bg-raised p-0.5"
+        [attr.aria-label]="frameworkNavLabel"
+      >
+        @for (link of frameworks; track link.id) {
+          <a
+            [href]="link.href"
+            [attr.aria-current]="link.isCurrent ? 'page' : null"
+            [class]="
+              'rounded px-3 py-1 text-[13px] font-medium no-underline transition-colors ' +
+              (link.isCurrent
+                ? 'bg-accent-soft text-accent'
+                : 'text-muted hover:text-ink')
+            "
+          >
+            {{ link.title }}
+          </a>
+        }
+      </nav>
+
       <div
-        class="ml-4 flex items-center gap-0.5 rounded-md border border-line bg-raised p-0.5"
+        class="ml-2 flex items-center gap-0.5 rounded-md border border-line bg-raised p-0.5"
         role="group"
         [attr.aria-label]="modeLabel"
       >
@@ -80,6 +102,8 @@ export class MastheadComponent {
   readonly headline = HEADLINE
   readonly tagline = TAGLINE
   readonly modeLabel = MODE_LABEL
+  readonly frameworkNavLabel = FRAMEWORK_NAV_LABEL
+  readonly frameworks = getFrameworkLinks('angular')
   readonly modes = MODES
   readonly resetLabel = RESET_LABEL
   readonly docsLabel = DOCS_LABEL

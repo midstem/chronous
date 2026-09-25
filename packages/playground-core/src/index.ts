@@ -11,6 +11,7 @@ export * from './theme'
 export * from './runtime'
 export * from './state'
 export * from './playground'
+export * from './frameworks'
 
 export * from './sidebar/constants'
 export * from './sidebar/types'

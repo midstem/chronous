@@ -1,5 +1,7 @@
 import type { ReactElement } from 'react'
 
+import { getFrameworkLinks } from '@midstem/playground-core'
+
 import { REPOSITORY_URL } from '../constants'
 import { MODES } from '../mode'
 import type { Mode } from '../mode'
@@ -9,11 +11,14 @@ import type { ColorScheme } from '../theme'
 
 import {
   DOCS_LABEL,
+  FRAMEWORK_NAV_LABEL,
   HEADLINE,
   MODE_LABEL,
   RESET_LABEL,
   TAGLINE
 } from './constants'
+
+const FRAMEWORKS = getFrameworkLinks('react')
 
 type MastheadProps = {
   mode: Mode
@@ -34,8 +39,28 @@ export const Masthead = ({
       <span className="text-xs font-normal text-faint">{TAGLINE}</span>
     </h1>
 
+    <nav
+      className="ml-2 flex items-center gap-0.5 rounded-md border border-line bg-raised p-0.5"
+      aria-label={FRAMEWORK_NAV_LABEL}
+    >
+      {FRAMEWORKS.map((link) => (
+        <a
+          key={link.id}
+          href={link.href}
+          aria-current={link.isCurrent ? 'page' : undefined}
+          className={`rounded px-3 py-1 text-[13px] font-medium no-underline transition-colors ${
+            link.isCurrent
+              ? 'bg-accent-soft text-accent'
+              : 'text-muted hover:text-ink'
+          }`}
+        >
+          {link.title}
+        </a>
+      ))}
+    </nav>
+
     <div
-      className="ml-4 flex items-center gap-0.5 rounded-md border border-line bg-raised p-0.5"
+      className="ml-2 flex items-center gap-0.5 rounded-md border border-line bg-raised p-0.5"
       role="group"
       aria-label={MODE_LABEL}
     >

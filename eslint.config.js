@@ -20,6 +20,7 @@ export default [
       '**/vite.config.ts',
       '**/scripts/**',
       '**/dist/**',
+      '**/dist-pages/**',
       '**/coverage/**',
       '**/node_modules/**'
     ]
