@@ -7,8 +7,26 @@ import { defineConfig } from 'vite'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
+const CHRONOUS_ANGULAR_SOURCE = resolve(
+  __dirname,
+  '..',
+  '..',
+  'packages',
+  'angular',
+  'src',
+  'index.ts'
+)
+
 export default defineConfig({
   base: './',
+  resolve: {
+    alias: [
+      {
+        find: /^@midstem\/chronous-angular$/,
+        replacement: CHRONOUS_ANGULAR_SOURCE
+      }
+    ]
+  },
   plugins: [
     angular({ tsconfig: resolve(__dirname, 'tsconfig.json') }),
     tailwindcss()
