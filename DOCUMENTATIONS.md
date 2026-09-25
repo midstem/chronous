@@ -14,6 +14,9 @@ The engine and the adapters document themselves:
 - [`packages/angular/DOCUMENTATIONS.md`](packages/angular/DOCUMENTATIONS.md) —
   the Angular surface: the one install, Safari, the signal functions, every
   directive
+- [`packages/vue/DOCUMENTATIONS.md`](packages/vue/DOCUMENTATIONS.md) —
+  the Vue surface: the one install, Safari, the composables, every
+  component
 
 What follows is the repository itself — how it is laid out, how the playground
 runs, how the benchmarks are read and how a release is cut.
@@ -25,9 +28,11 @@ runs, how the benchmarks are read and how a release is cut.
 | `packages/core`            | `@midstem/chronous` — the engine                     |
 | `packages/react`           | `@midstem/chronous-react` — hooks and primitives     |
 | `packages/angular`         | `@midstem/chronous-angular` — signals and directives |
+| `packages/vue`             | `@midstem/chronous-vue` — composables and components |
 | `packages/playground-core` | `@midstem/playground-core` — shared playground logic |
-| `apps/playground-react`    | React playground, deployed to GitHub Pages           |
+| `apps/playground-react`    | React playground                                     |
 | `apps/playground-angular`  | Angular playground                                   |
+| `apps/playground-vue`      | Vue playground                                       |
 | `tools/release`            | the interactive release CLI                          |
 | `tools/scripts`            | `prepack` and the build invariants                   |
 
@@ -37,7 +42,7 @@ npm run build
 npm run start
 ```
 
-`apps/playground-react` and `apps/playground-angular` consume the packages by name,
+`apps/playground-react`, `apps/playground-angular`, and `apps/playground-vue` consume the packages by name,
 so they resolve the built output the way an outside consumer would — which is why
 `npm run build` comes first, and why CI builds before it lints or typechecks.
 
@@ -71,8 +76,9 @@ transform would silently leave every input unbound.
 
 ## Playground
 
-[`apps/playground-react`](apps/playground-react) (React) and
-[`apps/playground-angular`](apps/playground-angular) (Angular) are interactive playgrounds:
+[`apps/playground-react`](apps/playground-react) (React),
+[`apps/playground-angular`](apps/playground-angular) (Angular), and
+[`apps/playground-vue`](apps/playground-vue) (Vue) are interactive playgrounds:
 every field of `CalendarRange` in the left rail, next to the events as editable JSON, and
 beside them a full-width board that is nothing but what `buildCalendar`
 returned — plus the raw result under it. A switch in the masthead trades the
@@ -81,13 +87,14 @@ in full, or stripped down to the shortest thing that still draws a calendar. It
 carries a light and a dark theme.
 
 ```bash
-npm run start # starts React playground
+npm run start         # starts React playground
 npm run start:angular # starts Angular playground
+npm run start:vue     # starts Vue playground
 ```
 
-Every push to `main` publishes the React playground to GitHub Pages through
+Every push to `main` publishes all playgrounds to GitHub Pages through
 [`.github/workflows/pages.yml`](.github/workflows/pages.yml), which runs
-`npm run build:pages` and uploads `apps/playground-react/dist`.
+`npm run build:pages` and uploads `dist-pages`.
 
 ## Benchmarks
 

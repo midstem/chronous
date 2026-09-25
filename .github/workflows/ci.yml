@@ -39,4 +39,4 @@ jobs:
         run: npm run test
 
       - name: Build the playgrounds
-        run: npm run build --workspace @midstem/chronous-playground-react && npm run build --workspace @midstem/chronous-playground-angular
+        run: npm run build --workspace @midstem/chronous-playground-react && npm run build --workspace @midstem/chronous-playground-angular && npm run build --workspace @midstem/chronous-playground-vue

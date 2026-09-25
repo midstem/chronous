@@ -20,6 +20,7 @@ else.
 | [`@midstem/chronous`](packages/core)                   | The engine: time model, layout, recurrence. No framework, no DOM |
 | [`@midstem/chronous-react`](packages/react)            | Hooks and headless primitives for React                          |
 | [`@midstem/chronous-angular`](packages/angular)        | Signals and headless directives for Angular                      |
+| [`@midstem/chronous-vue`](packages/vue)                | Composables and headless components for Vue                      |
 | [`@midstem/playground-core`](packages/playground-core) | Shared logic and styles for Chronous playgrounds                 |
 
 Follow a package link for its own README — installation and the shortest example
@@ -27,17 +28,19 @@ that draws a calendar.
 
 ## Playgrounds
 
-[`apps/playground-react`](apps/playground-react) (React) and
-[`apps/playground-angular`](apps/playground-angular) (Angular) are interactive
+[`apps/playground-react`](apps/playground-react) (React),
+[`apps/playground-angular`](apps/playground-angular) (Angular), and
+[`apps/playground-vue`](apps/playground-vue) (Vue) are interactive
 playgrounds: the range and the events on the left, the board they produce beside
-them, and the code snippet a switch away. Every push to `main` deploys the React
-playground to [GitHub Pages](https://midstem.github.io/chronous/).
+them, and the code snippet a switch away. Every push to `main` deploys the
+playgrounds to [GitHub Pages](https://midstem.github.io/chronous/).
 
 ```bash
 npm install
 npm run build
 npm run start         # React playground
 npm run start:angular # Angular playground
+npm run start:vue     # Vue playground
 ```
 
 ## Documentation
@@ -50,7 +53,9 @@ Its source is kept in the repository and is never published to npm:
 engine, [`packages/react/DOCUMENTATIONS.md`](packages/react/DOCUMENTATIONS.md)
 for React,
 [`packages/angular/DOCUMENTATIONS.md`](packages/angular/DOCUMENTATIONS.md) for
-Angular, and [DOCUMENTATIONS.md](DOCUMENTATIONS.md) for the repository
+Angular,
+[`packages/vue/DOCUMENTATIONS.md`](packages/vue/DOCUMENTATIONS.md) for Vue,
+and [DOCUMENTATIONS.md](DOCUMENTATIONS.md) for the repository
 itself — layout, the playground, benchmarks and how a release is cut.
 
 ## License
