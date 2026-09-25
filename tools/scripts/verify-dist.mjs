@@ -13,7 +13,8 @@ const MODULE_FILE_NAMES = ['index.js', 'index.d.ts']
 const PACKAGES = [
   { name: 'core', fileNames: [...MODULE_FILE_NAMES, 'index.cjs'] },
   { name: 'react', fileNames: [...MODULE_FILE_NAMES, 'index.cjs'] },
-  { name: 'angular', fileNames: MODULE_FILE_NAMES }
+  { name: 'angular', fileNames: MODULE_FILE_NAMES },
+  { name: 'vue', fileNames: [...MODULE_FILE_NAMES, 'index.cjs'] }
 ]
 
 const PARTIAL_IVY_FILE_NAME =
@@ -75,7 +76,7 @@ bundles.forEach((content, name) => {
     line.includes(SUBPATH_IMPORT_PREFIX)
   )
 
-  if (name.startsWith('packages/react/')) {
+  if (name.startsWith('packages/react/') || name.startsWith('packages/vue/')) {
     const coreLines = findLines(content, (line) =>
       CORE_SPECIFIER_PATTERN.test(line)
     )

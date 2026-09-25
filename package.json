@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/midstem/chronous#readme",
   "scripts": {
-    "build": "npm run build --workspace @midstem/chronous --workspace @midstem/chronous-react --workspace @midstem/chronous-angular",
+    "build": "npm run build --workspace @midstem/chronous --workspace @midstem/chronous-react --workspace @midstem/chronous-angular --workspace @midstem/chronous-vue",
     "build:pages": "node tools/scripts/build-pages.mjs",
     "build:angular": "npm run build && npm run build --workspace @midstem/chronous-playground-angular",
     "verify:dist": "node tools/scripts/verify-dist.mjs",
@@ -70,7 +70,8 @@
     "typescript": "^6.0.3",
     "vite": "^8.2.2",
     "vite-plugin-dts": "^5.0.3",
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.11",
+    "vue": "^3.5.41"
   },
   "pre-commit": "lint-tsc"
 }
