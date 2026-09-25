@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <script>
+      {
+        const pinned = localStorage.getItem('chronous-color-scheme')
+
+        if (pinned === 'light' || pinned === 'dark') {
+          document.querySelector('meta[name="color-scheme"]').content = pinned
+          document.documentElement.style.colorScheme = pinned
+          document.documentElement.style.setProperty(
+            '--lightningcss-light',
+            pinned === 'light' ? 'initial' : ' '
+          )
+          document.documentElement.style.setProperty(
+            '--lightningcss-dark',
+            pinned === 'dark' ? 'initial' : ' '
+          )
+        }
+      }
+    </script>
+    <title>Chronous playground (Vue)</title>
+    <meta
+      name="description"
+      content="Every option of the Chronous scheduling engine, editable next to the board it draws."
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

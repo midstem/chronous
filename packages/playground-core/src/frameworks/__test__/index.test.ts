@@ -11,9 +11,9 @@ describe('frameworks', () => {
     expect(FRAMEWORK_NAV_LABEL).toBe('Playgrounds')
   })
 
-  it('contains react and angular framework entries', () => {
+  it('contains react, angular, and vue framework entries', () => {
     const ids = PLAYGROUND_FRAMEWORKS.map((f) => f.id)
-    expect(ids).toEqual(['react', 'angular'])
+    expect(ids).toEqual(['react', 'angular', 'vue'])
   })
 
   it('returns links relative to current framework', () => {
@@ -32,11 +32,24 @@ describe('frameworks', () => {
         packageName: '@midstem/chronous-angular',
         href: '../angular/',
         isCurrent: false
+      },
+      {
+        id: 'vue',
+        title: 'Vue',
+        packageName: '@midstem/chronous-vue',
+        href: '../vue/',
+        isCurrent: false
       }
     ])
 
     const angularLinks = getFrameworkLinks('angular')
     expect(angularLinks[0].isCurrent).toBe(false)
     expect(angularLinks[1].isCurrent).toBe(true)
+    expect(angularLinks[2].isCurrent).toBe(false)
+
+    const vueLinks = getFrameworkLinks('vue')
+    expect(vueLinks[0].isCurrent).toBe(false)
+    expect(vueLinks[1].isCurrent).toBe(false)
+    expect(vueLinks[2].isCurrent).toBe(true)
   })
 })

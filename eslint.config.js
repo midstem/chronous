@@ -22,7 +22,8 @@ export default [
       '**/dist/**',
       '**/dist-pages/**',
       '**/coverage/**',
-      '**/node_modules/**'
+      '**/node_modules/**',
+      '**/*.vue'
     ]
   },
 
@@ -110,7 +111,7 @@ export default [
   },
 
   {
-    files: ['packages/vue/**/*.{ts,js}'],
+    files: ['packages/vue/**/*.{ts,js}', 'apps/playground-vue/**/*.{ts,js}'],
     rules: {
       'react-hooks/rules-of-hooks': 'off',
       'react-hooks/exhaustive-deps': 'off',

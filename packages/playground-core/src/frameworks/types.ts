@@ -1,4 +1,4 @@
-export type PlaygroundFramework = 'react' | 'angular'
+export type PlaygroundFramework = 'react' | 'angular' | 'vue'
 
 export type FrameworkOption = {
   id: PlaygroundFramework
