@@ -128,7 +128,7 @@ All of these rules can technically be implemented with `Date`, `Intl`, and enoug
 
 ## Browser support
 
-Without native Temporal or an application-provided global polyfill, Chronous uses an automatic `Date`/`Intl` fallback and warns in the console. The calendar remains usable, but recurrence and clock-transition calculations can be approximate. The public API does not change when Temporal becomes available. See [browser behavior](DOCUMENTATIONS.md#browser-behavior).
+Without native Temporal or an application-provided global polyfill, Chronous uses an automatic `Date`/`Intl` fallback and warns in the console. The calendar remains usable, but recurrence and clock-transition calculations can be approximate. The public API does not change when Temporal becomes available. See [browser behavior](../packages/core/DOCUMENTATIONS.md#browser-behavior).
 
 ## Sources
 

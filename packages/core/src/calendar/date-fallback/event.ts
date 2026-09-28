@@ -16,13 +16,13 @@ const UNREADABLE_START_REASON = 'has an unreadable start'
 const UNREADABLE_END_REASON = 'has an unreadable end'
 
 const DURATION_PATTERN =
-  /^P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)W)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?$/i
+  /^P(?:(\d+(?:[.,]\d+)?)Y)?(?:(\d+(?:[.,]\d+)?)M)?(?:(\d+(?:[.,]\d+)?)W)?(?:(\d+(?:[.,]\d+)?)D)?(?:T(?:(\d+(?:[.,]\d+)?)H)?(?:(\d+(?:[.,]\d+)?)M)?(?:(\d+(?:[.,]\d+)?)S)?)?$/i
 
 const durationParts = (eventId: string, value: string): number[] => {
   const match = DURATION_PATTERN.exec(value)
   if (!match || match.slice(1).every((part) => part === undefined))
     throw new InvalidEventError(eventId, 'has an unreadable duration')
-  return match.slice(1).map((part) => Number(part ?? 0))
+  return match.slice(1).map((part) => Number((part ?? '0').replace(',', '.')))
 }
 
 const durationDays = (eventId: string, value: string): number => {
@@ -31,7 +31,10 @@ const durationDays = (eventId: string, value: string): number => {
     value
   )
   if (hours || minutes || seconds)
-    throw new InvalidEventError(eventId, 'all-day duration needs date units')
+    warnApproximation(
+      `duration-time:${eventId}`,
+      `Time units in the all-day duration of event "${eventId}" are ignored in Date fallback.`
+    )
   if (years || months)
     warnApproximation(
       `duration:${eventId}`,
@@ -66,8 +69,7 @@ export const normalizeFallbackEvent = <TData>(
   if (
     input.id === undefined ||
     input.id === null ||
-    typeof input.id !== 'string' ||
-    input.id.length === 0
+    typeof input.id !== 'string'
   ) {
     throw new InvalidEventError(input.id ?? '', 'has an invalid id')
   }

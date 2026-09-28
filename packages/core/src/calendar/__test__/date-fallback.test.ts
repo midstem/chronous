@@ -23,6 +23,87 @@ afterEach(() => {
 })
 
 describe('automatic Date fallback', () => {
+  it('keeps valid fractional durations and empty event ids visible', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const calendar = buildCalendar(RANGE, [
+      {
+        id: 'fractional',
+        start: '2026-03-18T09:00:00',
+        duration: 'PT1.5H'
+      },
+      { id: '', start: '2026-03-18T12:00:00', duration: 'PT1H' }
+    ])
+
+    expect(calendar.days[2].boxes.map((box) => box.event.id)).toEqual([
+      'fractional',
+      ''
+    ])
+    expect(calendar.days[2].boxes[0].end).toBe('2026-03-18T10:30:00+02:00')
+  })
+
+  it('keeps an all-day event with a time-unit duration visible', () => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const calendar = buildCalendar(RANGE, [
+      { id: 'all-hours', start: '2026-03-18', allDay: true, duration: 'PT1H' }
+    ])
+
+    expect(calendar.rows[0].bars[0].event.id).toBe('all-hours')
+    expect(
+      warning.mock.calls.some(([message]) =>
+        String(message).includes('Time units in the all-day duration')
+      )
+    ).toBe(true)
+  })
+
+  it('renders monthly ordinal and set-position recurrence instances', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const calendar = buildCalendar(
+      { view: 'month', currentDate: '2026-02-15', timeZone: 'UTC' },
+      [
+        {
+          id: 'last-friday',
+          start: '2026-01-30T09:00:00Z',
+          duration: 'PT1H',
+          recurrence: { rule: 'FREQ=MONTHLY;BYDAY=-1FR' }
+        },
+        {
+          id: 'last-weekday',
+          start: '2026-01-30T11:00:00Z',
+          duration: 'PT1H',
+          recurrence: { rule: 'FREQ=MONTHLY;BYDAY=MO,TU,WE,TH,FR;BYSETPOS=-1' }
+        }
+      ]
+    )
+
+    const february27 = calendar.days.find((day) => day.date === '2026-02-27')
+    expect(february27?.boxes.map((box) => box.event.seriesId)).toEqual([
+      'last-friday',
+      'last-weekday'
+    ])
+  })
+
+  it('counts actual monthly occurrences when a month lacks the anchor date', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const calendar = buildCalendar(
+      {
+        view: 'days',
+        currentDate: '2026-03-30',
+        dayCount: 3,
+        timeZone: 'UTC'
+      },
+      [
+        {
+          id: 'month-end',
+          start: '2026-01-31T09:00:00Z',
+          duration: 'PT1H',
+          recurrence: { rule: 'FREQ=MONTHLY;COUNT=2' }
+        }
+      ]
+    )
+
+    expect(calendar.days[1].boxes[0].event.seriesId).toBe('month-end')
+  })
+
   it('renders fixed, floating, duration and all-day events with the ordinary range API', () => {
     const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const calendar = buildCalendar(RANGE, [

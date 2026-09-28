@@ -1,16 +1,14 @@
 import type { EventInput } from '#src/event'
-import { ISO_WEEKDAY, INSTANCE_SEPARATOR } from '../../recurrence/constants'
+import { INSTANCE_SEPARATOR } from '../../recurrence/constants'
 import { parseRule } from '../../recurrence/parse'
-import type { RecurrenceRule } from '../../recurrence/types'
 
+import { matchesFallbackRule } from './candidates'
 import { normalizeFallbackEvent } from './event'
 import {
   addDaysToDate,
   daysDifference,
-  daysInMonth,
   getZonedParts,
   isDateOnlyString,
-  isoDayOfWeek,
   parseDateOnly,
   parseTimedIso
 } from './time'
@@ -18,91 +16,6 @@ import type { FallbackDay, FallbackEvent } from './types'
 import { warnApproximation } from './warn'
 
 const MS_PER_DAY = 86_400_000
-
-const monthIndex = (date: string): number => {
-  const { year, month } = parseDateOnly(date)
-  return year * 12 + month - 1
-}
-
-const matchesRule = (
-  rule: RecurrenceRule,
-  anchor: string,
-  date: string
-): boolean => {
-  const dayDiff = daysDifference(anchor, date)
-  if (dayDiff < 0) return false
-
-  const anchorParts = parseDateOnly(anchor)
-  const parts = parseDateOnly(date)
-  const monthDiff = monthIndex(date) - monthIndex(anchor)
-  const weekStart = rule.weekStartsOn === 0 ? 7 : rule.weekStartsOn
-  const anchorWeek = daysDifference(
-    addDaysToDate(anchor, -(isoDayOfWeek(anchor) - weekStart + 7) % 7),
-    date
-  )
-
-  const periodMatches =
-    rule.frequency === 'DAILY'
-      ? dayDiff % rule.interval === 0
-      : rule.frequency === 'WEEKLY'
-        ? Math.floor(anchorWeek / 7) % rule.interval === 0
-        : rule.frequency === 'MONTHLY'
-          ? monthDiff % rule.interval === 0
-          : Math.floor(monthDiff / 12) % rule.interval === 0
-  if (!periodMatches) return false
-
-  if (rule.byMonth.length > 0 && !rule.byMonth.includes(parts.month))
-    return false
-  if (rule.byDay.length > 0 && rule.frequency === 'WEEKLY') {
-    if (
-      !rule.byDay.some(
-        (item) => ISO_WEEKDAY[item.weekday] === isoDayOfWeek(date)
-      )
-    )
-      return false
-  } else if (
-    rule.frequency === 'WEEKLY' &&
-    isoDayOfWeek(date) !== isoDayOfWeek(anchor)
-  ) {
-    return false
-  }
-
-  if (rule.byMonthDay.length > 0) {
-    const last = daysInMonth(parts.year, parts.month)
-    if (
-      !rule.byMonthDay.some(
-        (day) => (day > 0 ? day : last + day + 1) === parts.day
-      )
-    )
-      return false
-  } else if (rule.frequency === 'MONTHLY' || rule.frequency === 'YEARLY') {
-    if (parts.day !== anchorParts.day) return false
-  }
-
-  if (
-    rule.frequency === 'YEARLY' &&
-    rule.byMonth.length === 0 &&
-    parts.month !== anchorParts.month
-  )
-    return false
-
-  return true
-}
-
-const simpleOrdinal = (
-  rule: RecurrenceRule,
-  anchor: string,
-  date: string
-): number => {
-  const days = daysDifference(anchor, date)
-  if (rule.frequency === 'DAILY') return Math.floor(days / rule.interval) + 1
-  if (rule.frequency === 'WEEKLY')
-    return Math.floor(days / (7 * rule.interval)) + 1
-  const months = monthIndex(date) - monthIndex(anchor)
-  return rule.frequency === 'MONTHLY'
-    ? Math.floor(months / rule.interval) + 1
-    : Math.floor(months / (12 * rule.interval)) + 1
-}
 
 const overlaps = <TData>(
   event: FallbackEvent<TData>,
@@ -203,7 +116,7 @@ export const expandFallbackRecurrence = <TData>(
     }
   }
 
-  let rule: RecurrenceRule | undefined
+  let rule: ReturnType<typeof parseRule> | undefined
   if (recurrence.rule) {
     try {
       rule = parseRule(input.id, recurrence.rule)
@@ -218,20 +131,13 @@ export const expandFallbackRecurrence = <TData>(
   }
 
   if (rule) {
-    const limitedCount =
-      rule.count !== undefined &&
-      (rule.byDay.length > 0 ||
-        rule.byMonthDay.length > 0 ||
-        rule.byMonth.length > 0 ||
-        rule.bySetPos.length > 0)
     if (
-      limitedCount ||
       rule.bySetPos.length > 0 ||
       (rule.byDay.length > 0 && rule.frequency !== 'WEEKLY')
     ) {
       warnApproximation(
         `recurrence-filters:${input.id}`,
-        `Some recurrence filters or COUNT for "${input.id}" may differ in Date fallback.`
+        `Some recurrence filters for "${input.id}" may differ in Date fallback.`
       )
     }
     const first = base.allDay
@@ -280,14 +186,14 @@ export const expandFallbackRecurrence = <TData>(
       }
     }
 
-    for (let date = from; date <= last; date = addDaysToDate(date, 1)) {
-      if (!matchesRule(rule, anchor, date)) continue
-      if (
-        rule.count !== undefined &&
-        !limitedCount &&
-        simpleOrdinal(rule, anchor, date) > rule.count
-      )
-        continue
+    const candidateCache = new Map<string, string[]>()
+    let generated = 0
+    const scanFrom = rule.count === undefined ? from : anchor
+    for (let date = scanFrom; date <= last; date = addDaysToDate(date, 1)) {
+      if (!matchesFallbackRule(rule, anchor, date, candidateCache)) continue
+      generated += 1
+      if (rule.count !== undefined && generated > rule.count) break
+      if (date < from) continue
       if (until && isDateOnlyString(until) && date > until) continue
       const occurrence = make(base.allDay ? date : `${date}${wallTime}`)
       if (

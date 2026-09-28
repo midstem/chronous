@@ -25,7 +25,7 @@ and stays in the repository — it is not part of the published package.
 ## Temporal
 
 For a practical explanation with ten calendar examples, see
-[Why Chronous uses Temporal](WHY_TEMPORAL.md).
+[Why Chronous uses Temporal](../../docs/WHY_TEMPORAL.md).
 
 Chronous uses [Temporal](https://tc39.es/proposal-temporal/docs/) for its full
 calendar behavior. It distinguishes an instant, a date without a time, and a
@@ -65,16 +65,17 @@ the calendar zone. Durations with calendar units use approximate elapsed time;
 a transition day can have approximate slot boundaries. These cases log more
 specific warnings. Recurring series expand approximately in the visible range, including daily, weekly,
 monthly and yearly intervals, explicit dates, exceptions and overrides. Some rule
-filters, counts and DST transitions may produce different instances from the full
-engine; each series logs a warning naming its id. An unreadable event is omitted
-with a warning, while other events remain visible. An invalid calendar range
+filters and DST transitions may produce different instances from the full
+engine; each series logs a warning naming its id. Malformed input such as
+`start: 'not-a-date'` is omitted with a warning while other events remain
+visible. An invalid calendar range
 still produces `InvalidRangeError` from the core function; framework adapters
 catch it and expose it in their `error` result.
 
 If the server supplies only separate events with fixed UTC `start` and `end`
 values, the fallback can convert and place them in `range.timeZone` without a
 polyfill. It still logs the missing-Temporal warning, and time-grid slots around
-a clock transition can be approximate. See [the concrete example](/docs/WHY_TEMPORAL.md).
+a clock transition can be approximate. See [the concrete example](../../docs/WHY_TEMPORAL.md).
 
 This is a safety net for an application that forgot the polyfill, not a second
 full scheduling engine. Install the polyfill for exact recurrence, DST,
