@@ -7,8 +7,8 @@ import {
   DISAMBIGUATION_OPTIONS,
   LOCALES,
   LOCALE_HINT,
-  PRESETS,
   PRESET_HINT,
+  PRESET_OPTIONS,
   SLOT_MINUTES_HINT,
   STYLE_HINT,
   STYLE_OPTIONS,
@@ -19,18 +19,13 @@ import {
   WEEK_STARTS_ON_OPTIONS,
   ZONES
 } from '@midstem/playground-core'
-import type { Option, PresetId, Style } from '@midstem/playground-core'
+import type { PresetId, Style } from '@midstem/playground-core'
 
 import { NumberFieldComponent } from '../fields/number-field.component'
 import { SelectFieldComponent } from '../fields/select-field.component'
 import { TextFieldComponent } from '../fields/text-field.component'
 import { PanelComponent } from '../panel/panel.component'
 import { PlaygroundService } from '../playground/playground.service'
-
-const PRESET_OPTIONS: readonly Option[] = PRESETS.map(({ id, label }) => ({
-  value: id,
-  label
-}))
 
 @Component({
   selector: 'app-controls',

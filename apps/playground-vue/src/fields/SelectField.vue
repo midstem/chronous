@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useId } from 'vue'
 import type { Option } from '@midstem/playground-core'
 
 defineProps<{
@@ -12,12 +13,24 @@ defineProps<{
 const emit = defineEmits<{
   (e: 'update:value', value: string): void
 }>()
+
+const id = useId()
 </script>
 
 <template>
-  <label class="flex flex-col gap-1">
-    <span v-if="!labelHidden" class="field-label">{{ label }}</span>
+  <div class="flex flex-col gap-1">
+    <label
+      :class="
+        labelHidden
+          ? 'sr-only'
+          : 'font-mono text-xs font-semibold tracking-tight text-ink'
+      "
+      :for="id"
+    >
+      {{ label }}
+    </label>
     <select
+      :id="id"
       class="field-control"
       :value="value"
       @change="emit('update:value', ($event.target as HTMLSelectElement).value)"
@@ -30,6 +43,6 @@ const emit = defineEmits<{
         {{ option.label }}
       </option>
     </select>
-    <span v-if="hint" class="field-hint">{{ hint }}</span>
-  </label>
+    <span v-if="hint" class="text-[11px] leading-4 text-muted">{{ hint }}</span>
+  </div>
 </template>

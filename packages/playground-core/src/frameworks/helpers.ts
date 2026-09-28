@@ -1,5 +1,9 @@
-import { PLAYGROUND_FRAMEWORKS } from './constants'
-import type { FrameworkLink, PlaygroundFramework } from './types'
+import { FRAMEWORK_LOGOS, PLAYGROUND_FRAMEWORKS } from './constants'
+import type {
+  FrameworkLink,
+  FrameworkLogoData,
+  PlaygroundFramework
+} from './types'
 
 export const getFrameworkLinks = (
   current: PlaygroundFramework
@@ -9,3 +13,7 @@ export const getFrameworkLinks = (
     href: `../${framework.id}/`,
     isCurrent: framework.id === current
   }))
+
+export const getFrameworkLogo = (
+  framework: PlaygroundFramework
+): FrameworkLogoData => FRAMEWORK_LOGOS[framework]

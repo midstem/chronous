@@ -34,9 +34,28 @@ const frameworks = getFrameworkLinks('vue')
   <header
     class="flex shrink-0 flex-wrap items-center gap-3 border-b border-line bg-surface px-4 py-2.5"
   >
-    <h1 class="flex items-baseline gap-2 text-base font-semibold">
-      {{ HEADLINE }}
-      <span class="text-xs font-normal text-faint">{{ TAGLINE }}</span>
+    <h1 class="flex items-center gap-2 text-base font-semibold">
+      <svg
+        class="shrink-0"
+        viewBox="0 0 128 128"
+        width="24"
+        height="24"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          fill="#42b883"
+          d="M78.8,10L64,35.4L49.2,10H0l64,110l64-110C128,10,78.8,10,78.8,10z"
+        />
+        <path
+          fill="#35495e"
+          d="M78.8,10L64,35.4L49.2,10H25.6L64,76l38.4-66H78.8z"
+        />
+      </svg>
+      <span class="flex items-baseline gap-2">
+        {{ HEADLINE }}
+        <span class="text-xs font-normal text-faint">{{ TAGLINE }}</span>
+      </span>
     </h1>
 
     <nav

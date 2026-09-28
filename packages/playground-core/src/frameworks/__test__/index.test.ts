@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  FRAMEWORK_LOGOS,
   FRAMEWORK_NAV_LABEL,
   PLAYGROUND_FRAMEWORKS,
-  getFrameworkLinks
+  getFrameworkLinks,
+  getFrameworkLogo
 } from '../index'
 
 describe('frameworks', () => {
@@ -14,6 +16,15 @@ describe('frameworks', () => {
   it('contains react, angular, and vue framework entries', () => {
     const ids = PLAYGROUND_FRAMEWORKS.map((f) => f.id)
     expect(ids).toEqual(['react', 'angular', 'vue'])
+  })
+
+  it('provides logos for each framework', () => {
+    for (const framework of ['react', 'angular', 'vue'] as const) {
+      const logo = getFrameworkLogo(framework)
+      expect(logo).toBe(FRAMEWORK_LOGOS[framework])
+      expect(logo.viewBox).toBeTruthy()
+      expect(logo.svg).toBeTruthy()
+    }
   })
 
   it('returns links relative to current framework', () => {

@@ -2,6 +2,7 @@ import type { LocaleId, TimeZoneId, ViewKind } from '@midstem/chronous'
 
 import type { Option } from '../types'
 import { UNSET } from '../constants'
+import { PRESETS } from '../fixtures'
 
 export const VIEWS: readonly ViewKind[] = [
   'day',
@@ -81,6 +82,13 @@ export const LOCALE_HINT =
   'Passed to formatIso for every heading, gutter label and cell number. The engine never reads it.'
 
 export const PRESET_HINT = 'Replaces the events below with a ready fixture.'
+
+export const PRESET_OPTIONS: readonly Option[] = PRESETS.map(
+  ({ id, label }) => ({
+    value: id,
+    label
+  })
+)
 
 export const STYLE_HINT =
   'How the board draws itself, and which file the Code tab prints. Simple keeps the same components with plain markup on them.'
