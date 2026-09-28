@@ -152,19 +152,22 @@ do the loop above for you.
 
 ## Temporal
 
-Chronous requires `Temporal` when it builds a calendar. On runtimes without native
-Temporal, install `temporal-polyfill` in your application and import its global
-entry before the first calendar operation:
+Chronous uses `Temporal` for full calendar behavior. On runtimes without
+native support, install `temporal-polyfill` in your application and import its
+global entry before the first calendar operation:
 
 ```ts
 import 'temporal-polyfill/global'
 import { buildCalendar } from '@midstem/chronous'
 ```
 
-Chronous does not load the polyfill. Without either native Temporal or that
-import, calendar operations throw `MissingTemporalError`. All-day dates,
-recurrence and time-zone transitions use Temporal's explicit calendar and zone
-semantics.
+Chronous does not bundle the polyfill. If `globalThis.Temporal` is absent, it
+automatically renders basic calendars with `Date` and `Intl` and warns in the
+console. The public API needs no fallback flag. DST layouts can be approximate,
+and recurring series are shown approximately with a warning. Unreadable
+events can be omitted while other events remain visible. See the [full fallback contract](https://github.com/midstem/chronous/blob/main/packages/core/DOCUMENTATIONS.md#browser-behavior).
+For concrete examples of why the full engine uses Temporal, see
+[Why Chronous uses Temporal](https://github.com/midstem/chronous/blob/main/docs/WHY_TEMPORAL.md).
 
 ## Documentation
 

@@ -35,11 +35,52 @@ afterEach(() => {
 })
 
 describe('a browser with no Temporal', () => {
-  it('reports an immediate missing Temporal error', async () => {
-    await withoutTemporal(({ useCalendar, MissingTemporalError }) => {
+  it('draws automatically with the Date fallback', async () => {
+    await withoutTemporal(({ useCalendar }) => {
+      const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
       const { result } = renderHook(() => useCalendar(RANGE, []))
-      expect(result.current.calendar).toBeNull()
-      expect(result.current.error).toBeInstanceOf(MissingTemporalError)
+      expect(result.current.calendar?.days).toHaveLength(1)
+      expect(result.current.error).toBeNull()
+      expect(warning).toHaveBeenCalled()
+      warning.mockRestore()
+    })
+  })
+
+  it('renders a fixed event without extra range options', async () => {
+    await withoutTemporal(({ useCalendar }) => {
+      const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      try {
+        const { result } = renderHook(() =>
+          useCalendar(RANGE, [
+            {
+              id: 'meeting',
+              start: '2026-03-18T07:00:00Z',
+              end: '2026-03-18T08:00:00Z'
+            }
+          ])
+        )
+        expect(result.current.error).toBeNull()
+        expect(result.current.calendar?.days[0].boxes[0].start).toBe(
+          '2026-03-18T09:00:00+02:00'
+        )
+      } finally {
+        warning.mockRestore()
+      }
+    })
+  })
+
+  it('returns an invalid range as an error without throwing during render', async () => {
+    await withoutTemporal(({ useCalendar }) => {
+      const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      try {
+        const { result } = renderHook(() =>
+          useCalendar({ ...RANGE, timeZone: 'Invalid/Zone' }, [])
+        )
+        expect(result.current.calendar).toBeNull()
+        expect(result.current.error?.name).toBe('InvalidRangeError')
+      } finally {
+        warning.mockRestore()
+      }
     })
   })
 })

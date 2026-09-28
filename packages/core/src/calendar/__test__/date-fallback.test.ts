@@ -1,0 +1,343 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+import { InvalidRangeError } from '#src/range'
+import type { CalendarRange } from '#src/range'
+
+import { resetFallbackWarning } from '../date-fallback'
+import { buildCalendar } from '../index'
+
+const RANGE: CalendarRange = {
+  view: 'week',
+  currentDate: '2026-03-18',
+  timeZone: 'Europe/Kyiv'
+}
+
+beforeEach(() => {
+  resetFallbackWarning()
+  vi.stubGlobal('Temporal', undefined)
+})
+
+afterEach(() => {
+  vi.unstubAllGlobals()
+  vi.restoreAllMocks()
+})
+
+describe('automatic Date fallback', () => {
+  it('keeps valid fractional durations and empty event ids visible', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const calendar = buildCalendar(RANGE, [
+      {
+        id: 'fractional',
+        start: '2026-03-18T09:00:00',
+        duration: 'PT1.5H'
+      },
+      { id: '', start: '2026-03-18T12:00:00', duration: 'PT1H' }
+    ])
+
+    expect(calendar.days[2].boxes.map((box) => box.event.id)).toEqual([
+      'fractional',
+      ''
+    ])
+    expect(calendar.days[2].boxes[0].end).toBe('2026-03-18T10:30:00+02:00')
+  })
+
+  it('keeps an all-day event with a time-unit duration visible', () => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const calendar = buildCalendar(RANGE, [
+      { id: 'all-hours', start: '2026-03-18', allDay: true, duration: 'PT1H' }
+    ])
+
+    expect(calendar.rows[0].bars[0].event.id).toBe('all-hours')
+    expect(
+      warning.mock.calls.some(([message]) =>
+        String(message).includes('Time units in the all-day duration')
+      )
+    ).toBe(true)
+  })
+
+  it('renders monthly ordinal and set-position recurrence instances', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const calendar = buildCalendar(
+      { view: 'month', currentDate: '2026-02-15', timeZone: 'UTC' },
+      [
+        {
+          id: 'last-friday',
+          start: '2026-01-30T09:00:00Z',
+          duration: 'PT1H',
+          recurrence: { rule: 'FREQ=MONTHLY;BYDAY=-1FR' }
+        },
+        {
+          id: 'last-weekday',
+          start: '2026-01-30T11:00:00Z',
+          duration: 'PT1H',
+          recurrence: { rule: 'FREQ=MONTHLY;BYDAY=MO,TU,WE,TH,FR;BYSETPOS=-1' }
+        }
+      ]
+    )
+
+    const february27 = calendar.days.find((day) => day.date === '2026-02-27')
+    expect(february27?.boxes.map((box) => box.event.seriesId)).toEqual([
+      'last-friday',
+      'last-weekday'
+    ])
+  })
+
+  it('counts actual monthly occurrences when a month lacks the anchor date', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const calendar = buildCalendar(
+      {
+        view: 'days',
+        currentDate: '2026-03-30',
+        dayCount: 3,
+        timeZone: 'UTC'
+      },
+      [
+        {
+          id: 'month-end',
+          start: '2026-01-31T09:00:00Z',
+          duration: 'PT1H',
+          recurrence: { rule: 'FREQ=MONTHLY;COUNT=2' }
+        }
+      ]
+    )
+
+    expect(calendar.days[1].boxes[0].event.seriesId).toBe('month-end')
+  })
+
+  it('renders fixed, floating, duration and all-day events with the ordinary range API', () => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const calendar = buildCalendar(RANGE, [
+      {
+        id: 'fixed',
+        start: '2026-03-18T07:00:00Z',
+        end: '2026-03-18T08:00:00Z'
+      },
+      {
+        id: 'floating',
+        start: '2026-03-18T11:00:00',
+        duration: 'PT30M'
+      },
+      { id: 'holiday', start: '2026-03-18', end: '2026-03-20' }
+    ])
+
+    expect(calendar.days[2].boxes.map((box) => box.event.id)).toEqual([
+      'fixed',
+      'floating'
+    ])
+    expect(calendar.days[2].boxes[0].start).toBe('2026-03-18T09:00:00+02:00')
+    expect(calendar.days[2].boxes[1].end).toBe('2026-03-18T11:30:00+02:00')
+    expect(calendar.rows[0].bars[0].event.id).toBe('holiday')
+    expect(warning.mock.calls[0][0]).toContain('temporal-polyfill/global')
+    expect(
+      warning.mock.calls.filter(([text]) =>
+        String(text).includes('Temporal is missing')
+      )
+    ).toHaveLength(1)
+  })
+
+  it('shows approximate recurring instances alongside ordinary events', () => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const calendar = buildCalendar(RANGE, [
+      {
+        id: 'series',
+        start: '2026-03-18T09:00:00',
+        recurrence: { rule: 'FREQ=DAILY;COUNT=3' }
+      },
+      {
+        id: 'ordinary',
+        start: '2026-03-18T07:00:00Z',
+        end: '2026-03-18T08:00:00Z'
+      }
+    ])
+
+    expect(calendar.days[2].boxes.map((box) => box.event.id)).toEqual([
+      'ordinary',
+      'series__2026-03-18T09:00:00+02:00'
+    ])
+    expect(calendar.days[3].boxes[0].event.seriesId).toBe('series')
+    expect(calendar.days[4].boxes[0].event.seriesId).toBe('series')
+    expect(
+      warning.mock.calls.some(
+        ([text]) =>
+          String(text).includes('series') &&
+          String(text).includes('approximate')
+      )
+    ).toBe(true)
+  })
+
+  it('shows a long-running series in the current view and applies an exception', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const calendar = buildCalendar(RANGE, [
+      {
+        id: 'daily',
+        start: '2025-01-01T09:00:00',
+        duration: 'PT30M',
+        recurrence: {
+          rule: 'FREQ=DAILY',
+          exceptions: ['2026-03-18T09:00:00']
+        }
+      }
+    ])
+
+    expect(calendar.days[1].boxes[0].event.seriesId).toBe('daily')
+    expect(calendar.days[2].boxes).toHaveLength(0)
+    expect(calendar.days[3].boxes[0].event.seriesId).toBe('daily')
+  })
+
+  it('keeps the source-zone wall time across DST in a different calendar zone', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const calendar = buildCalendar(
+      {
+        view: 'days',
+        currentDate: '2026-03-02',
+        dayCount: 16,
+        timeZone: 'Europe/Berlin'
+      },
+      [
+        {
+          id: 'team',
+          start: '2026-03-02T09:00:00',
+          timeZone: 'America/New_York',
+          recurrence: { rule: 'FREQ=WEEKLY;BYDAY=MO;COUNT=3' }
+        }
+      ]
+    )
+
+    const boxes = calendar.days.flatMap((day) => day.boxes)
+    expect(boxes.map((box) => box.start)).toEqual([
+      '2026-03-02T15:00:00+01:00',
+      '2026-03-09T14:00:00+01:00',
+      '2026-03-16T14:00:00+01:00'
+    ])
+    expect(boxes[1].event.recurrenceId).toBe('2026-03-09T09:00:00-04:00')
+  })
+
+  it('matches a source-zone exception when the viewer uses another zone', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const calendar = buildCalendar(
+      {
+        view: 'days',
+        currentDate: '2026-03-02',
+        dayCount: 16,
+        timeZone: 'Europe/Berlin'
+      },
+      [
+        {
+          id: 'team',
+          start: '2026-03-02T09:00:00',
+          timeZone: 'America/New_York',
+          recurrence: {
+            rule: 'FREQ=WEEKLY;BYDAY=MO;COUNT=3',
+            exceptions: ['2026-03-09T09:00:00']
+          }
+        }
+      ]
+    )
+
+    expect(
+      calendar.days.flatMap((day) => day.boxes.map((box) => box.start))
+    ).toEqual(['2026-03-02T15:00:00+01:00', '2026-03-16T14:00:00+01:00'])
+  })
+
+  it('keeps a malformed series visible at its original date', () => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const calendar = buildCalendar(RANGE, [
+      {
+        id: 'broken-rule',
+        start: '2026-03-18T09:00:00',
+        recurrence: { rule: 'FREQ=HOURLY' }
+      }
+    ])
+
+    expect(calendar.days[2].boxes[0].event.seriesId).toBe('broken-rule')
+    expect(
+      warning.mock.calls.some(([text]) =>
+        String(text).includes('could not be read')
+      )
+    ).toBe(true)
+  })
+
+  it('keeps a series visible when UNTIL cannot be read', () => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const calendar = buildCalendar(RANGE, [
+      {
+        id: 'bad-until',
+        start: '2026-03-18T09:00:00',
+        recurrence: { rule: 'FREQ=DAILY;UNTIL=not-a-date' }
+      }
+    ])
+
+    expect(calendar.days[2].boxes[0].event.seriesId).toBe('bad-until')
+    expect(
+      warning.mock.calls.some(([text]) => String(text).includes('UNTIL'))
+    ).toBe(true)
+  })
+
+  it('applies a moved override in the visible range', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const calendar = buildCalendar(RANGE, [
+      {
+        id: 'moved',
+        start: '2026-03-18T09:00:00',
+        duration: 'PT1H',
+        recurrence: {
+          rule: 'FREQ=DAILY;COUNT=2',
+          overrides: [
+            {
+              recurrenceId: '2026-03-18T09:00:00',
+              start: '2026-03-19T14:00:00'
+            }
+          ]
+        }
+      }
+    ])
+
+    expect(calendar.days[2].boxes).toHaveLength(0)
+    expect(calendar.days[3].boxes.map((box) => box.event.seriesId)).toEqual([
+      'moved',
+      'moved'
+    ])
+  })
+
+  it('renders a DST transition day with nonnegative slots and a specific warning', () => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const calendar = buildCalendar(
+      { ...RANGE, view: 'day', currentDate: '2026-03-29' },
+      []
+    )
+    const day = calendar.days[0]
+
+    expect(day.date).toBe('2026-03-29')
+    expect(day.slots).toHaveLength(24)
+    expect(day.slots.every((slot) => slot.minutes >= 0)).toBe(true)
+    expect(day.slots.reduce((sum, slot) => sum + slot.minutes, 0)).toBe(
+      day.minutes
+    )
+    expect(
+      warning.mock.calls.some(([text]) => String(text).includes('transition'))
+    ).toBe(true)
+  })
+
+  it('keeps the extra hour of a fall transition in the final slot', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const day = buildCalendar(
+      {
+        view: 'day',
+        currentDate: '2026-11-01',
+        timeZone: 'America/New_York'
+      },
+      []
+    ).days[0]
+
+    expect(day.minutes).toBe(1500)
+    expect(day.slots).toHaveLength(24)
+    expect(day.slots.reduce((sum, slot) => sum + slot.minutes, 0)).toBe(1500)
+  })
+
+  it('still rejects an invalid calendar time zone', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    expect(() =>
+      buildCalendar({ ...RANGE, timeZone: 'Invalid/Zone' }, [])
+    ).toThrow(InvalidRangeError)
+  })
+})

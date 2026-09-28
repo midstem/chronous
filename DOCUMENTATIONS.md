@@ -62,9 +62,13 @@ linked rather than bundled, so it depends on the engine the ordinary way and
 resolves it at runtime — the same one install for a consumer, and `instanceof`
 on the error classes holds across a direct engine import.
 
-The application must supply Temporal before using the calendar. Where it is not
-native, install `temporal-polyfill` and import `temporal-polyfill/global` from
-the application entry module. Chronous reads `globalThis.Temporal` synchronously.
+For exact calendar behavior, the application should install `temporal-polyfill`
+and import `temporal-polyfill/global` from its entry module in browsers without
+native Temporal. Chronous does not bundle it. When `globalThis.Temporal` is
+absent, core automatically uses a warning-producing `Date` fallback for basic
+calendar behavior; no `CalendarRange` flag is required. See the
+[core browser behavior](packages/core/DOCUMENTATIONS.md#browser-behavior) for
+its limitations.
 
 `packages/angular` builds with `ngc` in `compilationMode: 'partial'` rather than
 with vite, because a published Angular library has to carry `ɵɵngDeclare*`

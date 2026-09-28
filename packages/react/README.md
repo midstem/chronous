@@ -25,8 +25,8 @@ npm install @midstem/chronous-react
 
 One package is enough: the engine is built into this bundle, and `buildCalendar`,
 `formatIso`, the error classes and every type come from this same import.
-Temporal must be available before using the calendar. See [Temporal](#temporal)
-for setup on browsers without native support.
+Temporal is needed for full calendar behavior. See [Temporal](#temporal) for
+setup and the automatic Date fallback on browsers without native support.
 
 ## Basic usage
 
@@ -95,8 +95,9 @@ when you would rather walk the layout yourself.
 
 ## Temporal
 
-Chronous requires `Temporal`. If your target browser does not have it, install
-the polyfill in your application and import it before rendering:
+Chronous uses `Temporal` for full behavior. On a browser without native
+support, install the polyfill in your application and import it before
+rendering:
 
 ```bash
 npm install @midstem/chronous-react temporal-polyfill
@@ -106,9 +107,10 @@ npm install @midstem/chronous-react temporal-polyfill
 import 'temporal-polyfill/global'
 ```
 
-In browsers with native Temporal, the extra import is unnecessary. Chronous does
-not download a polyfill or wait for one. Without Temporal, calendar results
-contain `MissingTemporalError` immediately.
+Chronous does not bundle the polyfill. If it is absent, an automatic `Date`
+fallback keeps basic calendars working and logs warnings for approximate or
+omitted data. No fallback option is needed. See the
+[full fallback contract](https://github.com/midstem/chronous/blob/main/packages/core/DOCUMENTATIONS.md#browser-behavior).
 
 ## Documentation
 

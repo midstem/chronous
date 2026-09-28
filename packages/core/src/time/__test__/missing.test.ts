@@ -3,7 +3,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 type TemporalCarrier = { Temporal?: typeof Temporal }
 
 const carrier = globalThis as TemporalCarrier
-
 const held = carrier.Temporal
 
 const withoutTemporal = async <TResult>(
@@ -11,10 +10,12 @@ const withoutTemporal = async <TResult>(
 ): Promise<TResult> => {
   vi.resetModules()
   delete carrier.Temporal
+  const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
   try {
     return await run(await import('../../index'))
   } finally {
+    warning.mockRestore()
     carrier.Temporal = held
   }
 }
@@ -31,49 +32,68 @@ afterEach(() => {
 })
 
 describe('a runtime with no Temporal', () => {
-  it('fails buildCalendar with MissingTemporalError, not a bad time zone', async () => {
-    await withoutTemporal(({ buildCalendar, MissingTemporalError }) => {
-      expect(() => buildCalendar(RANGE, [])).toThrow(MissingTemporalError)
-    })
-  })
-
-  it('names the polyfill import in the message', async () => {
-    await withoutTemporal(({ buildCalendar }) => {
-      expect(() => buildCalendar(RANGE, [])).toThrow(
-        /temporal-polyfill\/global/
-      )
-    })
-  })
-
-  it('fails a navigation step the same way', async () => {
-    await withoutTemporal(
-      ({ calendarReducer, initialCalendarState, MissingTemporalError }) => {
-        expect(() =>
-          calendarReducer(initialCalendarState(RANGE), { type: 'next' })
-        ).toThrow(MissingTemporalError)
-      }
-    )
-  })
-
-  it('fails formatIso the same way', async () => {
-    await withoutTemporal(({ formatIso, MissingTemporalError }) => {
-      expect(() => formatIso('2026-03-25', { locale: 'en-GB' })).toThrow(
-        MissingTemporalError
-      )
-    })
-  })
-
-  it('reports Temporal as unavailable', async () => {
-    await withoutTemporal(({ isTemporalAvailable }) => {
+  it('builds a calendar automatically and leaves the global untouched', async () => {
+    await withoutTemporal(({ buildCalendar, isTemporalAvailable }) => {
       expect(isTemporalAvailable()).toBe(false)
+      expect(buildCalendar(RANGE, []).days).toHaveLength(7)
+      expect(carrier.Temporal).toBeUndefined()
     })
   })
 
-  it('works after the consumer installs a global Temporal implementation', async () => {
+  it('keeps navigation working', async () => {
+    await withoutTemporal(({ calendarReducer, initialCalendarState }) => {
+      const state = initialCalendarState(RANGE)
+      expect(calendarReducer(state, { type: 'next' }).range.currentDate).toBe(
+        '2026-04-01'
+      )
+      expect(
+        calendarReducer(state, {
+          type: 'today',
+          now: '2026-08-25T23:30:00Z'
+        }).range.currentDate
+      ).toBe('2026-08-26')
+    })
+  })
+
+  it('formats date-only, absolute and floating values', async () => {
+    await withoutTemporal(({ formatIso }) => {
+      expect(
+        formatIso('2026-03-25', {
+          locale: 'en-GB',
+          options: { year: 'numeric', month: '2-digit', day: '2-digit' }
+        })
+      ).toBe('25/03/2026')
+      expect(
+        formatIso('2026-03-25T09:00:00+02:00', {
+          locale: 'en-GB',
+          options: { hour: '2-digit', minute: '2-digit', hour12: false }
+        })
+      ).toBe('09:00')
+      expect(
+        formatIso('2026-03-25T09:00:00', {
+          locale: 'en-GB',
+          options: { hour: '2-digit', minute: '2-digit', hour12: false }
+        })
+      ).toBe('09:00')
+    })
+  })
+
+  it('uses Temporal automatically if the host installs it later', async () => {
     await withoutTemporal(({ buildCalendar }) => {
-      expect(() => buildCalendar(RANGE, [])).toThrow()
+      const events = [
+        {
+          id: 'series',
+          start: '2026-03-25T09:00:00',
+          recurrence: { rule: 'FREQ=DAILY;COUNT=2' }
+        }
+      ]
+      expect(
+        buildCalendar(RANGE, events).days.flatMap((day) => day.boxes)
+      ).toHaveLength(2)
       carrier.Temporal = held
-      expect(buildCalendar(RANGE, []).days).toHaveLength(7)
+      expect(
+        buildCalendar(RANGE, events).days.flatMap((day) => day.boxes)
+      ).toHaveLength(2)
     })
   })
 })

@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { MISSING_TEMPORAL_MESSAGE } from '../constants'
 import { format, formatIso, plainDate, zoned } from '../index'
 import type { DateTimeFormatOptions } from '../types'
 
@@ -194,11 +193,9 @@ describe('formatIso', () => {
     )
   })
 
-  it('fails with a readable message when Temporal is missing', () => {
+  it('formats unambiguous dates when Temporal is missing', () => {
     vi.stubGlobal('Temporal', undefined)
 
-    expect(() => formatIso('2026-03-15', { locale: 'en-GB' })).toThrow(
-      MISSING_TEMPORAL_MESSAGE
-    )
+    expect(formatIso('2026-03-15', { locale: 'en-GB' })).toBe('15/03/2026')
   })
 })

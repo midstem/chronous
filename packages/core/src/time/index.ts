@@ -24,7 +24,11 @@ import {
   toFormattable,
   wallDay
 } from './helpers'
-import { requireTemporal } from './temporal'
+import { readTemporal, requireTemporal } from './temporal'
+import {
+  warnApproximation,
+  warnFallbackOnce
+} from '../calendar/date-fallback/warn'
 import type {
   CalendarDate,
   CompareResult,
@@ -184,6 +188,48 @@ export const format = (value: TimePoint, range: FormatOptions): string => {
 }
 
 export const formatIso = (value: IsoDateTime, range: FormatOptions): string => {
+  if (!readTemporal()) {
+    warnFallbackOnce()
+
+    const floating = !isDateOnly(value) && !ABSOLUTE_INSTANT_PATTERN.test(value)
+    if (floating)
+      warnApproximation(
+        'format:floating',
+        'Formatting floating date-times without Temporal preserves their wall fields; cross-zone conversion may differ.'
+      )
+
+    const instant = new Date(
+      isDateOnly(value)
+        ? `${value}T00:00:00Z`
+        : floating
+          ? `${value.replace(BRACKETED_ZONE_PATTERN, '')}Z`
+          : value.replace(BRACKETED_ZONE_PATTERN, '')
+    )
+
+    if (Number.isNaN(instant.getTime()))
+      throw new RangeError('Invalid ISO date')
+
+    if (isDateOnly(value)) {
+      const fields = /^([+-]?\d{4,6})-(\d{2})-(\d{2})$/.exec(value)
+      if (
+        !fields ||
+        instant.getUTCFullYear() !== Number(fields[1]) ||
+        instant.getUTCMonth() + 1 !== Number(fields[2]) ||
+        instant.getUTCDate() !== Number(fields[3])
+      )
+        throw new RangeError('Invalid ISO date')
+    }
+
+    const timeZone =
+      isDateOnly(value) || floating
+        ? UTC_TIME_ZONE
+        : (range.timeZone ?? isoZoneOf(value) ?? UTC_TIME_ZONE)
+
+    return getFormatter(range.locale, timeZone, range.options ?? {}).format(
+      instant
+    )
+  }
+
   if (isDateOnly(value)) return format(plainDate(value), range)
 
   const timeZone = range.timeZone ?? isoZoneOf(value) ?? UTC_TIME_ZONE

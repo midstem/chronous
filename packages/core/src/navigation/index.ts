@@ -25,7 +25,7 @@ export const calendarReducer = (
     case 'prev':
       return withDate(state, shiftedDate(state.range, BACKWARD))
     case 'today':
-      return withDate(state, dateAt(action.now, state.range.timeZone))
+      return withDate(state, dateAt(action.now, state.range))
     case 'goto':
       return withDate(state, action.date)
     case 'view':

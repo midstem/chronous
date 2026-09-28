@@ -42,16 +42,19 @@ against the package that built the calendar.
 
 ## Temporal, and Safari
 
-The host application must provide Temporal before rendering. On browsers without
-native Temporal, install `temporal-polyfill` and import its global entry from
-your application entry module:
+For exact calendar behavior, install `temporal-polyfill` in the application
+and import its global entry before rendering on browsers without native
+Temporal:
 
 ```ts
 import 'temporal-polyfill/global'
 ```
 
-Chronous reads `globalThis.Temporal` synchronously. If it is absent, calendar
-results report `MissingTemporalError` immediately.
+Chronous does not bundle the polyfill. If `globalThis.Temporal` is absent, it
+automatically uses a `Date` fallback and warns in the console. The range API
+does not change. Ordinary events and approximate recurring instances keep rendering. An
+unreadable event may be omitted with a warning, and DST layout may be approximate. See the
+[core browser behavior](../core/DOCUMENTATIONS.md#browser-behavior).
 
 ## `useCalendar`
 
@@ -99,9 +102,10 @@ first — so a long month never drags the anchor backwards. The weekday of the
 anchor survives a week step, which is what makes switching to `day` afterwards
 land where the reader was looking.
 
-`next` and `prev` are computed refs that evaluate to null when the range itself
-cannot be stepped: an anchor date that cannot be read, or a `dayCount` that is
-not a whole number of days.
+`next` and `prev` are computed refs that evaluate to null when the range
+cannot be stepped, such as an unreadable anchor date or invalid `dayCount`.
+They remain usable without Temporal through the automatic Date fallback;
+DST transitions can make the layout approximate and produce a warning.
 
 `today` is a computed ref returning a function rather than a value because it
 depends on the wall clock and not on the inputs: it is read at the click, in
