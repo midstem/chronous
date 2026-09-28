@@ -52,8 +52,8 @@ import 'temporal-polyfill/global'
 
 Chronous does not bundle the polyfill. If `globalThis.Temporal` is absent, it
 automatically uses a `Date` fallback and warns in the console. The range API
-does not change. Ordinary events keep rendering; a recurring or unreadable
-event is omitted with a warning, and DST layout may be approximate. See the
+does not change. Ordinary events and approximate recurring instances keep rendering. An
+unreadable event may be omitted with a warning, and DST layout may be approximate. See the
 [core browser behavior](../core/DOCUMENTATIONS.md#browser-behavior).
 
 ## `useCalendar`

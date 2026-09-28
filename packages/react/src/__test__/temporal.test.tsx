@@ -68,6 +68,21 @@ describe('a browser with no Temporal', () => {
       }
     })
   })
+
+  it('returns an invalid range as an error without throwing during render', async () => {
+    await withoutTemporal(({ useCalendar }) => {
+      const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      try {
+        const { result } = renderHook(() =>
+          useCalendar({ ...RANGE, timeZone: 'Invalid/Zone' }, [])
+        )
+        expect(result.current.calendar).toBeNull()
+        expect(result.current.error?.name).toBe('InvalidRangeError')
+      } finally {
+        warning.mockRestore()
+      }
+    })
+  })
 })
 
 describe('a browser that ships Temporal', () => {

@@ -57,9 +57,13 @@ views and ordinary fixed events, floating local times, all-day dates, and
 simple ISO durations. Floating times are interpreted in the event's zone or
 the calendar zone. Durations with calendar units use approximate elapsed time;
 a transition day can have approximate slot boundaries. These cases log more
-specific warnings. A recurring series or an event that cannot be read is
-omitted with a warning naming its id; other events and the calendar continue
-to render. An invalid calendar range still produces `InvalidRangeError`.
+specific warnings. Recurring series expand approximately in the visible range, including daily, weekly,
+monthly and yearly intervals, explicit dates, exceptions and overrides. Some rule
+filters, counts and DST transitions may produce different instances from the full
+engine; each series logs a warning naming its id. An unreadable event is omitted
+with a warning, while other events remain visible. An invalid calendar range
+still produces `InvalidRangeError` from the core function; framework adapters
+catch it and expose it in their `error` result.
 
 This is a safety net for an application that forgot the polyfill, not a second
 full scheduling engine. Install the polyfill for exact recurrence, DST,

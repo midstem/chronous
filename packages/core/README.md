@@ -164,8 +164,8 @@ import { buildCalendar } from '@midstem/chronous'
 Chronous does not bundle the polyfill. If `globalThis.Temporal` is absent, it
 automatically renders basic calendars with `Date` and `Intl` and warns in the
 console. The public API needs no fallback flag. DST layouts can be approximate,
-and unsupported recurring or malformed events are omitted with a warning while
-other events remain visible. See the [full fallback contract](https://github.com/midstem/chronous/blob/main/packages/core/DOCUMENTATIONS.md#browser-behavior).
+and recurring series are shown approximately with a warning. Unreadable
+events can be omitted while other events remain visible. See the [full fallback contract](https://github.com/midstem/chronous/blob/main/packages/core/DOCUMENTATIONS.md#browser-behavior).
 
 ## Documentation
 

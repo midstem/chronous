@@ -54,7 +54,7 @@ describe('automatic Date fallback', () => {
     ).toHaveLength(1)
   })
 
-  it('keeps the calendar and other events when a recurrence cannot be expanded', () => {
+  it('shows approximate recurring instances alongside ordinary events', () => {
     const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const calendar = buildCalendar(RANGE, [
       {
@@ -70,14 +70,97 @@ describe('automatic Date fallback', () => {
     ])
 
     expect(calendar.days[2].boxes.map((box) => box.event.id)).toEqual([
-      'ordinary'
+      'ordinary',
+      'series__2026-03-18T09:00:00+02:00'
     ])
+    expect(calendar.days[3].boxes[0].event.seriesId).toBe('series')
+    expect(calendar.days[4].boxes[0].event.seriesId).toBe('series')
     expect(
       warning.mock.calls.some(
         ([text]) =>
-          String(text).includes('series') && String(text).includes('omitted')
+          String(text).includes('series') &&
+          String(text).includes('approximate')
       )
     ).toBe(true)
+  })
+
+  it('shows a long-running series in the current view and applies an exception', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const calendar = buildCalendar(RANGE, [
+      {
+        id: 'daily',
+        start: '2025-01-01T09:00:00',
+        duration: 'PT30M',
+        recurrence: {
+          rule: 'FREQ=DAILY',
+          exceptions: ['2026-03-18T09:00:00']
+        }
+      }
+    ])
+
+    expect(calendar.days[1].boxes[0].event.seriesId).toBe('daily')
+    expect(calendar.days[2].boxes).toHaveLength(0)
+    expect(calendar.days[3].boxes[0].event.seriesId).toBe('daily')
+  })
+
+  it('keeps a malformed series visible at its original date', () => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const calendar = buildCalendar(RANGE, [
+      {
+        id: 'broken-rule',
+        start: '2026-03-18T09:00:00',
+        recurrence: { rule: 'FREQ=HOURLY' }
+      }
+    ])
+
+    expect(calendar.days[2].boxes[0].event.seriesId).toBe('broken-rule')
+    expect(
+      warning.mock.calls.some(([text]) =>
+        String(text).includes('could not be read')
+      )
+    ).toBe(true)
+  })
+
+  it('keeps a series visible when UNTIL cannot be read', () => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const calendar = buildCalendar(RANGE, [
+      {
+        id: 'bad-until',
+        start: '2026-03-18T09:00:00',
+        recurrence: { rule: 'FREQ=DAILY;UNTIL=not-a-date' }
+      }
+    ])
+
+    expect(calendar.days[2].boxes[0].event.seriesId).toBe('bad-until')
+    expect(
+      warning.mock.calls.some(([text]) => String(text).includes('UNTIL'))
+    ).toBe(true)
+  })
+
+  it('applies a moved override in the visible range', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const calendar = buildCalendar(RANGE, [
+      {
+        id: 'moved',
+        start: '2026-03-18T09:00:00',
+        duration: 'PT1H',
+        recurrence: {
+          rule: 'FREQ=DAILY;COUNT=2',
+          overrides: [
+            {
+              recurrenceId: '2026-03-18T09:00:00',
+              start: '2026-03-19T14:00:00'
+            }
+          ]
+        }
+      }
+    ])
+
+    expect(calendar.days[2].boxes).toHaveLength(0)
+    expect(calendar.days[3].boxes.map((box) => box.event.seriesId)).toEqual([
+      'moved',
+      'moved'
+    ])
   })
 
   it('renders a DST transition day with nonnegative slots and a specific warning', () => {

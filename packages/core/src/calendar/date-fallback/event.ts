@@ -1,6 +1,5 @@
 import { InvalidEventError } from '#src/event'
 import type { EventInput } from '#src/event'
-import { InvalidRecurrenceError } from '#src/recurrence'
 
 import {
   addDaysToDate,
@@ -71,13 +70,6 @@ export const normalizeFallbackEvent = <TData>(
     input.id.length === 0
   ) {
     throw new InvalidEventError(input.id ?? '', 'has an invalid id')
-  }
-
-  if (input.recurrence !== undefined) {
-    throw new InvalidRecurrenceError(
-      input.id,
-      'is not supported in date fallback mode'
-    )
   }
 
   const isAllDay =

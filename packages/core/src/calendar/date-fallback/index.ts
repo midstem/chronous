@@ -5,6 +5,7 @@ import type { CalendarLayout } from '../types'
 import { normalizeFallbackEvent } from './event'
 import { buildFallbackLayout } from './layout'
 import { buildFallbackRange } from './range'
+import { expandFallbackRecurrence } from './recurrence'
 import { warnApproximation, warnFallbackOnce } from './warn'
 import type { FallbackEvent } from './types'
 
@@ -18,7 +19,15 @@ export const buildCalendarDateFallback = <TData>(
   const normalizedEvents: FallbackEvent<TData>[] = []
   for (const event of events) {
     try {
-      normalizedEvents.push(normalizeFallbackEvent(event, range.timeZone))
+      const base = normalizeFallbackEvent(event, range.timeZone)
+      normalizedEvents.push(
+        ...expandFallbackRecurrence(
+          event,
+          base,
+          builtRange.days,
+          range.timeZone
+        )
+      )
     } catch (cause) {
       const reason = cause instanceof Error ? cause.message : String(cause)
       warnApproximation(

@@ -89,7 +89,7 @@ describe('a runtime with no Temporal', () => {
       ]
       expect(
         buildCalendar(RANGE, events).days.flatMap((day) => day.boxes)
-      ).toHaveLength(0)
+      ).toHaveLength(2)
       carrier.Temporal = held
       expect(
         buildCalendar(RANGE, events).days.flatMap((day) => day.boxes)
