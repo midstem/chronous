@@ -12,6 +12,9 @@ import type { EventData, Metric } from '@midstem/playground-core'
 @Component({
   selector: 'app-state',
   standalone: true,
+  host: {
+    class: 'block shrink-0'
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <details

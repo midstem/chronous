@@ -13,6 +13,9 @@ import type { EventData } from '@midstem/playground-core'
   selector: 'app-agenda',
   standalone: true,
   imports: [CALENDAR_DIRECTIVES],
+  host: {
+    class: 'block'
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ul chronousAgendaList class="divide-y divide-hair">

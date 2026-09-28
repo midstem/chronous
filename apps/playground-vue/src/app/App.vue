@@ -19,7 +19,7 @@ const hourHeight = computed(() => hourHeightOf(state.value.density))
 </script>
 
 <template>
-  <div class="flex h-dvh flex-col bg-canvas text-ink">
+  <div class="flex h-dvh flex-col overflow-hidden bg-canvas text-ink">
     <Masthead
       :mode="mode"
       :pinned-scheme="scheme.pinned.value"

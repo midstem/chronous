@@ -5,6 +5,9 @@ import { CALENDAR_DIRECTIVES } from '@midstem/chronous-angular'
   selector: 'app-plain-slotted',
   standalone: true,
   imports: [CALENDAR_DIRECTIVES],
+  host: {
+    class: 'block'
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="sticky top-0 z-10 bg-surface">

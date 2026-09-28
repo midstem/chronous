@@ -24,6 +24,9 @@ import { ThemeToggleComponent } from '../theme/theme-toggle.component'
   selector: 'app-masthead',
   standalone: true,
   imports: [RuntimeComponent, ThemeToggleComponent],
+  host: {
+    class: 'block shrink-0'
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header

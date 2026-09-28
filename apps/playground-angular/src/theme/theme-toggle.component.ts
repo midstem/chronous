@@ -11,6 +11,9 @@ import { ThemeService } from './theme.service'
 @Component({
   selector: 'app-theme-toggle',
   standalone: true,
+  host: {
+    class: 'inline-flex'
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <button

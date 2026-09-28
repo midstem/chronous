@@ -23,9 +23,12 @@ import { SnippetComponent } from '../snippet/snippet.component'
     BoardComponent,
     SnippetComponent
   ],
+  host: {
+    class: 'block h-dvh overflow-hidden'
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="flex h-dvh flex-col bg-canvas text-ink">
+    <div class="flex h-full flex-col overflow-hidden bg-canvas text-ink">
       <app-masthead
         [mode]="mode()"
         (modeChange)="mode.set($event)"

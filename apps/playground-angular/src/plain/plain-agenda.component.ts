@@ -5,6 +5,9 @@ import { CALENDAR_DIRECTIVES } from '@midstem/chronous-angular'
   selector: 'app-plain-agenda',
   standalone: true,
   imports: [CALENDAR_DIRECTIVES],
+  host: {
+    class: 'block'
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ul chronousAgendaList class="divide-y divide-hair">

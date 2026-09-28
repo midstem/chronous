@@ -21,6 +21,9 @@ import type { Density } from '@midstem/playground-core'
 @Component({
   selector: 'app-toolbar',
   standalone: true,
+  host: {
+    class: 'block shrink-0'
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="flex flex-wrap items-center gap-3 pb-3">

@@ -11,6 +11,9 @@ import { PlaygroundService } from '../playground/playground.service'
 @Component({
   selector: 'app-events',
   standalone: true,
+  host: {
+    class: 'flex min-h-0 flex-1 flex-col'
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="flex min-h-0 flex-1 flex-col gap-2">

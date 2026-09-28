@@ -9,9 +9,12 @@ import { EventsComponent } from '../events/events.component'
   selector: 'app-sidebar',
   standalone: true,
   imports: [ControlsComponent, EventsComponent],
+  host: {
+    class: 'flex min-h-0 flex-col'
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <aside class="flex min-h-0 flex-col border-r border-line bg-raised">
+    <aside class="flex min-h-0 flex-1 flex-col border-r border-line bg-raised">
       <div class="flex shrink-0 gap-0.5 border-b border-line px-2 pt-2">
         @for (item of tabs; track item.id) {
           <button
