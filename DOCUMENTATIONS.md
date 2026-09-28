@@ -62,9 +62,13 @@ linked rather than bundled, so it depends on the engine the ordinary way and
 resolves it at runtime — the same one install for a consumer, and `instanceof`
 on the error classes holds across a direct engine import.
 
-The application must supply Temporal before using the calendar. Where it is not
+For full calendar behavior, the application must supply Temporal. Where it is not
 native, install `temporal-polyfill` and import `temporal-polyfill/global` from
 the application entry module. Chronous reads `globalThis.Temporal` synchronously.
+For a limited calendar of fixed instants and date-only all-day events, set
+`timeFallback: 'date'` on `CalendarRange`. The fallback rejects recurrence,
+floating times and displayed DST transition days; see the
+[core Temporal section](packages/core/DOCUMENTATIONS.md#limited-date-fallback).
 
 `packages/angular` builds with `ngc` in `compilationMode: 'partial'` rather than
 with vite, because a published Angular library has to carry `ɵɵngDeclare*`

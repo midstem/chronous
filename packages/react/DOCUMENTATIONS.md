@@ -40,7 +40,7 @@ against the package that built the calendar.
 
 ## Temporal, and Safari
 
-The host application must provide Temporal before rendering. On browsers without
+For full behavior, the host application must provide Temporal. On browsers without
 native Temporal, install `temporal-polyfill` and import its global entry from
 your application entry module:
 
@@ -49,7 +49,8 @@ import 'temporal-polyfill/global'
 ```
 
 Chronous reads `globalThis.Temporal` synchronously. If it is absent, calendar
-results report `MissingTemporalError` immediately.
+results report `MissingTemporalError` by default. Set `timeFallback: 'date'` on
+the range for the [limited Date mode](../core/DOCUMENTATIONS.md#limited-date-fallback).
 
 ## `useCalendar`
 
@@ -92,12 +93,14 @@ first — so a long month never drags the anchor backwards. The weekday of the
 anchor survives a week step, which is what makes switching to `day` afterwards
 land where the reader was looking.
 
-`next` and `prev` are also null while Temporal is still loading, and become
-steppable on their own once it lands. Beyond that they are null when the range
+`next` and `prev` are also null while Temporal is still loading unless the range
+uses the limited Date mode. Beyond that they are null when the range
 itself cannot be stepped: an anchor
 date that cannot be read, or a `dayCount` that is not a whole number of days.
 An unreadable time zone does not stop a step — it stops the calendar, not the
 arithmetic — so the buttons keep working while the zone is being fixed.
+In Date mode, a step also validates the target range and can be unavailable
+when it contains a DST transition or an unreadable zone.
 
 `today` is a function rather than a value because it depends on the wall clock
 and not on the inputs: it is read at the click, in the calendar's own zone. It

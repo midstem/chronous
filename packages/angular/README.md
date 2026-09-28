@@ -25,8 +25,9 @@ npm install @midstem/chronous-angular
 
 One install is enough: the engine arrives with it, and `buildCalendar`,
 `formatIso`, the error classes and every type are re-exported from this same
-specifier. Temporal must be available before using the calendar. See
-[Temporal](#temporal) for setup on browsers without native support.
+specifier. Temporal is needed for full calendar behavior. See
+[Temporal](#temporal) for setup and the limited Date mode on browsers without
+native support.
 
 Standalone, signal-based and zoneless-friendly. Angular 18 or newer.
 
@@ -143,7 +144,7 @@ and the period title, and you set your own `range` signal from it.
 
 ## Temporal
 
-Chronous requires `Temporal`. If your target browser does not have it, install
+Chronous uses `Temporal` for full behavior. If your target browser does not have it, install
 the polyfill in your application and import it before rendering:
 
 ```bash
@@ -156,7 +157,8 @@ import 'temporal-polyfill/global'
 
 In browsers with native Temporal, the extra import is unnecessary. Chronous does
 not download a polyfill or wait for one. Without Temporal, calendar results
-contain `MissingTemporalError` immediately.
+contain `MissingTemporalError` by default. Set `timeFallback: 'date'` on the range
+for the [limited Date mode](https://github.com/midstem/chronous/blob/main/packages/core/DOCUMENTATIONS.md#limited-date-fallback).
 
 ## Documentation
 

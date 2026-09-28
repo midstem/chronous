@@ -152,7 +152,7 @@ do the loop above for you.
 
 ## Temporal
 
-Chronous requires `Temporal` when it builds a calendar. On runtimes without native
+Chronous uses `Temporal` for full calendar behavior. On runtimes without native
 Temporal, install `temporal-polyfill` in your application and import its global
 entry before the first calendar operation:
 
@@ -162,9 +162,12 @@ import { buildCalendar } from '@midstem/chronous'
 ```
 
 Chronous does not load the polyfill. Without either native Temporal or that
-import, calendar operations throw `MissingTemporalError`. All-day dates,
-recurrence and time-zone transitions use Temporal's explicit calendar and zone
-semantics.
+import, calendar operations throw `MissingTemporalError` by default. An opt-in
+`timeFallback: 'date'` range can render fixed instants and date-only all-day
+events outside DST transition days; it rejects recurrence, floating times and
+durations. See the [limited Date fallback](https://github.com/midstem/chronous/blob/main/packages/core/DOCUMENTATIONS.md#limited-date-fallback)
+for the exact contract. All-day dates, recurrence and time-zone transitions use
+Temporal's explicit calendar and zone semantics in full mode.
 
 ## Documentation
 

@@ -55,11 +55,43 @@ describe('a runtime with no Temporal', () => {
     )
   })
 
-  it('fails formatIso the same way', async () => {
-    await withoutTemporal(({ formatIso, MissingTemporalError }) => {
-      expect(() => formatIso('2026-03-25', { locale: 'en-GB' })).toThrow(
-        MissingTemporalError
+  it('steps and selects today in explicit Date fallback mode', async () => {
+    await withoutTemporal(({ calendarReducer, initialCalendarState }) => {
+      const state = initialCalendarState({ ...RANGE, timeFallback: 'date' })
+      expect(calendarReducer(state, { type: 'next' }).range.currentDate).toBe(
+        '2026-04-01'
       )
+      expect(
+        calendarReducer(state, {
+          type: 'today',
+          now: '2026-08-25T23:30:00Z'
+        }).range.currentDate
+      ).toBe('2026-08-26')
+    })
+  })
+
+  it('formats an unambiguous date without Temporal', async () => {
+    await withoutTemporal(({ formatIso }) => {
+      expect(
+        formatIso('2026-03-25', {
+          locale: 'en-GB',
+          options: { year: 'numeric', month: '2-digit', day: '2-digit' }
+        })
+      ).toBe('25/03/2026')
+      expect(
+        formatIso('2026-03-25T09:00:00+02:00', {
+          locale: 'en-GB',
+          options: { hour: '2-digit', minute: '2-digit', hour12: false }
+        })
+      ).toBe('09:00')
+    })
+  })
+
+  it('still rejects floating date-times without Temporal', async () => {
+    await withoutTemporal(({ formatIso, MissingTemporalError }) => {
+      expect(() =>
+        formatIso('2026-03-25T09:00:00', { locale: 'en-GB' })
+      ).toThrow(MissingTemporalError)
     })
   })
 

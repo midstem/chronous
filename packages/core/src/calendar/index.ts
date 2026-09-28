@@ -4,8 +4,10 @@ import { buildLayout } from '#src/layout'
 import { buildRange } from '#src/range'
 import type { CalendarRange } from '#src/range'
 import { expandEvents } from '#src/recurrence'
+import { isTemporalAvailable } from '#src/runtime'
 import { requireTemporal, toIso } from '#src/time'
 
+import { buildCalendarDateFallback } from './date-fallback'
 import { dayOf, rowOf } from './helpers'
 import type { CalendarLayout } from './types'
 
@@ -18,6 +20,10 @@ export const buildCalendar = <TData>(
   range: CalendarRange,
   events: readonly EventInput<TData>[]
 ): CalendarLayout<TData> => {
+  if (!isTemporalAvailable() && range.timeFallback === 'date') {
+    return buildCalendarDateFallback(range, events)
+  }
+
   requireTemporal()
 
   const built = buildRange(range)

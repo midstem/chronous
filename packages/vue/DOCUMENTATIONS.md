@@ -42,7 +42,7 @@ against the package that built the calendar.
 
 ## Temporal, and Safari
 
-The host application must provide Temporal before rendering. On browsers without
+For full behavior, the host application must provide Temporal. On browsers without
 native Temporal, install `temporal-polyfill` and import its global entry from
 your application entry module:
 
@@ -51,7 +51,8 @@ import 'temporal-polyfill/global'
 ```
 
 Chronous reads `globalThis.Temporal` synchronously. If it is absent, calendar
-results report `MissingTemporalError` immediately.
+results report `MissingTemporalError` by default. Set `timeFallback: 'date'` on
+the range for the [limited Date mode](../core/DOCUMENTATIONS.md#limited-date-fallback).
 
 ## `useCalendar`
 
@@ -101,7 +102,9 @@ land where the reader was looking.
 
 `next` and `prev` are computed refs that evaluate to null when the range itself
 cannot be stepped: an anchor date that cannot be read, or a `dayCount` that is
-not a whole number of days.
+not a whole number of days. Without Temporal they are also null unless the
+range uses the limited Date mode; that mode rejects target ranges containing a
+DST transition or an unreadable zone.
 
 `today` is a computed ref returning a function rather than a value because it
 depends on the wall clock and not on the inputs: it is read at the click, in

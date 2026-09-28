@@ -42,6 +42,29 @@ describe('a browser with no Temporal', () => {
       expect(result.current.error).toBeInstanceOf(MissingTemporalError)
     })
   })
+
+  it('renders a fixed event when the Date fallback is selected', async () => {
+    await withoutTemporal(({ useCalendar }) => {
+      const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      try {
+        const { result } = renderHook(() =>
+          useCalendar({ ...RANGE, timeFallback: 'date' }, [
+            {
+              id: 'meeting',
+              start: '2026-03-18T07:00:00Z',
+              end: '2026-03-18T08:00:00Z'
+            }
+          ])
+        )
+        expect(result.current.error).toBeNull()
+        expect(result.current.calendar?.days[0].boxes[0].start).toBe(
+          '2026-03-18T09:00:00+02:00'
+        )
+      } finally {
+        warning.mockRestore()
+      }
+    })
+  })
 })
 
 describe('a browser that ships Temporal', () => {
