@@ -49,6 +49,9 @@ import { ToolbarComponent } from '../toolbar/toolbar.component'
     PlainAgendaComponent,
     StateComponent
   ],
+  host: {
+    class: 'flex min-h-0 min-w-0 flex-1 flex-col'
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ng-template #calendarError let-error>

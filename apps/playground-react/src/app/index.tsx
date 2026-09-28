@@ -22,7 +22,7 @@ export const App = (): ReactElement => {
   const { state, range, source, events, problem } = playground
 
   return (
-    <div className="flex h-dvh flex-col bg-canvas text-ink">
+    <div className="flex h-dvh flex-col overflow-hidden bg-canvas text-ink">
       <Masthead
         mode={mode}
         scheme={scheme}

@@ -14,6 +14,9 @@ import type { EventData } from '@midstem/playground-core'
   selector: 'app-allday',
   standalone: true,
   imports: [CALENDAR_DIRECTIVES],
+  host: {
+    class: 'block'
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <chronous-all-day-row

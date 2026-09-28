@@ -17,6 +17,9 @@ import type { CodeToken } from '@midstem/playground-core'
 @Component({
   selector: 'app-code',
   standalone: true,
+  host: {
+    class: 'flex min-h-0 min-w-0 flex-1 flex-col'
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="flex min-h-0 flex-1 flex-col p-4">

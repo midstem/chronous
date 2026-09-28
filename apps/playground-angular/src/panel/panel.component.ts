@@ -3,6 +3,9 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core'
 @Component({
   selector: 'app-panel',
   standalone: true,
+  host: {
+    class: 'block'
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section

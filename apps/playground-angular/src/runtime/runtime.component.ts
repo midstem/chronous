@@ -18,6 +18,9 @@ import {
 @Component({
   selector: 'app-runtime',
   standalone: true,
+  host: {
+    class: 'inline-flex'
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <button

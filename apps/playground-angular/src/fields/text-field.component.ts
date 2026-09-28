@@ -10,6 +10,9 @@ let nextId = 0
 @Component({
   selector: 'app-text-field',
   standalone: true,
+  host: {
+    class: 'block'
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="flex flex-col gap-1">

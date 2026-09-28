@@ -49,6 +49,13 @@
     scrollbar-color: var(--color-line) transparent;
   }
 
+  html,
+  body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+  }
+
   body {
     background: var(--color-canvas);
     color: var(--color-ink);

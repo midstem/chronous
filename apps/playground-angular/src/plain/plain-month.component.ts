@@ -7,6 +7,9 @@ const LANE_HEIGHT = 20
   selector: 'app-plain-month',
   standalone: true,
   imports: [CALENDAR_DIRECTIVES],
+  host: {
+    class: 'block'
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div chronousMonthGrid>

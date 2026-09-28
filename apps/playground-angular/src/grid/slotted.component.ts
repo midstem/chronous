@@ -25,6 +25,9 @@ import { AlldayComponent } from '../allday/allday.component'
   selector: 'app-slotted',
   standalone: true,
   imports: [CALENDAR_DIRECTIVES, AlldayComponent],
+  host: {
+    class: 'block'
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="sticky top-0 z-30 bg-surface">

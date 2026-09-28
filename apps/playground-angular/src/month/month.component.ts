@@ -18,6 +18,9 @@ import type { EventData } from '@midstem/playground-core'
   selector: 'app-month',
   standalone: true,
   imports: [CALENDAR_DIRECTIVES],
+  host: {
+    class: 'block'
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div chronousMonthGrid>
