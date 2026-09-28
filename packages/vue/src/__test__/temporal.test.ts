@@ -34,11 +34,14 @@ afterEach(() => {
 })
 
 describe('a browser with no Temporal', () => {
-  it('reports an immediate missing Temporal error', async () => {
-    await withoutTemporal(({ useCalendar, MissingTemporalError }) => {
+  it('draws automatically with the Date fallback', async () => {
+    await withoutTemporal(({ useCalendar }) => {
+      const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
       const result = useCalendar(RANGE, [])
-      expect(result.calendar.value).toBeNull()
-      expect(result.error.value).toBeInstanceOf(MissingTemporalError)
+      expect(result.calendar.value?.days).toHaveLength(1)
+      expect(result.error.value).toBeNull()
+      expect(warning).toHaveBeenCalled()
+      warning.mockRestore()
     })
   })
 })

@@ -7,13 +7,58 @@ import {
   getZonedParts,
   isDateOnlyString,
   parseDateOnly,
-  parseFixedTimedIso
+  parseTimedIso
 } from './time'
 import type { FallbackEvent } from './types'
+import { warnApproximation } from './warn'
 
 const END_BEFORE_START_REASON = 'ends before it starts'
 const UNREADABLE_START_REASON = 'has an unreadable start'
 const UNREADABLE_END_REASON = 'has an unreadable end'
+
+const DURATION_PATTERN =
+  /^P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)W)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?$/i
+
+const durationParts = (eventId: string, value: string): number[] => {
+  const match = DURATION_PATTERN.exec(value)
+  if (!match || match.slice(1).every((part) => part === undefined))
+    throw new InvalidEventError(eventId, 'has an unreadable duration')
+  return match.slice(1).map((part) => Number(part ?? 0))
+}
+
+const durationDays = (eventId: string, value: string): number => {
+  const [years, months, weeks, days, hours, minutes, seconds] = durationParts(
+    eventId,
+    value
+  )
+  if (hours || minutes || seconds)
+    throw new InvalidEventError(eventId, 'all-day duration needs date units')
+  if (years || months)
+    warnApproximation(
+      `duration:${eventId}`,
+      `Calendar months and years for event "${eventId}" use approximate lengths in Date fallback.`
+    )
+  return years * 365 + months * 30 + weeks * 7 + days
+}
+
+const durationMilliseconds = (eventId: string, value: string): number => {
+  const [years, months, weeks, days, hours, minutes, seconds] = durationParts(
+    eventId,
+    value
+  )
+  if (years || months || weeks || days)
+    warnApproximation(
+      `duration:${eventId}`,
+      `Calendar units in the duration of event "${eventId}" use approximate elapsed time in Date fallback.`
+    )
+  return (
+    ((((years * 365 + months * 30 + weeks * 7 + days) * 24 + hours) * 60 +
+      minutes) *
+      60 +
+      seconds) *
+    1000
+  )
+}
 
 export const normalizeFallbackEvent = <TData>(
   input: EventInput<TData>,
@@ -35,13 +80,6 @@ export const normalizeFallbackEvent = <TData>(
     )
   }
 
-  if (input.duration !== undefined) {
-    throw new InvalidEventError(
-      input.id,
-      'duration is not supported in date fallback mode'
-    )
-  }
-
   const isAllDay =
     input.allDay !== undefined
       ? input.allDay
@@ -49,77 +87,84 @@ export const normalizeFallbackEvent = <TData>(
         (input.end === undefined || isDateOnlyString(input.end))
 
   if (isAllDay) {
-    if (!isDateOnlyString(input.start)) {
-      throw new InvalidEventError(
-        input.id,
-        'all-day events must be date-only in date fallback mode'
-      )
-    }
-
+    const sourceZone = input.timeZone ?? timeZone
+    const start = isDateOnlyString(input.start)
+      ? input.start
+      : getZonedParts(
+          parseTimedIso(
+            input.id,
+            input.start,
+            sourceZone,
+            UNREADABLE_START_REASON
+          ),
+          sourceZone
+        ).dateString
     parseDateOnly(
-      input.start,
+      start,
       (cause) => new InvalidEventError(input.id, UNREADABLE_START_REASON, cause)
     )
 
     let end: string
     if (input.end !== undefined) {
-      if (!isDateOnlyString(input.end)) {
-        throw new InvalidEventError(
-          input.id,
-          UNREADABLE_END_REASON,
-          new RangeError(`Invalid all-day end date: "${input.end}"`)
-        )
-      }
+      const parsedEnd = isDateOnlyString(input.end)
+        ? input.end
+        : getZonedParts(
+            parseTimedIso(
+              input.id,
+              input.end,
+              sourceZone,
+              UNREADABLE_END_REASON
+            ),
+            sourceZone
+          ).dateString
       parseDateOnly(
-        input.end,
+        parsedEnd,
         (cause) => new InvalidEventError(input.id, UNREADABLE_END_REASON, cause)
       )
 
-      if (input.end < input.start) {
+      if (parsedEnd < start) {
         throw new InvalidEventError(input.id, END_BEFORE_START_REASON)
       }
 
-      end =
-        input.end === input.start ? addDaysToDate(input.start, 1) : input.end
+      end = parsedEnd === start ? addDaysToDate(start, 1) : parsedEnd
+    } else if (input.duration !== undefined) {
+      end = addDaysToDate(start, durationDays(input.id, input.duration))
     } else {
-      end = addDaysToDate(input.start, 1)
+      end = addDaysToDate(start, 1)
     }
+
+    if (end === start) end = addDaysToDate(start, 1)
 
     return {
       id: input.id,
       allDay: true,
-      start: input.start,
+      start,
       end,
       data: input.data
     }
   }
 
-  if (isDateOnlyString(input.start)) {
-    throw new InvalidEventError(
-      input.id,
-      'floating times are not supported in date fallback mode'
-    )
-  }
-
-  const startEpoch = parseFixedTimedIso(
+  const sourceZone = input.timeZone ?? timeZone
+  const startEpoch = parseTimedIso(
     input.id,
     input.start,
+    sourceZone,
     UNREADABLE_START_REASON
   )
 
   let endEpoch: number
   if (input.end !== undefined) {
-    if (isDateOnlyString(input.end)) {
-      throw new InvalidEventError(
-        input.id,
-        UNREADABLE_END_REASON,
-        new RangeError('End of timed event cannot be date-only')
-      )
-    }
-    endEpoch = parseFixedTimedIso(input.id, input.end, UNREADABLE_END_REASON)
+    endEpoch = parseTimedIso(
+      input.id,
+      input.end,
+      sourceZone,
+      UNREADABLE_END_REASON
+    )
     if (endEpoch < startEpoch) {
       throw new InvalidEventError(input.id, END_BEFORE_START_REASON)
     }
+  } else if (input.duration !== undefined) {
+    endEpoch = startEpoch + durationMilliseconds(input.id, input.duration)
   } else {
     endEpoch = startEpoch
   }

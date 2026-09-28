@@ -48,17 +48,19 @@ both imports.
 
 ## Temporal, and Safari
 
-For full behavior, the host application must provide Temporal. On browsers without
-native Temporal, install `temporal-polyfill` and import its global entry from
-your application entry module:
+For exact calendar behavior, install `temporal-polyfill` in the application
+and import its global entry before rendering on browsers without native
+Temporal:
 
 ```ts
 import 'temporal-polyfill/global'
 ```
 
-Chronous reads `globalThis.Temporal` synchronously. If it is absent, calendar
-results report `MissingTemporalError` by default. Set `timeFallback: 'date'` on
-the range for the [limited Date mode](../core/DOCUMENTATIONS.md#limited-date-fallback).
+Chronous does not bundle the polyfill. If `globalThis.Temporal` is absent, it
+automatically uses a `Date` fallback and warns in the console. The range API
+does not change. Ordinary events keep rendering; a recurring or unreadable
+event is omitted with a warning, and DST layout may be approximate. See the
+[core browser behavior](../core/DOCUMENTATIONS.md#browser-behavior).
 
 ## `injectCalendar`
 
@@ -116,14 +118,10 @@ first — so a long month never drags the anchor backwards. The weekday of the
 anchor survives a week step, which is what makes switching to `day` afterwards
 land where the reader was looking.
 
-`next` and `prev` are null while Temporal is still loading unless the range uses
-the limited Date mode. Beyond that they are null when the range itself
-cannot be stepped: an anchor date that cannot be read, or a `dayCount` that is
-not a whole number of days. An unreadable time zone does not stop a step — it
-stops the calendar, not the arithmetic — so the buttons keep working while the
-zone is being fixed.
-In Date mode, a step also validates the target range and can be unavailable
-when it contains a DST transition or an unreadable zone.
+`next` and `prev` remain usable when Temporal is absent because core uses its
+automatic Date fallback. They are null when the range cannot be stepped, such
+as an unreadable anchor date or invalid `dayCount`. DST transitions can make
+the resulting calendar layout approximate and produce a console warning.
 
 `today` is a function rather than a value because it depends on the wall clock
 and not on the inputs: it is read at the click, in the calendar's own zone. It

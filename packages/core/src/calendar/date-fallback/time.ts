@@ -2,6 +2,8 @@ import { InvalidEventError } from '#src/event'
 import { InvalidRangeError } from '#src/range'
 import type { IsoDate, IsoDateTime } from '#src/time'
 
+import { warnApproximation } from './warn'
+
 const DATE_ONLY_PATTERN = /^([+-]?\d{4,6})-(\d{2})-(\d{2})$/
 
 const FIXED_TIMED_PATTERN =
@@ -9,6 +11,9 @@ const FIXED_TIMED_PATTERN =
 
 const FLOATING_TIMED_PATTERN =
   /^[+-]?\d{4,6}-\d{2}-\d{2}[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d{1,9})?)?(?:\[.+\])?$/i
+
+const LOCAL_TIMED_FIELDS =
+  /^([+-]?\d{4,6}-\d{2}-\d{2})[T ](\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,9}))?)?$/
 
 export const validateTimeZone = (timeZone: string): void => {
   try {
@@ -248,10 +253,16 @@ export type TransitionCheckResult = {
   endIso: IsoDateTime
 }
 
+const transitionCache = new Map<string, TransitionCheckResult>()
+
 export const checkTransitionDay = (
   dateStr: string,
   timeZone: string
 ): TransitionCheckResult => {
+  const key = `${timeZone}|${dateStr}`
+  const cached = transitionCache.get(key)
+  if (cached) return cached
+
   const nextDateStr = addDaysToDate(dateStr, 1)
   const startEpoch = getDayStartEpoch(dateStr, timeZone)
   const endEpoch = getDayStartEpoch(nextDateStr, timeZone)
@@ -276,13 +287,17 @@ export const checkTransitionDay = (
 
   const isTransition = !is24Hours || !constantOffset || !midnightMatches
 
-  return {
+  const result = {
     isTransition,
     startEpoch,
     endEpoch,
     startIso: startZoned.isoString,
     endIso: endZoned.isoString
   }
+
+  if (transitionCache.size >= 256) transitionCache.clear()
+  transitionCache.set(key, result)
+  return result
 }
 
 export const parseFixedTimedIso = (
@@ -365,4 +380,63 @@ export const parseFixedTimedIso = (
 
   const localUtcMs = utcEpoch(year, month, day, hour, minute, second, ms)
   return localUtcMs - offsetMin * 60_000
+}
+
+export const parseTimedIso = (
+  eventId: string,
+  value: string,
+  sourceZone: string,
+  reason: string
+): number => {
+  const annotated = /\[([^\]]+)\]$/.exec(value)
+  const zone = annotated?.[1] ?? sourceZone
+  const bare = annotated ? value.slice(0, annotated.index) : value
+
+  if (FIXED_TIMED_PATTERN.test(bare))
+    return parseFixedTimedIso(eventId, bare, reason)
+
+  if (isDateOnlyString(bare)) {
+    parseDateOnly(
+      bare,
+      (cause) => new InvalidEventError(eventId, reason, cause)
+    )
+    return getDayStartEpoch(bare, zone)
+  }
+
+  const fields = LOCAL_TIMED_FIELDS.exec(bare)
+  if (!fields)
+    throw new InvalidEventError(
+      eventId,
+      reason,
+      new RangeError(`Invalid ISO date-time: "${value}"`)
+    )
+
+  parseDateOnly(
+    fields[1],
+    (cause) => new InvalidEventError(eventId, reason, cause)
+  )
+  const hour = Number(fields[2])
+  const minute = Number(fields[3])
+  const second = fields[4] === undefined ? 0 : Number(fields[4])
+  const millisecond = fields[5]
+    ? Math.floor(Number(`0.${fields[5]}`) * 1000)
+    : 0
+  if (hour > 23 || minute > 59 || second > 59)
+    throw new InvalidEventError(
+      eventId,
+      reason,
+      new RangeError('Invalid wall time')
+    )
+
+  const day = checkTransitionDay(fields[1], zone)
+  if (day.isTransition) {
+    warnApproximation(
+      `wall:${zone}:${fields[1]}`,
+      `Wall times on ${fields[1]} in ${zone} are approximate in Date fallback.`
+    )
+  }
+
+  return (
+    day.startEpoch + ((hour * 60 + minute) * 60 + second) * 1000 + millisecond
+  )
 }

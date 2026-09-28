@@ -13,6 +13,7 @@ import {
   validateTimeZone
 } from './time'
 import type { FallbackDay } from './types'
+import { warnApproximation } from './warn'
 
 const DEFAULT_SLOT_MINUTES = 60
 const DEFAULT_WEEK_STARTS_ON: WeekStartsOn = 1
@@ -132,19 +133,30 @@ export const buildFallbackRange = (
   const days: FallbackDay[] = dates.map((date) => {
     const check = checkTransitionDay(date, range.timeZone)
     if (check.isTransition) {
-      throw new InvalidRangeError(
-        'UTC offset transition or non-24-hour day is not supported in date fallback mode'
+      warnApproximation(
+        `transition:${range.timeZone}:${date}`,
+        `The ${date} grid in ${range.timeZone} crosses a time-zone transition; Date fallback slot boundaries may differ from Temporal.`
       )
     }
 
+    const slotCount = Math.ceil(1440 / slotMinutes)
     const slots = isSlotted
-      ? Array.from({ length: Math.ceil(1440 / slotMinutes) }, (_, index) => {
+      ? Array.from({ length: slotCount }, (_, index) => {
           const minuteOfDay = index * slotMinutes
-          const slotStartEpoch = check.startEpoch + minuteOfDay * 60_000
-          const slotEndEpoch = Math.min(
-            check.startEpoch + (index + 1) * slotMinutes * 60_000,
+          const slotStartEpoch = Math.min(
+            check.startEpoch + minuteOfDay * 60_000,
             check.endEpoch
           )
+          const slotEndEpoch =
+            index === slotCount - 1
+              ? check.endEpoch
+              : Math.max(
+                  slotStartEpoch,
+                  Math.min(
+                    check.startEpoch + (index + 1) * slotMinutes * 60_000,
+                    check.endEpoch
+                  )
+                )
           return {
             minuteOfDay,
             start: getZonedParts(slotStartEpoch, range.timeZone).isoString,
@@ -160,7 +172,7 @@ export const buildFallbackRange = (
       endEpoch: check.endEpoch,
       startIso: check.startIso,
       endIso: check.endIso,
-      minutes: 1440,
+      minutes: (check.endEpoch - check.startEpoch) / 60_000,
       inCurrentPeriod: isDateInCurrentPeriod(date),
       slots
     }

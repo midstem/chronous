@@ -5,7 +5,8 @@ import type { CalendarLayout } from '../types'
 import { normalizeFallbackEvent } from './event'
 import { buildFallbackLayout } from './layout'
 import { buildFallbackRange } from './range'
-import { warnFallbackOnce } from './warn'
+import { warnApproximation, warnFallbackOnce } from './warn'
+import type { FallbackEvent } from './types'
 
 export const buildCalendarDateFallback = <TData>(
   range: CalendarRange,
@@ -14,9 +15,18 @@ export const buildCalendarDateFallback = <TData>(
   warnFallbackOnce()
 
   const builtRange = buildFallbackRange(range)
-  const normalizedEvents = events.map((event) =>
-    normalizeFallbackEvent(event, range.timeZone)
-  )
+  const normalizedEvents: FallbackEvent<TData>[] = []
+  for (const event of events) {
+    try {
+      normalizedEvents.push(normalizeFallbackEvent(event, range.timeZone))
+    } catch (cause) {
+      const reason = cause instanceof Error ? cause.message : String(cause)
+      warnApproximation(
+        `event:${event.id}:${reason}`,
+        `Event "${event.id}" was omitted from the Date fallback: ${reason}`
+      )
+    }
+  }
 
   const layout = buildFallbackLayout(
     builtRange.view,

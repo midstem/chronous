@@ -20,7 +20,7 @@ export const buildCalendar = <TData>(
   range: CalendarRange,
   events: readonly EventInput<TData>[]
 ): CalendarLayout<TData> => {
-  if (!isTemporalAvailable() && range.timeFallback === 'date') {
+  if (!isTemporalAvailable()) {
     return buildCalendarDateFallback(range, events)
   }
 

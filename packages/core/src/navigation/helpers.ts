@@ -11,7 +11,6 @@ import {
 } from '#src/time'
 import type { IsoDate, IsoDateTime } from '#src/time'
 
-import { buildFallbackRange } from '../calendar/date-fallback/range'
 import {
   addDaysToDate,
   formatDateOnly,
@@ -19,6 +18,7 @@ import {
   parseDateOnly,
   validateTimeZone
 } from '../calendar/date-fallback/time'
+import { warnFallbackOnce } from '../calendar/date-fallback/warn'
 
 import {
   MONTH_VIEW,
@@ -33,7 +33,8 @@ export const shiftedDate = (
   range: CalendarRange,
   direction: number
 ): IsoDate => {
-  if (!isTemporalAvailable() && range.timeFallback === 'date') {
+  if (!isTemporalAvailable()) {
+    warnFallbackOnce()
     const anchor = parseDateOnly(
       range.currentDate,
       (cause) => new InvalidRangeError('the anchor date cannot be read', cause)
@@ -47,7 +48,6 @@ export const shiftedDate = (
           })()
         : addDaysToDate(range.currentDate, direction * stepDays(range))
 
-    buildFallbackRange({ ...range, currentDate: date })
     return date
   }
 
@@ -62,17 +62,20 @@ export const shiftedDate = (
 }
 
 export const dateAt = (now: IsoDateTime, range: CalendarRange): IsoDate => {
-  if (!isTemporalAvailable() && range.timeFallback === 'date') {
+  if (!isTemporalAvailable()) {
+    warnFallbackOnce()
     try {
       validateTimeZone(range.timeZone)
-      if (!/(Z|[+-]\d{2}:?\d{2})(\[[^\]]+\])?$/i.test(now))
-        throw new RangeError('The current moment needs an explicit offset')
+      if (!/(Z|[+-]\d{2}:?\d{2})(\[[^\]]+\])?$/i.test(now)) {
+        const date = now.slice(0, 10)
+        parseDateOnly(date)
+        return date
+      }
 
       const instant = new Date(now.replace(/\[[^\]]+\]$/, ''))
       if (Number.isNaN(instant.getTime()))
         throw new RangeError('Invalid ISO date')
       const date = getZonedParts(instant.getTime(), range.timeZone).dateString
-      buildFallbackRange({ ...range, currentDate: date })
       return date
     } catch (cause) {
       throw new InvalidRangeError(UNREADABLE_MOMENT_REASON, cause)

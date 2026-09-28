@@ -21,96 +21,55 @@ and stays in the repository — it is not part of the published package.
 
 ## Temporal
 
-The engine speaks [Temporal](https://tc39.es/proposal-temporal/docs/) —
-separate types for a moment in a time zone, a date without a time and a
-duration — so that DST transitions, all-day events and cross-zone schedules are
-handled explicitly. `Date` represents an instant, and `Intl.DateTimeFormat`
-can display that instant in a chosen zone. Together they are sufficient for a
-one-off event stored as an absolute timestamp, such as
-`2026-03-18T07:00:00Z`, when the only task is showing it in the viewer's zone.
+Chronous uses [Temporal](https://tc39.es/proposal-temporal/docs/) for its full
+calendar behavior. It distinguishes an instant, a date without a time, and a
+wall time in a named zone. A `Date` plus `Intl.DateTimeFormat` is sufficient to
+show a one-off UTC instant in a viewer's zone. It is not enough by itself to
+recover an organizer's intended recurring wall time or to treat an all-day date
+as a date rather than midnight UTC.
 
-That does not cover every calendar event. An all-day holiday such as
-`2026-03-18` is a calendar date, not midnight UTC: converting midnight UTC to
-America/Los_Angeles would put it on March 17. A meeting that repeats at 09:00
-in `Europe/Kyiv` must keep that wall time while its UTC offset changes; adding
-seven times 24 hours to a `Date` can move it to 10:00 after a DST transition.
-An event entered as `2026-03-18T09:00:00` also needs a named zone before it can
-become an instant. During a DST transition, a local time may occur twice or not
-at all, so the calendar's `disambiguation` setting determines which instant is
-meant. `Date` and `Intl` do not provide these calendar operations directly.
+For example, an event stored as `2026-03-18T07:00:00Z` can be displayed as
+09:00 in Kyiv with `Date` and `Intl`. A meeting that repeats at 09:00 in
+`Europe/Kyiv` needs that named zone and wall-clock rule: adding seven times
+24 hours to the UTC instant can move the meeting after a DST transition. Store
+all-day events as date-only values such as `2026-03-18`, so conversion to a
+viewer's zone does not move the holiday to a different day.
 
-For a Notion-like application, storing UTC instants for fixed meetings is a
-sound choice. Store the intended IANA time zone as well when a meeting follows
-an organizer's local clock, especially for recurrence. Store all-day values as
-date-only strings. Converting fetched UTC instants to the viewer's zone is a
-display step; it does not recover an event's original wall-time or recurrence
-intent. Chronous uses Temporal to perform those calculations independently of
-the viewer's device time zone.
+### Browser behavior
 
-A silent `Date` fallback would change these results on unsupported browsers.
-The reduced mode below is opt-in and refuses inputs it cannot calculate with
-its stated guarantees. The full Temporal path remains the recommended mode.
-
-Chronous reads `globalThis.Temporal` synchronously. On browsers without native
-Temporal, install `temporal-polyfill` in your app and import its global entry
-before using the engine:
+The application should install `temporal-polyfill` and import its global entry
+before using Chronous in browsers without native Temporal:
 
 ```ts
 import 'temporal-polyfill/global'
 import { buildCalendar } from '@midstem/chronous'
 ```
 
-`isTemporalAvailable()` reports whether Temporal is present. By default,
-calendar operations without it throw `MissingTemporalError`. For server
-rendering, import the polyfill in your server entry module before rendering.
+Chronous does not include or install that polyfill. It reads
+`globalThis.Temporal` when an operation runs. Native Temporal or the global
+polyfill uses the full engine. If neither is present, Chronous automatically
+uses an internal `Date` and `Intl` fallback. The caller does not set a flag,
+and the input and output types stay the same. When Temporal becomes available,
+the same application code uses the full engine on its next call.
 
-### Limited Date fallback
+The fallback logs one warning about the missing polyfill. It renders the five
+views and ordinary fixed events, floating local times, all-day dates, and
+simple ISO durations. Floating times are interpreted in the event's zone or
+the calendar zone. Durations with calendar units use approximate elapsed time;
+a transition day can have approximate slot boundaries. These cases log more
+specific warnings. A recurring series or an event that cannot be read is
+omitted with a warning naming its id; other events and the calendar continue
+to render. An invalid calendar range still produces `InvalidRangeError`.
 
-To render a calendar without Temporal, set `timeFallback: 'date'` on its range:
+This is a safety net for an application that forgot the polyfill, not a second
+full scheduling engine. Install the polyfill for exact recurrence, DST,
+ambiguous wall-time handling and the complete Temporal semantics.
+`isTemporalAvailable()` reports whether `globalThis.Temporal` is present; it
+may return `false` while the Date fallback is rendering.
 
-```ts
-buildCalendar(
-  {
-    view: 'week',
-    currentDate: '2026-03-18',
-    timeZone: 'Europe/Kyiv',
-    timeFallback: 'date'
-  },
-  [
-    {
-      id: 'meeting',
-      start: '2026-03-18T07:00:00Z',
-      end: '2026-03-18T08:00:00Z'
-    }
-  ]
-)
-```
-
-The fallback uses `Date` for instants and `Intl.DateTimeFormat` for the named
-calendar zone. It supports the five views, fixed timed events with an explicit
-`Z` or numeric offset, and all-day events with date-only values. `end` remains
-exclusive for all-day events. A bracketed zone annotation on a timed event is
-not accepted in this mode. It emits one `console.warn` when first used.
-If Temporal is available, the same range uses the full Temporal engine.
-
-The fallback rejects recurrence, `duration`, floating date-times without an
-offset, and any displayed day with a UTC offset transition or a length other
-than 24 hours. The range or event returns a typed error instead of a partially
-correct layout. A month grid includes padding days, so a transition in the
-padding also makes that month unavailable in fallback mode. Navigation can step
-between supported ranges; its `today` action requires an absolute timestamp.
-`formatIso` can format date-only values and absolute timestamps without
-Temporal, but floating date-times still need Temporal.
-
-This mode is useful for a read-only calendar of one-off meetings and all-day
-dates. Install the polyfill for recurring meetings, DST weeks, floating event
-times or full API behavior. The framework adapters pass `timeFallback` through
-their `CalendarRange` and report any typed fallback error in their usual result.
-
-FullCalendar 7 also requires [`temporal-polyfill`](https://fullcalendar.io/docs/temporal-polyfill), but uses its module API
-internally rather than installing a global. Chronous currently reads the global,
-so the application import above is required for full behavior even if the
-dependency is installed.
+[FullCalendar 7](https://fullcalendar.io/docs/temporal-polyfill) also requires
+`temporal-polyfill`, but uses it as an internal module rather than installing a
+global. Chronous instead leaves polyfill installation to the application.
 
 ## Events
 
@@ -206,7 +165,6 @@ type CalendarRange = {
   dayCount?: number
   slotMinutes?: number
   disambiguation?: Disambiguation
-  timeFallback?: 'date'
 }
 ```
 

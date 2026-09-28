@@ -54,16 +54,19 @@ afterEach(() => {
 })
 
 describe('a browser with no Temporal', () => {
-  it('reports an immediate missing Temporal error', async () => {
-    await withoutTemporal(({ injectCalendar, MissingTemporalError }) => {
+  it('draws automatically with the Date fallback', async () => {
+    await withoutTemporal(({ injectCalendar }) => {
+      const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
       const result = TestBed.runInInjectionContext(() =>
         injectCalendar(
           () => RANGE,
           () => []
         )
       )
-      expect(result().calendar).toBeNull()
-      expect(result().error).toBeInstanceOf(MissingTemporalError)
+      expect(result().calendar?.days).toHaveLength(1)
+      expect(result().error).toBeNull()
+      expect(warning).toHaveBeenCalled()
+      warning.mockRestore()
     })
   })
 })

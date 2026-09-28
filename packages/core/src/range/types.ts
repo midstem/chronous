@@ -17,7 +17,6 @@ export type CalendarRange = {
   dayCount?: number
   slotMinutes?: number
   disambiguation?: Disambiguation
-  timeFallback?: 'date'
 }
 
 export type ResolvedRange = {
