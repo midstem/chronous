@@ -58,36 +58,60 @@ flowchart TB
 
 ### 3. A clock reading can be missing or happen twice
 
-**Idea.** A user enters a local clock time for an appointment near a clock change in New York. The calendar must interpret that input in the **event's** zone.
+**Idea.** A user types a time shown on the New York wall clock. Before the calendar can save it as UTC, it must check whether that clock reading actually identifies one moment.
 
-| Date in New York | Entered time | What happens?                                             | Possible calendar decision                                   |
-| ---------------- | ------------ | --------------------------------------------------------- | ------------------------------------------------------------ |
-| March 8, 2026    | **02:30**    | It does not exist: clocks skip from 01:59 to 03:00.       | Use 01:30 (`earlier`), 03:30 (`later`), or reject the input. |
-| November 1, 2026 | **01:30**    | It occurs twice: first at **05:30Z**, then at **06:30Z**. | Choose the first, choose the second, or reject the input.    |
+| Clock change in New York | What the clock does     | If the user enters… | What does it mean?                                         |
+| ------------------------ | ----------------------- | ------------------- | ---------------------------------------------------------- |
+| Spring, March 8, 2026    | **01:59 → 03:00**       | **02:30**           | No such local time exists.                                 |
+| Autumn, November 1, 2026 | **01:59 → 01:00 again** | **01:30**           | The clock shows 01:30 twice: at **05:30Z** and **06:30Z**. |
 
-**Problem.** A local clock reading near a transition may correspond to **zero or two UTC instants**. The event's date, time and zone are needed before it can become a definite instant.
+**Problem.** In spring, 02:30 never appears on the clock. In autumn, 01:30 appears once before the clock is turned back and once after. A date plus a clock reading can therefore match **zero or two UTC instants**.
 
-**Solution.** Temporal exposes `earlier`, `later`, `compatible`, and `reject`; Chronous exposes the choice through `disambiguation`. The application can make a deliberate product decision instead of silently picking a time.
+**Solution.** Chronous uses Temporal's `disambiguation` choice. For the missing spring time, it can move 02:30 to **01:30** (`earlier`) or **03:30** (`later`), or reject the input. For the repeated autumn time, it can choose the **first** or **second** 01:30, or reject the input.
 
 **Why a simple `Date` calculation fails.** `new Date(year, month, day, hour, minute)` uses the **device's local zone** and its built-in choice. It cannot express “resolve this New York wall time using my `reject` policy” directly.
 
-**When `Date` is enough.** If the event already has an exact UTC instant, there is no ambiguity left to resolve. A product that accepts the device zone and JavaScript's default choice may also use `Date`.
+**When `Date` is enough.** If the server has already supplied the exact UTC instant, there is no ambiguity left to resolve. A product that accepts the device zone and JavaScript's default choice may also use `Date`.
 
 ## Seven other useful cases
 
-| #   | Calendar situation                               | Why the distinction matters                                                                                                                                                                                                                                                                 |
-| --- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 4   | **A holiday on January 1**                       | A holiday is a **date**, not midnight UTC. `new Date('2026-01-01')` displays as December 31 at 16:00 in Los Angeles. Temporal `PlainDate` models the correct meaning. **A plain `YYYY-MM-DD` string also works** if you never convert it to a UTC `Date`.                                   |
-| 5   | **Organizer in New York, viewer in Berlin**      | A 09:00 New York series appears at **15:00 Berlin on March 2**, then **14:00 Berlin on March 16**. First calculate in `event.timeZone`, then display in `range.timeZone`.                                                                                                                   |
-| 6   | **A 30-minute clock change**                     | October 4, 2026 is **23.5 hours** long in `Australia/Lord_Howe`. Assuming every clock change is one hour breaks day-grid positions.                                                                                                                                                         |
-| 7   | **January 31 + one calendar month**              | `Date#setUTCMonth()` overflows to **March 3**. `Temporal.PlainDate.add({ months: 1 })` gives **February 28** by default. This is date arithmetic, not an `RRULE` result.                                                                                                                    |
-| 8   | **Repeat on February 29**                        | `FREQ=YEARLY;BYMONTH=2;BYMONTHDAY=29` produces **2024, then 2028**. Adding 365 days or simply adding one year gives the wrong rule result. Chronous applies `RRULE`; Temporal supplies calendar dates.                                                                                      |
-| 9   | **Cancel an occurrence in the organizer's zone** | A New York occurrence on July 6 at 00:30 appears in Los Angeles on **July 5 at 21:30**. Match the exception to the series' occurrence, not the viewer's calendar date.                                                                                                                      |
-| 10  | **A future zone rule changes**                   | A saved UTC instant means “this exact moment.” A saved **09:00 + named zone + rule** means “keep the organizer's 09:00” when future zone data changes. The system must retain that intent and recalculate; Temporal uses the host's time-zone data but cannot predict future legal changes. |
+| #   | Calendar situation                   | Why the distinction matters                                                                                                                                                                                                                                                                 |
+| --- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 4   | **A holiday on January 1**           | A holiday is a **date**, not midnight UTC. `new Date('2026-01-01')` displays as December 31 at 16:00 in Los Angeles. Temporal `PlainDate` models the correct meaning. **A plain `YYYY-MM-DD` string also works** if you never convert it to a UTC `Date`.                                   |
+| 5   | **Display a series in another zone** | A 09:00 New York series appears at **15:00 Berlin on March 2**, then **14:00 Berlin on March 16**. This is about **displaying each occurrence**: calculate it in `event.timeZone`, then convert it to `range.timeZone`.                                                                     |
+| 6   | **A 30-minute clock change**         | October 4, 2026 is **23.5 hours** long in `Australia/Lord_Howe`. Assuming every clock change is one hour breaks day-grid positions.                                                                                                                                                         |
+| 7   | **January 31 + one calendar month**  | `Date#setUTCMonth()` overflows to **March 3**. `Temporal.PlainDate.add({ months: 1 })` gives **February 28** by default. This is date arithmetic, not an `RRULE` result.                                                                                                                    |
+| 8   | **Repeat on February 29**            | `FREQ=YEARLY;BYMONTH=2;BYMONTHDAY=29` produces **2024, then 2028**. Adding 365 days or simply adding one year gives the wrong rule result. Chronous applies `RRULE`; Temporal supplies calendar dates.                                                                                      |
+| 9   | **Cancel one specific occurrence**   | A New York occurrence on July 6 at 00:30 appears in Los Angeles on **July 5 at 21:30**. This is about **which occurrence to remove**, not how to display it: an exception for July 6 in New York must still find that occurrence when the viewer sees July 5.                               |
+| 10  | **A future zone rule changes**       | A saved UTC instant means “this exact moment.” A saved **09:00 + named zone + rule** means “keep the organizer's 09:00” when future zone data changes. The system must retain that intent and recalculate; Temporal uses the host's time-zone data but cannot predict future legal changes. |
 
 ## When is `Date` + `Intl` enough?
 
-**Yes:** if your database provides an exact UTC instant for a **one-off** event, `Date` + `Intl.DateTimeFormat` can show it in anyone's zone. The same is true when a server has already expanded **every** occurrence into UTC instants and the client only displays them.
+If your server sends **ordinary events with fixed UTC starts and ends**, Chronous can display them through its automatic `Date` + `Intl` fallback. Set `range.timeZone` to the zone in which the calendar should be shown; Chronous converts those UTC instants to that zone. It does **not** automatically choose the browser user's zone for you.
+
+```ts
+import { buildCalendar } from '@midstem/chronous'
+
+const range = {
+  view: 'day',
+  currentDate: '2026-03-18',
+  timeZone: 'Europe/Berlin'
+} as const
+
+const events = [
+  {
+    id: 'server-meeting',
+    start: '2026-03-18T08:00:00Z',
+    end: '2026-03-18T09:00:00Z'
+  }
+]
+
+buildCalendar(range, events) // shows 09:00–10:00 in Berlin
+```
+
+**For this narrow use case, you do not need the polyfill to convert and place those events.** The same applies if the server has already expanded a recurring rule and sends **each occurrence as a separate fixed UTC event**. Chronous still logs its missing-Temporal warning because it cannot know that your application will only use this subset. On a day with a clock transition, the fallback's **time-grid slot boundaries can be approximate**, even when the event's UTC instant and displayed local time are correct.
+
+Use the polyfill when Chronous must calculate future occurrences from an `RRULE`, resolve local wall-clock input, apply calendar durations such as `P1D`, or provide exact grid behavior around clock changes.
 
 In Chronous, leaving out `event.timeZone` does **not** automatically mean UTC:
 

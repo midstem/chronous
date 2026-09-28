@@ -40,8 +40,8 @@ viewer's zone does not move the holiday to a different day.
 
 ### Browser behavior
 
-The application should install `temporal-polyfill` and import its global entry
-before using Chronous in browsers without native Temporal:
+For full calendar behavior, the application should install `temporal-polyfill`
+and import its global entry in browsers without native Temporal:
 
 ```ts
 import 'temporal-polyfill/global'
@@ -67,6 +67,11 @@ engine; each series logs a warning naming its id. An unreadable event is omitted
 with a warning, while other events remain visible. An invalid calendar range
 still produces `InvalidRangeError` from the core function; framework adapters
 catch it and expose it in their `error` result.
+
+If the server supplies only separate events with fixed UTC `start` and `end`
+values, the fallback can convert and place them in `range.timeZone` without a
+polyfill. It still logs the missing-Temporal warning, and time-grid slots around
+a clock transition can be approximate. See [the concrete example](WHY_TEMPORAL.md).
 
 This is a safety net for an application that forgot the polyfill, not a second
 full scheduling engine. Install the polyfill for exact recurrence, DST,
