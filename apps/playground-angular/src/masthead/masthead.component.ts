@@ -29,9 +29,29 @@ import { ThemeToggleComponent } from '../theme/theme-toggle.component'
     <header
       class="flex shrink-0 flex-wrap items-center gap-3 border-b border-line bg-surface px-4 py-2.5"
     >
-      <h1 class="flex items-baseline gap-2 text-base font-semibold">
-        {{ headline }}
-        <span class="text-xs font-normal text-faint">{{ tagline }}</span>
+      <h1 class="flex items-center gap-2 text-base font-semibold">
+        <svg
+          class="shrink-0"
+          viewBox="0 0 250 250"
+          width="24"
+          height="24"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            fill="#dd0031"
+            d="M125 30L31.9 63.2l14.2 123.1L125 230l78.9-43.7 14.2-123.1z"
+          />
+          <path fill="#c3002f" d="M125 30v22.2-.1V230l78.9-43.7 14.2-123.1z" />
+          <path
+            fill="#fff"
+            d="M125 52.1L66.8 182.6h21.7l11.7-29.2h49.4l11.7 29.2H183zm17 83.3h-34l17-40.9z"
+          />
+        </svg>
+        <span class="flex items-baseline gap-2">
+          {{ headline }}
+          <span class="text-xs font-normal text-faint">{{ tagline }}</span>
+        </span>
       </h1>
 
       <nav

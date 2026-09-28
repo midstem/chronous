@@ -6,13 +6,17 @@ defineProps<{
 </script>
 
 <template>
-  <section class="panel">
-    <header class="panel-header">
-      <h3 class="panel-title">{{ title }}</h3>
-      <span v-if="badge" class="panel-badge">{{ badge }}</span>
-    </header>
-    <div class="panel-body">
-      <slot />
-    </div>
+  <section
+    class="flex flex-col gap-3 rounded-lg border border-line bg-surface p-3"
+  >
+    <h2
+      class="flex flex-wrap items-baseline justify-between gap-2 text-[13px] font-semibold"
+    >
+      {{ title }}
+      <span v-if="badge" class="font-mono text-[10px] font-normal text-faint">
+        {{ badge }}
+      </span>
+    </h2>
+    <slot />
   </section>
 </template>

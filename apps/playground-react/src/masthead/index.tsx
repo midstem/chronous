@@ -34,9 +34,49 @@ export const Masthead = ({
   onReset
 }: MastheadProps): ReactElement => (
   <header className="flex shrink-0 flex-wrap items-center gap-3 border-b border-line bg-surface px-4 py-2.5">
-    <h1 className="flex items-baseline gap-2 text-base font-semibold">
-      {HEADLINE}
-      <span className="text-xs font-normal text-faint">{TAGLINE}</span>
+    <h1 className="flex items-center gap-2 text-base font-semibold">
+      <svg
+        viewBox="0 0 118 103"
+        width="24"
+        height="24"
+        aria-hidden="true"
+        className="shrink-0"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g fill="none" fillRule="evenodd">
+          <circle cx="59" cy="51.5" r="10.8" fill="#61DAFB" />
+          <ellipse
+            cx="59"
+            cy="51.5"
+            rx="59"
+            ry="22.9"
+            stroke="#61DAFB"
+            strokeWidth="4.5"
+          />
+          <ellipse
+            cx="59"
+            cy="51.5"
+            rx="59"
+            ry="22.9"
+            stroke="#61DAFB"
+            strokeWidth="4.5"
+            transform="rotate(60 59 51.5)"
+          />
+          <ellipse
+            cx="59"
+            cy="51.5"
+            rx="59"
+            ry="22.9"
+            stroke="#61DAFB"
+            strokeWidth="4.5"
+            transform="rotate(120 59 51.5)"
+          />
+        </g>
+      </svg>
+      <span className="flex items-baseline gap-2">
+        {HEADLINE}
+        <span className="text-xs font-normal text-faint">{TAGLINE}</span>
+      </span>
     </h1>
 
     <nav

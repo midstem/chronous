@@ -2,7 +2,7 @@ import type { ViewKind } from '@midstem/chronous-react'
 import type { ReactElement } from 'react'
 
 import { NumberField, SelectField, TextField } from '../fields'
-import { PRESETS } from '../fixtures'
+import { PRESET_OPTIONS } from '@midstem/playground-core'
 import type { PresetId } from '../fixtures'
 import { Panel } from '../panel'
 import type { PlaygroundState } from '../playground'
@@ -32,8 +32,6 @@ type ControlsProps = {
   update: (patch: Partial<PlaygroundState>) => void
   choosePreset: (id: PresetId) => void
 }
-
-const PRESET_OPTIONS = PRESETS.map(({ id, label }) => ({ value: id, label }))
 
 export const Controls = ({
   state,

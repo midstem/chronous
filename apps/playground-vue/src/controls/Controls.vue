@@ -7,8 +7,8 @@ import {
   DISAMBIGUATION_OPTIONS,
   LOCALES,
   LOCALE_HINT,
-  PRESETS,
   PRESET_HINT,
+  PRESET_OPTIONS,
   SLOT_MINUTES_HINT,
   STYLE_HINT,
   STYLE_OPTIONS,
@@ -19,7 +19,7 @@ import {
   WEEK_STARTS_ON_OPTIONS,
   ZONES
 } from '@midstem/playground-core'
-import type { Option, PresetId, Style } from '@midstem/playground-core'
+import type { PresetId, Style } from '@midstem/playground-core'
 
 import NumberField from '../fields/NumberField.vue'
 import SelectField from '../fields/SelectField.vue'
@@ -29,11 +29,6 @@ import { usePlayground } from '../playground/use-playground'
 
 const playground = usePlayground()
 const { state } = playground
-
-const PRESET_OPTIONS: readonly Option[] = PRESETS.map(({ id, label }) => ({
-  value: id,
-  label
-}))
 
 const updateStyle = (style: string): void => {
   playground.update({ style: style as Style })
