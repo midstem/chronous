@@ -103,6 +103,61 @@ describe('automatic Date fallback', () => {
     expect(calendar.days[3].boxes[0].event.seriesId).toBe('daily')
   })
 
+  it('keeps the source-zone wall time across DST in a different calendar zone', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const calendar = buildCalendar(
+      {
+        view: 'days',
+        currentDate: '2026-03-02',
+        dayCount: 16,
+        timeZone: 'Europe/Berlin'
+      },
+      [
+        {
+          id: 'team',
+          start: '2026-03-02T09:00:00',
+          timeZone: 'America/New_York',
+          recurrence: { rule: 'FREQ=WEEKLY;BYDAY=MO;COUNT=3' }
+        }
+      ]
+    )
+
+    const boxes = calendar.days.flatMap((day) => day.boxes)
+    expect(boxes.map((box) => box.start)).toEqual([
+      '2026-03-02T15:00:00+01:00',
+      '2026-03-09T14:00:00+01:00',
+      '2026-03-16T14:00:00+01:00'
+    ])
+    expect(boxes[1].event.recurrenceId).toBe('2026-03-09T09:00:00-04:00')
+  })
+
+  it('matches a source-zone exception when the viewer uses another zone', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const calendar = buildCalendar(
+      {
+        view: 'days',
+        currentDate: '2026-03-02',
+        dayCount: 16,
+        timeZone: 'Europe/Berlin'
+      },
+      [
+        {
+          id: 'team',
+          start: '2026-03-02T09:00:00',
+          timeZone: 'America/New_York',
+          recurrence: {
+            rule: 'FREQ=WEEKLY;BYDAY=MO;COUNT=3',
+            exceptions: ['2026-03-09T09:00:00']
+          }
+        }
+      ]
+    )
+
+    expect(
+      calendar.days.flatMap((day) => day.boxes.map((box) => box.start))
+    ).toEqual(['2026-03-02T15:00:00+01:00', '2026-03-16T14:00:00+01:00'])
+  })
+
   it('keeps a malformed series visible at its original date', () => {
     const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const calendar = buildCalendar(RANGE, [

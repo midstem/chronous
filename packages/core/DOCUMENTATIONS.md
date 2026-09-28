@@ -21,6 +21,9 @@ and stays in the repository — it is not part of the published package.
 
 ## Temporal
 
+For a practical explanation with ten calendar examples, see
+[Why Chronous uses Temporal](WHY_TEMPORAL.md).
+
 Chronous uses [Temporal](https://tc39.es/proposal-temporal/docs/) for its full
 calendar behavior. It distinguishes an instant, a date without a time, and a
 wall time in a named zone. A `Date` plus `Intl.DateTimeFormat` is sufficient to

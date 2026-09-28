@@ -160,7 +160,7 @@ export const expandFallbackRecurrence = <TData>(
             sourceZone,
             'has an unreadable recurrence date'
           ),
-          timeZone
+          sourceZone
         ).isoString
 
   const make = (
@@ -189,7 +189,7 @@ export const expandFallbackRecurrence = <TData>(
     )
     const endEpoch = startEpoch + lengthMs
     const startIso = getZonedParts(startEpoch, timeZone).isoString
-    const key = recurrenceId ?? startIso
+    const key = recurrenceId ?? getZonedParts(startEpoch, sourceZone).isoString
     return {
       id: `${input.id}${INSTANCE_SEPARATOR}${key}`,
       seriesId: input.id,
@@ -212,7 +212,8 @@ export const expandFallbackRecurrence = <TData>(
         `recurrence-rule:${input.id}`,
         `The recurrence rule for "${input.id}" could not be read; only its original and explicit dates are shown: ${String(cause)}`
       )
-      instances.set(anchor, make(input.start))
+      const original = make(input.start)
+      instances.set(original.recurrenceId as string, original)
     }
   }
 
@@ -233,8 +234,12 @@ export const expandFallbackRecurrence = <TData>(
         `Some recurrence filters or COUNT for "${input.id}" may differ in Date fallback.`
       )
     }
-    const first = days[0].date
-    const last = days[days.length - 1].date
+    const first = base.allDay
+      ? days[0].date
+      : getZonedParts(days[0].startEpoch, sourceZone).dateString
+    const last = base.allDay
+      ? days[days.length - 1].date
+      : getZonedParts(days[days.length - 1].endEpoch - 1, sourceZone).dateString
     const backoff = Math.min(
       366,
       base.allDay
