@@ -167,7 +167,7 @@ console. The public API needs no fallback flag. DST layouts can be approximate,
 and recurring series are shown approximately with a warning. Unreadable
 events can be omitted while other events remain visible. See the [full fallback contract](https://github.com/midstem/chronous/blob/main/packages/core/DOCUMENTATIONS.md#browser-behavior).
 For concrete examples of why the full engine uses Temporal, see
-[Why Chronous uses Temporal](https://github.com/midstem/chronous/blob/main/packages/core/WHY_TEMPORAL.md).
+[Why Chronous uses Temporal](https://github.com/midstem/chronous/blob/main/docs/WHY_TEMPORAL.md).
 
 ## Documentation
 

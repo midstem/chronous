@@ -9,15 +9,18 @@ and stays in the repository — it is not part of the published package.
 
 ## Contents
 
-- [Temporal](#temporal)
-- [Events](#events)
-- [Recurrence](#recurrence)
-- [Views](#views)
-- [Navigation](#navigation)
-- [Calendars](#calendars)
-- [Layout](#layout)
-- [Lanes](#lanes)
-- [Labels](#labels)
+- [`@midstem/chronous` documentation](#midstemchronous-documentation)
+  - [Contents](#contents)
+  - [Temporal](#temporal)
+    - [Browser behavior](#browser-behavior)
+  - [Events](#events)
+  - [Recurrence](#recurrence)
+  - [Views](#views)
+  - [Navigation](#navigation)
+  - [Calendars](#calendars)
+  - [Layout](#layout)
+  - [Lanes](#lanes)
+  - [Labels](#labels)
 
 ## Temporal
 
@@ -71,7 +74,7 @@ catch it and expose it in their `error` result.
 If the server supplies only separate events with fixed UTC `start` and `end`
 values, the fallback can convert and place them in `range.timeZone` without a
 polyfill. It still logs the missing-Temporal warning, and time-grid slots around
-a clock transition can be approximate. See [the concrete example](WHY_TEMPORAL.md).
+a clock transition can be approximate. See [the concrete example](/docs/WHY_TEMPORAL.md).
 
 This is a safety net for an application that forgot the polyfill, not a second
 full scheduling engine. Install the polyfill for exact recurrence, DST,
