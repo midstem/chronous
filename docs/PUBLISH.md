@@ -85,7 +85,7 @@ by hand or need to fix something it refuses to touch.
 - keep `package-lock.json` in step: the `packages/<dir>` entry repeats that
   version, and `npm ci` fails when the two disagree. `npm run release` edits that
   one line for you;
-- update the package's `README.md` and `CHANGELOG.md` if the public API moved.
+- update the package's `README.md` if the public API moved.
 
 Releasing the adapters after an engine change is one bump, one tag and one
 release each. They are independent, so the order does not matter.
