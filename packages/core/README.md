@@ -1,4 +1,4 @@
-# Сhronous
+# Chronous
 
 [![NPM version][npm-image]][npm-url] [![bundle size][size-image]][size-url]
 
@@ -11,35 +11,25 @@
   <img src='https://raw.githubusercontent.com/midstem/chronous/main/images/midstem.png' height='60'>
 </a>
 
-<p><b>Chronous</b> is a headless scheduling engine for plain JavaScript. One
-call turns a range and a list of events into the days, slots, packed columns and
-lanes a calendar draws — time zones, DST and recurrence handled for you. No
-React, no DOM, no stylesheet: the markup and the CSS stay yours.</p>
+Chronous is a headless calendar engine for JavaScript. It calculates days, time slots and event positions across time zones and recurring schedules. You render the result with your own markup and styles.
 
 ## Installation
 
 ```bash
-npm install @midstem/chronous
-# If the runtime lacks Temporal:
-npm install temporal-polyfill
+npm install @midstem/chronous temporal-polyfill
 ```
+
+[Temporal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal#browser_compatibility) is available in current Chrome, Edge and Firefox, but not yet in Safari. Install the polyfill for Safari and other runtimes without native Temporal, then import `temporal-polyfill/global` once before calling the engine.
 
 ## Basic usage
 
-`buildCalendar` is the front door: a range and a list of events in, one plain
-object out. It draws nothing — it hands back the days, the slots and the
-geometry of every event as fractions, and the DOM is yours to build.
-
-### The markup
-
-One element to fill. Everything under it is created from what the engine
-returned.
+Add a container to your page:
 
 ```html
-<div class="calendar" id="calendar"></div>
+<div id="calendar" class="calendar"></div>
 ```
 
-### The engine
+Build a week and render its days and events:
 
 ```js
 import 'temporal-polyfill/global'
@@ -53,12 +43,6 @@ const calendar = buildCalendar(
       start: '2026-03-18T09:00',
       duration: 'PT30M',
       data: { title: 'Standup' }
-    },
-    {
-      id: 'review',
-      start: '2026-03-18T09:15',
-      duration: 'PT45M',
-      data: { title: 'Review' }
     }
   ]
 )
@@ -67,28 +51,26 @@ const root = document.querySelector('#calendar')
 
 for (const day of calendar.days) {
   const column = document.createElement('div')
-  column.className = 'day'
+  column.className = 'calendar-day'
 
   const heading = document.createElement('div')
-  heading.className = 'heading'
+  heading.className = 'calendar-heading'
   heading.textContent = formatIso(day.date, {
     locale: 'en-GB',
     options: { weekday: 'short', day: 'numeric' }
   })
 
   const grid = document.createElement('div')
-  grid.className = 'grid'
+  grid.className = 'calendar-grid'
 
   for (const box of day.boxes) {
     const event = document.createElement('div')
-    event.className = 'event'
-    event.textContent = box.event.data.title
-
+    event.className = 'calendar-event'
+    event.textContent = box.event.data?.title ?? box.event.id
     event.style.top = `${box.top * 100}%`
     event.style.height = `${box.height * 100}%`
     event.style.left = `${box.left * 100}%`
     event.style.width = `${box.width * 100}%`
-
     grid.append(event)
   }
 
@@ -97,83 +79,44 @@ for (const day of calendar.days) {
 }
 ```
 
-`top`, `height`, `left` and `width` are fractions of the day the box sits on, so
-they go straight into percentages. The two overlapping meetings above end up
-side by side without any measuring: the engine packed them into columns first.
-
-### The styles
+Give each day a grid for the positioned events:
 
 ```css
 .calendar {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
 }
 
-.day {
-  flex: 1 1 0;
+.calendar-day {
   min-width: 0;
+  border: 1px solid #e4e4e7;
 }
 
-.grid {
+.calendar-heading {
+  padding: 8px;
+  text-align: center;
+}
+
+.calendar-grid {
   position: relative;
   height: 960px;
 }
 
-.event {
+.calendar-event {
   position: absolute;
   overflow: hidden;
   border-radius: 4px;
   background: #1d4ed8;
-  color: #fff;
+  color: white;
+  font-size: 12px;
 }
 ```
 
-Two of these rules are a contract, not decoration — `.grid` is what the
-percentages are measured against, so it needs `position: relative` and a height
-of its own, and `.event` has to be `position: absolute` to use them. Its height
-is yours: 960px is forty pixels an hour. Everything else on the page is styling
-you own.
-
-### The rest of the object
-
-- `day.slots` are the wall-clock rows of that day — twenty-four by default, each
-  with its own `minuteOfDay` and real length — which is what hour lines and the
-  time gutter are drawn from.
-- `calendar.rows` are the bands above the grid, and `row.bars` the all-day
-  events on them, placed with `left` and `width` across the row and stacked by
-  `lane`. Events long enough to cover a whole day move up there too.
-- Everything crossing the boundary is a string or a number, so a calendar is
-  plain JSON: it survives `JSON.stringify` and a server-to-client payload
-  unchanged.
-
-Building a calendar in React? Install
-[`@midstem/chronous-react`](https://www.npmjs.com/package/@midstem/chronous-react)
-instead — it bundles this engine and re-exports all of it, and the components
-do the loop above for you.
-
-## Temporal
-
-Chronous uses `Temporal` for full calendar behavior. On runtimes without
-native support, install `temporal-polyfill` in your application and import its
-global entry before the first calendar operation:
-
-```ts
-import 'temporal-polyfill/global'
-import { buildCalendar } from '@midstem/chronous'
-```
-
-Chronous does not bundle the polyfill. If `globalThis.Temporal` is absent, it
-automatically renders basic calendars with `Date` and `Intl` and warns in the
-console. The public API needs no fallback flag. DST layouts can be approximate,
-and recurring series are shown approximately with a warning. Unreadable
-events can be omitted while other events remain visible. See the [full fallback contract](https://github.com/midstem/chronous/blob/main/packages/core/DOCUMENTATIONS.md#browser-behavior).
-For concrete examples of why the full engine uses Temporal, see
-[Why Chronous uses Temporal](https://github.com/midstem/chronous/blob/main/docs/WHY_TEMPORAL.md).
+The engine returns event positions as fractions; the example converts them to CSS percentages. Core also exports the types, formatting, navigation and layout APIs needed to build an adapter for a framework without a dedicated Chronous package. For ready-made integrations, use [React](https://www.npmjs.com/package/@midstem/chronous-react), [Vue](https://www.npmjs.com/package/@midstem/chronous-vue) or [Angular](https://www.npmjs.com/package/@midstem/chronous-angular).
 
 ## Documentation
 
-For events, recurrence, views, navigation, layout, lanes and labels, see the
-full documentation at
-[https://chronous.midstem.net/](https://chronous.midstem.net/).
+See the [documentation](https://chronous.midstem.net/docs/) for rendering examples, event and recurrence options, calendar views, navigation and how to load Temporal correctly. It also explains browser support and the behavior when Temporal is unavailable.
 
 ## License
 
