@@ -1,4 +1,4 @@
-# Сhronous-angular
+# Chronous Angular
 
 [![NPM version][npm-image]][npm-url] [![bundle size][size-image]][size-url]
 
@@ -11,79 +11,55 @@
   <img src='https://raw.githubusercontent.com/midstem/chronous/main/images/midstem.png' height='60'>
 </a>
 
-<p><b>Chronous</b> is a headless calendar for Angular. The engine owns the hard
-half — time zones, DST, recurrence and the layout of overlapping events — and
-the directives hand you the geometry already computed. Every part sits on the
-element <i>you</i> wrote, so nothing of ours ends up in your CSS and there is no
-stylesheet to import.</p>
+Chronous is a headless calendar for Angular 18+. Its directives handle time zones, recurrence and event layout while you control the markup and styles. No stylesheet is required.
 
 ## Installation
 
 ```bash
-npm install @midstem/chronous-angular
+npm install @midstem/chronous-angular temporal-polyfill
 ```
 
-One install is enough: the engine arrives with it, and `buildCalendar`,
-`formatIso`, the error classes and every type are re-exported from this same
-specifier. Temporal is needed for full calendar behavior. See
-[Temporal](#temporal) for setup and the automatic Date fallback on browsers without native support.
-
-Standalone, signal-based and zoneless-friendly. Angular 18 or newer.
+[Temporal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal#browser_compatibility) is available in current Chrome, Edge and Firefox, but not yet in Safari. Install the polyfill for Safari and other browsers without native Temporal, then import `temporal-polyfill/global` once in your app entry point before rendering the calendar. The Angular package includes the core engine.
 
 ## Basic usage
 
-A week view, styled with Tailwind CSS. `*chronousCalendar` takes the range and
-the events; every part under it is a plain element you style.
+This example uses Tailwind CSS for styling:
 
 ```ts
+import { Component, signal } from '@angular/core'
 import { CALENDAR_DIRECTIVES } from '@midstem/chronous-angular'
 import type { CalendarRange, EventInput } from '@midstem/chronous-angular'
-import { Component, signal } from '@angular/core'
-
-type EventData = { title: string }
 
 @Component({
   selector: 'app-board',
+  standalone: true,
   imports: [CALENDAR_DIRECTIVES],
   template: `
     <div
-      *chronousCalendar="range(); events: events(); locale: 'en-GB'"
-      class="h-full overflow-auto rounded-xl border border-zinc-200 bg-white"
+      *chronousCalendar="range(); events: events()"
+      class="h-full overflow-auto rounded-xl border"
     >
-      <div chronousHeader class="border-b border-zinc-200">
+      <div chronousHeader>
         <div
-          *chronousDayHeadings="
-            let day;
-            let weekdayLabel = weekdayLabel;
-            let dayLabel = dayLabel
-          "
-          class="border-l border-zinc-100 py-2 text-center text-sm font-medium"
+          *chronousDayHeadings="let day; let dayLabel = dayLabel"
+          class="border-l py-2 text-center"
         >
-          {{ weekdayLabel }} {{ dayLabel }}
+          {{ dayLabel }}
         </div>
       </div>
-
       <chronous-time-grid [hourHeight]="48">
         <div chronousTimeAxis>
-          <div
-            *chronousTimeLabels="let slot; let timeLabel = timeLabel"
-            class="right-2 text-[10px] text-zinc-400"
-          >
+          <div *chronousTimeLabels="let slot; let timeLabel = timeLabel">
             {{ timeLabel }}
           </div>
         </div>
-
-        <div *chronousDayColumns="let day" class="border-l border-zinc-100">
-          <span
-            *chronousTimeSlots="day"
-            class="border-t border-zinc-100"
-          ></span>
-
+        <div *chronousDayColumns="let day">
+          <span *chronousTimeSlots="day" class="border-t"></span>
           <div
             *chronousTimedEvents="day; let event"
-            class="truncate rounded-md bg-blue-700 px-1.5 text-[11px] font-medium text-white"
+            class="rounded bg-blue-700 text-white"
           >
-            {{ event.data.title }}
+            {{ event.id }}
           </div>
         </div>
       </chronous-time-grid>
@@ -96,75 +72,15 @@ export class BoardComponent {
     currentDate: '2026-03-18',
     timeZone: 'Europe/Kyiv'
   })
-
-  readonly events = signal<EventInput<EventData>[]>([
-    {
-      id: 'standup',
-      start: '2026-03-18T09:00',
-      duration: 'PT30M',
-      data: { title: 'Standup' }
-    }
+  readonly events = signal<EventInput[]>([
+    { id: 'standup', start: '2026-03-18T09:00', duration: 'PT30M' }
   ])
 }
 ```
 
-That is the whole wiring. A plural name renders one element per day, per slot or
-per event; your classes land on every one of them, and the layout the engine
-computed is written onto the same element as inline styles — so plain CSS works
-exactly the same way.
-
-`chronousMonthGrid` and `chronousAgendaList` cover the other two views,
-`<chronous-all-day-row>` adds the all-day strip, and `injectCalendar` /
-`injectCalendarNavigation` are there when you would rather walk the layout
-yourself.
-
-Navigation is yours to drive: `*chronousToolbar` hands you a `navigation` object
-and the period title, and you set your own `range` signal from it.
-
-```html
-<div *chronousToolbar="let navigation; let title = title">
-  <button
-    type="button"
-    [disabled]="!navigation.prev"
-    (click)="range.set(navigation.prev!)"
-  >
-    ‹
-  </button>
-  <span>{{ title }}</span>
-  <button
-    type="button"
-    [disabled]="!navigation.next"
-    (click)="range.set(navigation.next!)"
-  >
-    ›
-  </button>
-</div>
-```
-
-## Temporal
-
-Chronous uses `Temporal` for full behavior. On a browser without native
-support, install the polyfill in your application and import it before
-rendering:
-
-```bash
-npm install @midstem/chronous-angular temporal-polyfill
-```
-
-```ts
-import 'temporal-polyfill/global'
-```
-
-Chronous does not bundle the polyfill. If it is absent, an automatic `Date`
-fallback keeps basic calendars working and logs warnings for approximate or
-omitted data. No fallback option is needed. See the
-[full fallback contract](https://github.com/midstem/chronous/blob/main/packages/core/DOCUMENTATIONS.md#browser-behavior).
-
 ## Documentation
 
-For every directive, the template contexts, typed event data, navigation, labels
-and the Safari story, see the full documentation at
-[https://chronous.midstem.net/](https://chronous.midstem.net/).
+See the [documentation](https://chronous.midstem.net/docs/) for more examples, directives, typed event data, navigation and how to load Temporal correctly. It also explains browser support and the behavior when Temporal is unavailable.
 
 ## License
 
