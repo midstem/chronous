@@ -20,6 +20,7 @@ else.
 | [`@midstem/chronous`](packages/core)                   | The engine: time model, layout, recurrence. No framework, no DOM |
 | [`@midstem/chronous-react`](packages/react)            | Hooks and headless primitives for React                          |
 | [`@midstem/chronous-angular`](packages/angular)        | Signals and headless directives for Angular                      |
+| [`@midstem/chronous-svelte`](packages/svelte)          | Reactive helpers and headless components for Svelte 5            |
 | [`@midstem/chronous-vue`](packages/vue)                | Composables and headless components for Vue                      |
 | [`@midstem/playground-core`](packages/playground-core) | Shared logic and styles for Chronous playgrounds                 |
 
@@ -55,6 +56,7 @@ for React,
 [`packages/angular/DOCUMENTATIONS.md`](packages/angular/DOCUMENTATIONS.md) for
 Angular,
 [`packages/vue/DOCUMENTATIONS.md`](packages/vue/DOCUMENTATIONS.md) for Vue,
+[`packages/svelte/DOCUMENTATIONS.md`](packages/svelte/DOCUMENTATIONS.md) for Svelte,
 and [DOCUMENTATIONS.md](DOCUMENTATIONS.md) for the repository
 itself — layout, the playground, benchmarks and how a release is cut.
 

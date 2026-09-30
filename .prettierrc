@@ -8,5 +8,14 @@
   "arrowParens": "always",
   "quoteProps": "as-needed",
   "printWidth": 80,
-  "trailingComma": "none"
+  "trailingComma": "none",
+  "overrides": [
+    {
+      "files": "packages/svelte/**/*.svelte",
+      "options": {
+        "plugins": ["prettier-plugin-svelte"],
+        "parser": "svelte"
+      }
+    }
+  ]
 }

@@ -1,0 +1,63 @@
+{
+  "name": "@midstem/chronous-svelte",
+  "version": "1.0.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Headless Svelte 5 primitives for @midstem/chronous",
+  "author": "Midstem",
+  "sideEffects": false,
+  "svelte": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "svelte": "./dist/index.js",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/midstem/chronous.git",
+    "directory": "packages/svelte"
+  },
+  "bugs": {
+    "url": "https://github.com/midstem/chronous/issues"
+  },
+  "homepage": "https://github.com/midstem/chronous#readme",
+  "keywords": [
+    "svelte",
+    "svelte5",
+    "calendar",
+    "scheduler",
+    "headless",
+    "snippets",
+    "typescript"
+  ],
+  "scripts": {
+    "build": "svelte-package --input src --output dist && vite build && cp ../core/dist/index.d.ts dist/engine.d.ts",
+    "typecheck": "svelte-check --tsconfig ./tsconfig.json",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "prepack": "node ../../tools/scripts/prepack.mjs"
+  },
+  "peerDependencies": {
+    "svelte": ">=5.0.0"
+  },
+  "devDependencies": {
+    "@midstem/chronous": "*"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

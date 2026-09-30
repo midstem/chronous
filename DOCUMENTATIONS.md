@@ -18,23 +18,27 @@ The engine and the adapters document themselves:
   the Vue surface: the one install, Safari, the composables, every
   component
 
+- [`packages/svelte/DOCUMENTATIONS.md`](packages/svelte/DOCUMENTATIONS.md) —
+  the Svelte 5 surface: reactive helpers, snippets, contexts and every component
+
 What follows is the repository itself — how it is laid out, how the playground
 runs, how the benchmarks are read and how a release is cut.
 
 ## Layout
 
-| Path                       | What it is                                           |
-| -------------------------- | ---------------------------------------------------- |
-| `packages/core`            | `@midstem/chronous` — the engine                     |
-| `packages/react`           | `@midstem/chronous-react` — hooks and primitives     |
-| `packages/angular`         | `@midstem/chronous-angular` — signals and directives |
-| `packages/vue`             | `@midstem/chronous-vue` — composables and components |
-| `packages/playground-core` | `@midstem/playground-core` — shared playground logic |
-| `apps/playground-react`    | React playground                                     |
-| `apps/playground-angular`  | Angular playground                                   |
-| `apps/playground-vue`      | Vue playground                                       |
-| `tools/release`            | the interactive release CLI                          |
-| `tools/scripts`            | `prepack` and the build invariants                   |
+| Path                       | What it is                                                   |
+| -------------------------- | ------------------------------------------------------------ |
+| `packages/core`            | `@midstem/chronous` — the engine                             |
+| `packages/react`           | `@midstem/chronous-react` — hooks and primitives             |
+| `packages/angular`         | `@midstem/chronous-angular` — signals and directives         |
+| `packages/vue`             | `@midstem/chronous-vue` — composables and components         |
+| `packages/svelte`          | `@midstem/chronous-svelte` — reactive helpers and components |
+| `packages/playground-core` | `@midstem/playground-core` — shared playground logic         |
+| `apps/playground-react`    | React playground                                             |
+| `apps/playground-angular`  | Angular playground                                           |
+| `apps/playground-vue`      | Vue playground                                               |
+| `tools/release`            | the interactive release CLI                                  |
+| `tools/scripts`            | `prepack` and the build invariants                           |
 
 ```bash
 npm install
@@ -54,9 +58,15 @@ same import as the components — and there is never a question of which engine
 version an app is on. Reach for `@midstem/chronous` on its own where no
 framework is involved — a server, a worker, another adapter.
 
-The two adapters carry the engine differently, because their toolchains do.
+The adapters carry the engine differently, because their toolchains do.
 `@midstem/chronous-react` builds it into its own bundle; `verify-dist.mjs`
 fails the build if a `@midstem/chronous` specifier survives into `packages/react/dist`.
+`@midstem/chronous-vue` also bundles the engine. `@midstem/chronous-svelte`
+ships preprocessed Svelte 5 components and a local copy of the engine bundle
+and its public declarations. The consumer's Svelte compiler handles client and
+SSR builds; the adapter never resolves a separate core package at runtime.
+`verify-dist.mjs` checks every Svelte output module and declaration.
+
 `@midstem/chronous-angular` ships Angular's partial declarations, which are
 linked rather than bundled, so it depends on the engine the ordinary way and
 resolves it at runtime — the same one install for a consumer, and `instanceof`
