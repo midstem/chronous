@@ -11,7 +11,7 @@
   "trailingComma": "none",
   "overrides": [
     {
-      "files": "packages/svelte/**/*.svelte",
+      "files": "**/*.svelte",
       "options": {
         "plugins": ["prettier-plugin-svelte"],
         "parser": "svelte"

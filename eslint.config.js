@@ -116,7 +116,8 @@ export default [
     files: [
       'packages/vue/**/*.{ts,js}',
       'apps/playground-vue/**/*.{ts,js}',
-      'packages/svelte/**/*.{ts,js}'
+      'packages/svelte/**/*.{ts,js}',
+      'apps/playground-svelte/**/*.{ts,js}'
     ],
     rules: {
       'react-hooks/rules-of-hooks': 'off',
