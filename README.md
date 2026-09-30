@@ -30,8 +30,9 @@ that draws a calendar.
 ## Playgrounds
 
 [`apps/playground-react`](apps/playground-react) (React),
-[`apps/playground-angular`](apps/playground-angular) (Angular), and
-[`apps/playground-vue`](apps/playground-vue) (Vue) are interactive
+[`apps/playground-angular`](apps/playground-angular) (Angular),
+[`apps/playground-vue`](apps/playground-vue) (Vue), and
+[`apps/playground-svelte`](apps/playground-svelte) (Svelte) are interactive
 playgrounds: the range and the events on the left, the board they produce beside
 them, and the code snippet a switch away. Every push to `main` deploys the
 playgrounds to [GitHub Pages](https://midstem.github.io/chronous/).
@@ -42,6 +43,7 @@ npm run build
 npm run start         # React playground
 npm run start:angular # Angular playground
 npm run start:vue     # Vue playground
+npm run start:svelte  # Svelte playground
 ```
 
 ## Documentation

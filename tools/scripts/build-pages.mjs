@@ -10,7 +10,8 @@ const OUTPUT = resolve(ROOT, 'dist-pages')
 const PLAYGROUNDS = [
   { id: 'react', title: 'React', packageName: '@midstem/chronous-react' },
   { id: 'angular', title: 'Angular', packageName: '@midstem/chronous-angular' },
-  { id: 'vue', title: 'Vue', packageName: '@midstem/chronous-vue' }
+  { id: 'vue', title: 'Vue', packageName: '@midstem/chronous-vue' },
+  { id: 'svelte', title: 'Svelte', packageName: '@midstem/chronous-svelte' }
 ]
 
 const run = (workspace) =>

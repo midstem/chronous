@@ -37,6 +37,7 @@ runs, how the benchmarks are read and how a release is cut.
 | `apps/playground-react`    | React playground                                             |
 | `apps/playground-angular`  | Angular playground                                           |
 | `apps/playground-vue`      | Vue playground                                               |
+| `apps/playground-svelte`   | Svelte playground                                            |
 | `tools/release`            | the interactive release CLI                                  |
 | `tools/scripts`            | `prepack` and the build invariants                           |
 
@@ -46,7 +47,7 @@ npm run build
 npm run start
 ```
 
-`apps/playground-react`, `apps/playground-angular`, and `apps/playground-vue` consume the packages by name,
+`apps/playground-react`, `apps/playground-angular`, `apps/playground-vue`, and `apps/playground-svelte` consume the packages by name,
 so they resolve the built output the way an outside consumer would — which is why
 `npm run build` comes first, and why CI builds before it lints or typechecks.
 
@@ -91,8 +92,9 @@ transform would silently leave every input unbound.
 ## Playground
 
 [`apps/playground-react`](apps/playground-react) (React),
-[`apps/playground-angular`](apps/playground-angular) (Angular), and
-[`apps/playground-vue`](apps/playground-vue) (Vue) are interactive playgrounds:
+[`apps/playground-angular`](apps/playground-angular) (Angular),
+[`apps/playground-vue`](apps/playground-vue) (Vue), and
+[`apps/playground-svelte`](apps/playground-svelte) (Svelte) are interactive playgrounds:
 every field of `CalendarRange` in the left rail, next to the events as editable JSON, and
 beside them a full-width board that is nothing but what `buildCalendar`
 returned — plus the raw result under it. A switch in the masthead trades the
@@ -104,6 +106,7 @@ carries a light and a dark theme.
 npm run start         # starts React playground
 npm run start:angular # starts Angular playground
 npm run start:vue     # starts Vue playground
+npm run start:svelte  # starts Svelte playground
 ```
 
 Every push to `main` publishes all playgrounds to GitHub Pages through

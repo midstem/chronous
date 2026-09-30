@@ -13,13 +13,13 @@ describe('frameworks', () => {
     expect(FRAMEWORK_NAV_LABEL).toBe('Playgrounds')
   })
 
-  it('contains react, angular, and vue framework entries', () => {
+  it('contains all framework entries', () => {
     const ids = PLAYGROUND_FRAMEWORKS.map((f) => f.id)
-    expect(ids).toEqual(['react', 'angular', 'vue'])
+    expect(ids).toEqual(['react', 'angular', 'vue', 'svelte'])
   })
 
   it('provides logos for each framework', () => {
-    for (const framework of ['react', 'angular', 'vue'] as const) {
+    for (const framework of ['react', 'angular', 'vue', 'svelte'] as const) {
       const logo = getFrameworkLogo(framework)
       expect(logo).toBe(FRAMEWORK_LOGOS[framework])
       expect(logo.viewBox).toBeTruthy()
@@ -50,6 +50,13 @@ describe('frameworks', () => {
         packageName: '@midstem/chronous-vue',
         href: '../vue/',
         isCurrent: false
+      },
+      {
+        id: 'svelte',
+        title: 'Svelte',
+        packageName: '@midstem/chronous-svelte',
+        href: '../svelte/',
+        isCurrent: false
       }
     ])
 
@@ -57,6 +64,11 @@ describe('frameworks', () => {
     expect(angularLinks[0].isCurrent).toBe(false)
     expect(angularLinks[1].isCurrent).toBe(true)
     expect(angularLinks[2].isCurrent).toBe(false)
+
+    const svelteLinks = getFrameworkLinks('svelte')
+    expect(
+      svelteLinks.filter((link) => link.isCurrent).map((link) => link.id)
+    ).toEqual(['svelte'])
 
     const vueLinks = getFrameworkLinks('vue')
     expect(vueLinks[0].isCurrent).toBe(false)
