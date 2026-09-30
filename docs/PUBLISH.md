@@ -1,12 +1,12 @@
 # Publishing
 
-This repository publishes three packages under the `@midstem` scope —
-`@midstem/chronous` from `packages/core`, `@midstem/chronous-react` from
-`packages/react` and `@midstem/chronous-angular` from `packages/angular` — and
-each one is released on its own.
+This repository publishes the engine and framework adapters under the
+`@midstem` scope: `@midstem/chronous`, `@midstem/chronous-react`,
+`@midstem/chronous-angular`, `@midstem/chronous-vue` and
+`@midstem/chronous-svelte`. Each workspace in `packages/` is released on its own.
 
 `@midstem/chronous` is the engine itself: the scheduling model, layout and
-recurrence, with no framework and no DOM. Both adapters are built on it and
+recurrence, with no framework and no DOM. The adapters are built on it and
 re-export all of it, so a consumer installs one package.
 
 `@midstem/chronous-react` **inlines the engine at build time** rather than
@@ -16,6 +16,12 @@ the React bundle still resolves `@midstem/chronous` at runtime, if a bundle
 still carries `#src` imports, or if a public `.d.ts` names the `Temporal`
 namespace.
 
+`@midstem/chronous-vue` also bundles the engine. The Svelte adapter packages
+preprocessed Svelte components with an embedded engine bundle and declarations,
+so both browser and SSR consumers compile the components for their target.
+`verify:dist` inspects every Svelte output module and declaration for unresolved
+core imports, internal aliases and leaked Temporal types.
+
 `@midstem/chronous-angular` cannot do the same, because a published Angular
 library ships linkable partial declarations rather than a rolled-up bundle. It
 depends on `^1.0.0` of the engine the ordinary way, so npm installs it
@@ -23,8 +29,8 @@ transitively and an engine patch reaches Angular users without an Angular
 release. `verify:dist` checks instead that its output carries the
 `ɵɵngDeclare*` declarations the consumer's linker needs.
 
-An engine change therefore reaches React users only through a React release, and
-reaches the engine's own users through an engine release.
+An engine change reaches React, Vue and Svelte users through a release of their
+adapter, and reaches the engine's own users through an engine release.
 
 **Versions are independent.** A bug in an adapter is that adapter's patch and
 leaves the engine alone. The numbers are free to drift, and they will.
@@ -40,7 +46,7 @@ A release tag is the npm coordinate of exactly one package:
 ```
 
 This is the convention Lerna's independent mode and Changesets use in a
-monorepo, and the reason a bare `1.0.1` does not work: with three packages in
+monorepo, and the reason a bare `1.0.1` does not work: with multiple packages in
 the tree it does not say what was released. The bare `1.0.0` through `1.0.2` tags
 that already exist belong to the previous generation, which shipped as the
 unscoped `chronous` package; leave them alone.
@@ -80,8 +86,9 @@ by hand or need to fix something it refuses to touch.
 ## 1. Prepare the release branch
 
 - bump `version` in the package you are releasing — one of
-  `packages/core/package.json`, `packages/react/package.json` or
-  `packages/angular/package.json`, never two in one tag;
+  `packages/core/package.json`, `packages/react/package.json`,
+  `packages/angular/package.json`, `packages/vue/package.json` or
+  `packages/svelte/package.json`, never two in one tag;
 - keep `package-lock.json` in step: the `packages/<dir>` entry repeats that
   version, and `npm ci` fails when the two disagree. `npm run release` edits that
   one line for you;

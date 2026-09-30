@@ -1,0 +1,27 @@
+import {
+  InvalidEventError,
+  InvalidRangeError,
+  InvalidRecurrenceError,
+  MissingTemporalError,
+  buildCalendar
+} from '../engine.js'
+import type { CalendarRange, EventInput } from '../engine.js'
+import type { CalendarError, CalendarResult } from './types'
+
+const isCalendarError = (cause: unknown): cause is CalendarError =>
+  cause instanceof InvalidEventError ||
+  cause instanceof InvalidRangeError ||
+  cause instanceof InvalidRecurrenceError ||
+  cause instanceof MissingTemporalError
+
+export const resultOf = <TData>(
+  range: CalendarRange,
+  events: readonly EventInput<TData>[]
+): CalendarResult<TData> => {
+  try {
+    return { calendar: buildCalendar(range, events), error: null }
+  } catch (cause) {
+    if (!isCalendarError(cause)) throw cause
+    return { calendar: null, error: cause }
+  }
+}

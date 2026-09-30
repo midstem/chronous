@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -14,7 +14,11 @@ const PACKAGES = [
   { name: 'core', fileNames: [...MODULE_FILE_NAMES, 'index.cjs'] },
   { name: 'react', fileNames: [...MODULE_FILE_NAMES, 'index.cjs'] },
   { name: 'angular', fileNames: MODULE_FILE_NAMES },
-  { name: 'vue', fileNames: [...MODULE_FILE_NAMES, 'index.cjs'] }
+  { name: 'vue', fileNames: [...MODULE_FILE_NAMES, 'index.cjs'] },
+  {
+    name: 'svelte',
+    fileNames: [...MODULE_FILE_NAMES, 'engine.js', 'engine.d.ts']
+  }
 ]
 
 const PARTIAL_IVY_FILE_NAME =
@@ -71,12 +75,35 @@ PACKAGES.forEach(({ name: packageName, fileNames }) =>
   })
 )
 
+// Svelte ships preprocessed components for the consumer's client/SSR compiler.
+// Check every emitted module and declaration, including the embedded engine.
+const svelteDist = resolve(REPOSITORY_ROOT, 'packages/svelte/dist')
+const readSvelteModules = (directory) => {
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const path = resolve(directory, entry.name)
+
+    if (entry.isDirectory()) {
+      readSvelteModules(path)
+    } else if (/\.(?:js|svelte|ts)$/.test(entry.name)) {
+      const name = `packages/svelte/dist/${path.slice(svelteDist.length + 1)}`
+
+      bundles.set(name, readFileSync(path, 'utf8'))
+    }
+  }
+}
+
+if (existsSync(svelteDist)) readSvelteModules(svelteDist)
+
 bundles.forEach((content, name) => {
   const subpathLines = findLines(content, (line) =>
     line.includes(SUBPATH_IMPORT_PREFIX)
   )
 
-  if (name.startsWith('packages/react/') || name.startsWith('packages/vue/')) {
+  if (
+    name.startsWith('packages/react/') ||
+    name.startsWith('packages/vue/') ||
+    name.startsWith('packages/svelte/')
+  ) {
     const coreLines = findLines(content, (line) =>
       CORE_SPECIFIER_PATTERN.test(line)
     )

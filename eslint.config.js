@@ -23,7 +23,9 @@ export default [
       '**/dist-pages/**',
       '**/coverage/**',
       '**/node_modules/**',
-      '**/*.vue'
+      '**/.svelte-kit/**',
+      '**/*.vue',
+      '**/*.svelte'
     ]
   },
 
@@ -111,7 +113,11 @@ export default [
   },
 
   {
-    files: ['packages/vue/**/*.{ts,js}', 'apps/playground-vue/**/*.{ts,js}'],
+    files: [
+      'packages/vue/**/*.{ts,js}',
+      'apps/playground-vue/**/*.{ts,js}',
+      'packages/svelte/**/*.{ts,js}'
+    ],
     rules: {
       'react-hooks/rules-of-hooks': 'off',
       'react-hooks/exhaustive-deps': 'off',

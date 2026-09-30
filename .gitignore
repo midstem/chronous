@@ -31,3 +31,5 @@ bench.json
 packages/*/LICENSE
 
 .claude
+# Svelte packaging cache
+.svelte-kit
