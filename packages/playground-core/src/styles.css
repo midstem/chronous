@@ -2,6 +2,17 @@
 
 @source '.';
 
+@custom-variant embed {
+  :root[data-embed='true'] & {
+    @slot;
+  }
+}
+
+:root[data-embed='true'] [data-framework-nav],
+:root[data-embed='true'] .framework-nav {
+  display: none !important;
+}
+
 @theme {
   --color-canvas: light-dark(#f4f4f5, #09090b);
   --color-surface: light-dark(#ffffff, #18181b);

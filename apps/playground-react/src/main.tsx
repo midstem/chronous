@@ -3,11 +3,15 @@ import 'temporal-polyfill/global'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
+import { startEmbedBridge } from '@midstem/playground-core'
+
 import { App } from './app'
 import { Boundary } from './boundary'
 import { ROOT_ID } from './constants'
 
 import './styles.css'
+
+startEmbedBridge()
 
 const container = document.getElementById(ROOT_ID)
 

@@ -26,8 +26,10 @@
         title={formatDay(day.date, locale)}
       >
         <span
-          class="flex size-7 items-center justify-center rounded-full text-sm font-semibold"
-          class:today={day.date === today}>{dayLabel}</span
+          class={day.date === today
+            ? 'flex size-7 items-center justify-center rounded-full bg-accent text-sm font-semibold text-surface'
+            : 'flex size-7 items-center justify-center text-sm font-semibold'}
+          >{dayLabel}</span
         ><span class="text-[11px] tracking-wide text-muted uppercase"
           >{weekdayLabel}</span
         >
@@ -58,10 +60,3 @@
       </div>{/snippet}</C.AgendaDays
   ></C.AgendaList
 >
-
-<style>
-  .today {
-    background: var(--color-accent);
-    color: var(--color-surface);
-  }
-</style>

@@ -40,11 +40,14 @@
           class="flex items-center justify-center"
           style={`height:${NUMBER_HEIGHT}px`}
           ><span
-            class="flex size-6 items-center justify-center rounded-full text-xs font-medium"
-            class:today={day.date === today}>{dayLabel}</span
+            class={day.date === today
+              ? 'flex size-6 items-center justify-center rounded-full bg-accent text-xs font-semibold text-surface'
+              : 'flex size-6 items-center justify-center text-xs font-medium'}
+            >{dayLabel}</span
           ></span
         ><span class="block" style={`height:${lanes * MONTH_LANE_HEIGHT}px`}
-        ></span>{#if hiddenBars.length}<span class="px-1 text-[10px] text-muted"
+        ></span>{#if hiddenBars.length}<span
+            class="px-1 text-[10px] font-medium text-muted"
             >+{hiddenBars.length} more</span
           >{/if}<span class="flex flex-col gap-0.5"
           ><C.MonthTimedEvents
@@ -68,10 +71,3 @@
     >
   </C.MonthRows>
 </C.MonthGrid>
-
-<style>
-  .today {
-    background: var(--color-accent);
-    color: var(--color-surface);
-  }
-</style>

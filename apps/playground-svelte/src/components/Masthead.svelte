@@ -1,7 +1,6 @@
 <script lang="ts">
   import {
-    COPY,
-    MASTHEAD_DOCS_LABEL,
+    DOCS_LABEL,
     FRAMEWORK_NAV_LABEL,
     FRAMEWORK_LOGOS,
     HEADLINE,
@@ -15,31 +14,26 @@
     systemScheme,
     applyScheme,
     opposite,
-    DARK_QUERY,
-    runtimeStateOf
+    DARK_QUERY
   } from '@midstem/playground-core'
   import type { Mode, Scheme } from '@midstem/playground-core'
   import { onMount } from 'svelte'
+  import Runtime from './Runtime.svelte'
+  import SchemeToggle from './SchemeToggle.svelte'
 
   let {
     mode,
     onMode,
     reset
   }: { mode: Mode; onMode: (mode: Mode) => void; reset: () => void } = $props()
+
   let pinned = $state<Scheme | null>(storedScheme())
   let resolved = $state<Scheme>(systemScheme())
-  let shownScheme = $derived(pinned ?? resolved)
-  let dialog = $state(false)
-  let dialogElement: HTMLDialogElement
-  const runtime = runtimeStateOf()
-  const runtimeCopy = COPY[runtime]
+
   const frameworks = getFrameworkLinks('svelte')
+
   $effect(() => applyScheme(pinned))
-  $effect(() => {
-    if (dialog && dialogElement && !dialogElement.open)
-      dialogElement.showModal()
-    if (!dialog && dialogElement?.open) dialogElement.close()
-  })
+
   onMount(() => {
     const media = window.matchMedia(DARK_QUERY)
     const sync = (): void => {
@@ -48,6 +42,7 @@
     media.addEventListener('change', sync)
     return () => media.removeEventListener('change', sync)
   })
+
   const toggle = (): void => {
     pinned = pinned ? null : opposite(resolved)
   }
@@ -64,86 +59,66 @@
       height="24"
       aria-hidden="true">{@html FRAMEWORK_LOGOS.svelte.svg}</svg
     >
-    <span class="flex items-baseline gap-2"
-      >{HEADLINE}<span class="text-xs font-normal text-faint">{TAGLINE}</span
-      ></span
-    >
+    <span class="flex items-baseline gap-2">
+      {HEADLINE}
+      <span class="text-xs font-normal text-faint">{TAGLINE}</span>
+    </span>
   </h1>
+
   <nav
-    class="ml-2 flex items-center gap-0.5 rounded-md border border-line bg-raised p-0.5"
+    class="ml-2 flex items-center gap-0.5 rounded-md border border-line bg-raised p-0.5 embed:hidden"
+    data-framework-nav
     aria-label={FRAMEWORK_NAV_LABEL}
   >
-    {#each frameworks as link (link.id)}<a
+    {#each frameworks as link (link.id)}
+      <a
         href={link.href}
         aria-current={link.isCurrent ? 'page' : undefined}
-        class:current={link.isCurrent}
-        class="rounded px-3 py-1 text-[13px] font-medium no-underline text-muted hover:text-ink"
-        >{link.title}</a
-      >{/each}
+        class={`rounded px-3 py-1 text-[13px] font-medium no-underline transition-colors ${
+          link.isCurrent
+            ? 'bg-accent-soft text-accent'
+            : 'text-muted hover:text-ink'
+        }`}
+      >
+        {link.title}
+      </a>
+    {/each}
   </nav>
+
   <div
     class="ml-2 flex items-center gap-0.5 rounded-md border border-line bg-raised p-0.5"
     role="group"
     aria-label={MODE_LABEL}
   >
-    {#each MODES as option (option.value)}<button
+    {#each MODES as option (option.value)}
+      <button
         type="button"
         aria-pressed={option.value === mode}
-        class:active={option.value === mode}
-        class="rounded px-3 py-1 text-[13px] font-medium"
-        onclick={() => onMode(option.value)}>{option.label}</button
-      >{/each}
+        class={`rounded px-3 py-1 text-[13px] font-medium ${
+          option.value === mode
+            ? 'bg-accent-soft text-accent'
+            : 'text-muted hover:text-ink'
+        }`}
+        onclick={() => onMode(option.value)}
+      >
+        {option.label}
+      </button>
+    {/each}
   </div>
+
   <div class="ml-auto flex flex-wrap items-center gap-2">
-    <button type="button" class="ghost-button" onclick={() => (dialog = true)}
-      >{runtimeCopy.badge}</button
-    >
-    <button
-      type="button"
-      class="ghost-button"
-      aria-label="Toggle color scheme"
-      onclick={toggle}>{shownScheme}</button
-    >
-    <button type="button" class="ghost-button" onclick={reset}
-      >{RESET_LABEL}</button
-    >
+    <Runtime />
+    <SchemeToggle {pinned} {resolved} {toggle} />
+    <button type="button" class="ghost-button" onclick={reset}>
+      {RESET_LABEL}
+    </button>
     <a
       class="ghost-button"
       href={REPOSITORY_URL}
       target="_blank"
-      rel="noreferrer">{MASTHEAD_DOCS_LABEL}</a
+      rel="noreferrer"
     >
+      {DOCS_LABEL}
+    </a>
   </div>
 </header>
-<dialog
-  bind:this={dialogElement}
-  onclose={() => (dialog = false)}
-  class="max-w-lg rounded-xl border border-line bg-surface p-5 text-ink shadow-xl backdrop:bg-black/40"
->
-  <section aria-labelledby="runtime-title">
-    <div class="flex items-center justify-between gap-4">
-      <h2 id="runtime-title" class="text-lg font-semibold">
-        Temporal in this browser
-      </h2>
-      <button class="ghost-button" onclick={() => (dialog = false)}
-        >Close</button
-      >
-    </div>
-    <p class="mt-3 text-sm font-medium">{runtimeCopy.summary}</p>
-    <p class="mt-2 text-sm text-muted">{runtimeCopy.detail}</p>
-    <a
-      class="mt-3 inline-block text-sm text-accent"
-      href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal"
-      target="_blank"
-      rel="noreferrer">MDN: Temporal</a
-    >
-  </section>
-</dialog>
-
-<style>
-  .current,
-  .active {
-    background: var(--color-accent-soft);
-    color: var(--color-accent);
-  }
-</style>
