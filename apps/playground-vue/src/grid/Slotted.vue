@@ -9,8 +9,7 @@ import {
   MIN_BOX_HEIGHT,
   SCROLL_TO_HOUR,
   formatDay,
-  formatTime,
-  toneOf
+  formatTime
 } from '@midstem/playground-core'
 
 import AllDay from '../allday/AllDay.vue'
@@ -55,10 +54,7 @@ const numberClass = (isToday: boolean): string =>
     <AllDay />
   </div>
 
-  <Calendar.TimeGrid
-    :hour-height="hourHeight"
-    :scroll-to-hour="SCROLL_TO_HOUR"
-  >
+  <Calendar.TimeGrid :hour-height="hourHeight" :scroll-to-hour="SCROLL_TO_HOUR">
     <Calendar.TimeAxis>
       <Calendar.TimeLabels
         class="right-2 text-[10px] tabular-nums text-faint"
@@ -83,8 +79,7 @@ const numberClass = (isToday: boolean): string =>
       >
         <div
           :class="[
-            'h-full overflow-hidden rounded-md border border-surface px-1.5 py-px text-[11px] leading-[1.35] shadow-sm transition-[filter] hover:brightness-110',
-            toneOf(event.id)
+            'h-full overflow-hidden rounded-md border border-surface bg-event-timed px-1.5 py-px text-[11px] leading-[1.35] text-event-timed-ink shadow-sm transition-[filter] hover:brightness-110'
           ]"
           :title="`${event.data?.title ?? event.id}\n${formatTime(box.start, locale)} – ${formatTime(box.end, locale)}`"
         >
@@ -97,7 +92,8 @@ const numberClass = (isToday: boolean): string =>
             v-if="box.height * hourHeight * HOURS_IN_DAY >= COMPACT_BOX_HEIGHT"
             class="block truncate opacity-80"
           >
-            {{ formatTime(box.start, locale) }} – {{ formatTime(box.end, locale) }}
+            {{ formatTime(box.start, locale) }} –
+            {{ formatTime(box.end, locale) }}
           </span>
         </div>
       </Calendar.TimedEvents>

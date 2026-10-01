@@ -1,5 +1,5 @@
 const BUTTON =
-  'rounded-md border border-zinc-200 bg-white px-2.5 py-1 text-sm disabled:opacity-40 dark:border-zinc-700 dark:bg-zinc-900'
+  'rounded-md border border-slate-200 bg-white px-2.5 py-1 text-sm disabled:opacity-40 dark:border-white/15 dark:bg-slate-950'
 
 export const OPENING: readonly string[] = [
   '<template>',
@@ -8,7 +8,7 @@ export const OPENING: readonly string[] = [
   '    :events="EVENTS"',
   '    :locale="LOCALE"',
   '    gutter-width="66px"',
-  '    class="flex h-full flex-col p-4 text-zinc-900 dark:text-zinc-100"',
+  '    class="flex h-full flex-col p-4 text-slate-900 dark:text-slate-200"',
   '  >',
   '    <template #error="error">',
   '      <p',
@@ -55,7 +55,7 @@ export const OPENING: readonly string[] = [
   '',
   '      <h2 class="mr-auto truncate text-lg font-semibold">{{ title }}</h2>',
   '',
-  '      <div class="flex items-center gap-0.5 rounded-md border border-zinc-200 bg-white p-0.5 dark:border-zinc-700 dark:bg-zinc-900">',
+  '      <div class="flex items-center gap-0.5 rounded-md border border-slate-200 bg-white p-0.5 dark:border-white/15 dark:bg-slate-950">',
   '        <button',
   '          v-for="kind of VIEWS"',
   '          :key="kind"',
@@ -65,7 +65,7 @@ export const OPENING: readonly string[] = [
   "            'rounded px-2.5 py-1 text-xs font-medium capitalize',",
   '            kind === shown.view',
   "              ? 'bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300'",
-  "              : 'text-zinc-500 dark:text-zinc-400'",
+  "              : 'text-slate-500 dark:text-slate-400'",
   '          ]"',
   '          @click="goTo(navigation.withView(kind))"',
   '        >',
@@ -74,7 +74,7 @@ export const OPENING: readonly string[] = [
   '      </div>',
   '    </Calendar.Toolbar>',
   '',
-  '    <section class="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-900">',
+  '    <section class="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/15 dark:bg-slate-950">',
   '      <div class="min-h-0 flex-1 overflow-auto">'
 ]
 

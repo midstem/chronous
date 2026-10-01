@@ -20,7 +20,7 @@ export const Events = ({
   <div className="flex min-h-0 flex-1 flex-col gap-2">
     <p className="text-[11px] leading-4 text-muted">{hint}</p>
     <p className="font-mono text-[10px] text-faint">
-      EventInput[] · {count} on the board
+      Events JSON · {count} on the calendar
     </p>
     <textarea
       className={`field-control min-h-0 flex-1 resize-none font-mono text-[11px] leading-5 ${problem ? 'border-danger' : ''}`}

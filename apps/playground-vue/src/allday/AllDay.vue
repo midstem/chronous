@@ -5,8 +5,7 @@ import {
   ALL_DAY_LABEL,
   ALL_DAY_LANE_HEIGHT,
   CONTINUES,
-  MIN_LANES,
-  toneOf
+  MIN_LANES
 } from '@midstem/playground-core'
 
 const edge = (shown: boolean): string => (shown ? CONTINUES : '')
@@ -31,8 +30,7 @@ const edge = (shown: boolean): string => (shown ? CONTINUES : '')
     >
       <span
         :class="[
-          'flex h-full items-center truncate rounded-md px-2 text-[11px] font-medium',
-          toneOf(event.id)
+          'flex h-full items-center truncate rounded-md bg-event-all-day px-2 text-[11px] font-medium text-event-all-day-ink'
         ]"
         :title="event.data?.title ?? event.id"
       >

@@ -16,7 +16,7 @@ const SIMPLE_OPENING: readonly string[] = [
   '  template: `',
   '    <div',
   '      *chronousCalendar="range(); events: events(); locale: LOCALE"',
-  '      class="h-full overflow-auto bg-white p-4 text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100"',
+  '      class="h-full overflow-auto bg-white p-4 text-slate-900 dark:bg-slate-950 dark:text-slate-200"',
   '    >'
 ]
 
@@ -31,22 +31,22 @@ const SIMPLE_CLOSING: readonly string[] = [
 ]
 
 const SLOTTED_BODY = (hourHeight: number): readonly string[] => [
-  '      <div class="sticky top-0 z-10 bg-white dark:bg-zinc-900">',
-  '        <div chronousHeader class="border-b border-zinc-200 dark:border-zinc-700">',
+  '      <div class="sticky top-0 z-10 bg-white dark:bg-slate-950">',
+  '        <div chronousHeader class="border-b border-slate-200 dark:border-white/15">',
   '          <div></div>',
   '          <div',
   '            *chronousDayHeadings="let day; let weekdayLabel = weekdayLabel; let dayLabel = dayLabel"',
-  '            class="border-l border-zinc-100 py-2 text-center text-sm font-medium dark:border-zinc-800"',
+  '            class="border-l border-slate-100 py-2 text-center text-sm font-medium dark:border-white/5"',
   '          >',
   '            {{ weekdayLabel }} {{ dayLabel }}',
   '          </div>',
   '        </div>',
   '',
-  '        <chronous-all-day-row class="border-b border-zinc-200 dark:border-zinc-700">',
-  '          <span chronousGutterCell class="pl-2 text-[10px] text-zinc-400">all-day</span>',
+  '        <chronous-all-day-row class="border-b border-slate-200 dark:border-white/15">',
+  '          <span chronousGutterCell class="pl-2 text-[10px] text-slate-400">all-day</span>',
   '          <div',
   '            *chronousAllDayEvents="let event"',
-  '            class="truncate rounded bg-purple-600 px-2 text-[11px] leading-6 text-white dark:bg-purple-900"',
+  '            class="truncate rounded bg-blue-700 px-2 text-[11px] leading-6 text-white dark:bg-blue-300 dark:text-slate-950"',
   '          >',
   '            {{ event.data.title }}',
   '          </div>',
@@ -55,17 +55,17 @@ const SLOTTED_BODY = (hourHeight: number): readonly string[] => [
   '',
   `      <chronous-time-grid [hourHeight]="${hourHeight}">`,
   '        <div chronousTimeAxis>',
-  '          <div *chronousTimeLabels="let slot; let timeLabel = timeLabel" class="right-2 text-[10px] text-zinc-400">',
+  '          <div *chronousTimeLabels="let slot; let timeLabel = timeLabel" class="right-2 text-[10px] text-slate-400">',
   '            {{ timeLabel }}',
   '          </div>',
   '        </div>',
   '',
-  '        <div *chronousDayColumns="let day" class="border-l border-zinc-100 dark:border-zinc-800">',
-  '          <span *chronousTimeSlots="day" class="border-t border-zinc-100 dark:border-zinc-800"></span>',
+  '        <div *chronousDayColumns="let day" class="border-l border-slate-100 dark:border-white/5">',
+  '          <span *chronousTimeSlots="day" class="border-t border-slate-100 dark:border-white/5"></span>',
   '',
   '          <div',
   '            *chronousTimedEvents="day; let event"',
-  '            class="truncate rounded-md bg-blue-600 px-1.5 text-[11px] leading-[1.35] font-medium text-white dark:bg-blue-900"',
+  '            class="truncate rounded-md bg-violet-700 px-1.5 text-[11px] leading-[1.35] font-medium text-white dark:bg-violet-400 dark:text-slate-950"',
   '          >',
   '            {{ event.data.title }}',
   '          </div>',
@@ -75,16 +75,16 @@ const SLOTTED_BODY = (hourHeight: number): readonly string[] => [
 
 const MONTH_BODY: readonly string[] = [
   '      <div chronousMonthGrid>',
-  '        <div *chronousMonthRows="let row; laneHeight: 20" class="border-b border-zinc-200 last:border-b-0 dark:border-zinc-700">',
+  '        <div *chronousMonthRows="let row; laneHeight: 20" class="border-b border-slate-200 last:border-b-0 dark:border-white/15">',
   '          <div',
   '            *chronousMonthDays="row; let day; let dayLabel = dayLabel; let lanes = lanes"',
-  '            class="min-h-28 border-l border-zinc-100 p-1 first:border-l-0 dark:border-zinc-800"',
+  '            class="min-h-28 border-l border-slate-100 p-1 first:border-l-0 dark:border-white/5"',
   '          >',
   '            <div class="h-7 text-center text-xs font-medium">{{ dayLabel }}</div>',
   '            <div [style.height.px]="lanes * 20"></div>',
   '            <div',
   '              *chronousMonthTimedEvents="day; let event"',
-  '              class="truncate rounded bg-blue-600 px-1 text-[11px] leading-5 text-white dark:bg-blue-900"',
+  '              class="truncate rounded bg-violet-700 px-1 text-[11px] leading-5 text-white dark:bg-violet-400 dark:text-slate-950"',
   '            >',
   '              {{ event.data.title }}',
   '            </div>',
@@ -92,7 +92,7 @@ const MONTH_BODY: readonly string[] = [
   '',
   '          <div',
   '            *chronousMonthAllDayEvents="row; let event"',
-  '            class="truncate rounded bg-purple-600 px-1.5 text-[11px] leading-5 text-white dark:bg-purple-900"',
+  '            class="truncate rounded bg-blue-700 px-1.5 text-[11px] leading-5 text-white dark:bg-blue-300 dark:text-slate-950"',
   '          >',
   '            {{ event.data.title }}',
   '          </div>',
@@ -101,7 +101,7 @@ const MONTH_BODY: readonly string[] = [
 ]
 
 const AGENDA_BODY: readonly string[] = [
-  '      <ul chronousAgendaList class="divide-y divide-zinc-100 dark:divide-zinc-800">',
+  '      <ul chronousAgendaList class="divide-y divide-slate-100 dark:divide-white/5">',
   '        <li *chronousAgendaDays="let day; let dayLabel = dayLabel; let weekdayLabel = weekdayLabel; let bars = bars" class="flex gap-4 px-4 py-3">',
   '          <span class="w-16 shrink-0 text-sm font-semibold">{{ weekdayLabel }} {{ dayLabel }}</span>',
   '          <span class="flex flex-col gap-1">',
@@ -129,7 +129,7 @@ export const simpleOf = (
       : AGENDA_BODY
 
   return [
-    ...preambleOf(range, events, locale, { tones: false, clock: false }),
+    ...preambleOf(range, events, locale, { clock: false }),
     ...SIMPLE_OPENING,
     ...body,
     ...SIMPLE_CLOSING

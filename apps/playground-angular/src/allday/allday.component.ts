@@ -5,8 +5,7 @@ import {
   ALL_DAY_LABEL,
   ALL_DAY_LANE_HEIGHT,
   CONTINUES,
-  MIN_LANES,
-  toneOf
+  MIN_LANES
 } from '@midstem/playground-core'
 import type { EventData } from '@midstem/playground-core'
 
@@ -36,10 +35,7 @@ import type { EventData } from '@midstem/playground-core'
         class="px-px py-px"
       >
         <span
-          [class]="
-            'flex h-full items-center truncate rounded-md px-2 text-[11px] font-medium ' +
-            toneOf(event.id)
-          "
+          [class]="'flex h-full items-center truncate rounded-md bg-event-all-day px-2 text-[11px] font-medium text-event-all-day-ink'"
           [attr.title]="titleOf(event)"
         >
           {{ edge(bar.continuesBefore) }}
@@ -55,8 +51,6 @@ export class AlldayComponent {
   readonly minLanes = MIN_LANES
   readonly barGap = ALL_DAY_BAR_GAP
   readonly allDayLabel = ALL_DAY_LABEL
-
-  readonly toneOf = toneOf
 
   edge(shown: boolean): string {
     return shown ? CONTINUES : ''

@@ -6,6 +6,7 @@ import {
   DISAMBIGUATION_HINT,
   DISAMBIGUATION_OPTIONS,
   LOCALES,
+  LOCALE_OPTIONS,
   LOCALE_HINT,
   PRESET_HINT,
   PRESET_OPTIONS,
@@ -22,6 +23,7 @@ import {
 import type { PresetId, Style } from '@midstem/playground-core'
 
 import { NumberFieldComponent } from '../fields/number-field.component'
+import { ChoiceTextFieldComponent } from '../fields/choice-text-field.component'
 import { SelectFieldComponent } from '../fields/select-field.component'
 import { TextFieldComponent } from '../fields/text-field.component'
 import { PanelComponent } from '../panel/panel.component'
@@ -33,6 +35,7 @@ import { PlaygroundService } from '../playground/playground.service'
   imports: [
     PanelComponent,
     SelectFieldComponent,
+    ChoiceTextFieldComponent,
     TextFieldComponent,
     NumberFieldComponent
   ],
@@ -42,7 +45,7 @@ import { PlaygroundService } from '../playground/playground.service'
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="flex min-h-0 flex-1 flex-col gap-3 overflow-auto">
-      <app-panel title="Style" badge="playground only">
+      <app-panel title="Appearance" badge="playground">
         <app-select-field
           label="style"
           [labelHidden]="true"
@@ -53,7 +56,7 @@ import { PlaygroundService } from '../playground/playground.service'
         />
       </app-panel>
 
-      <app-panel title="Fixture" badge="playground only">
+      <app-panel title="Event examples" badge="loads sample data">
         <app-select-field
           label="preset"
           [hint]="presetHint"
@@ -63,7 +66,7 @@ import { PlaygroundService } from '../playground/playground.service'
         />
       </app-panel>
 
-      <app-panel title="CalendarRange" badge="buildCalendar argument">
+      <app-panel title="Calendar options" badge="buildCalendar range">
         <app-select-field
           label="view"
           [hint]="viewHint"
@@ -78,11 +81,11 @@ import { PlaygroundService } from '../playground/playground.service'
           [value]="state().currentDate"
           (valueChange)="updateCurrentDate($event)"
         />
-        <app-text-field
+        <app-choice-text-field
           label="timeZone"
           [hint]="timeZoneHint"
           [value]="state().timeZone"
-          [suggestions]="zones"
+          [options]="zones"
           (valueChange)="updateTimeZone($event)"
         />
         <app-select-field
@@ -115,12 +118,13 @@ import { PlaygroundService } from '../playground/playground.service'
         />
       </app-panel>
 
-      <app-panel title="Labels" badge="playground only">
-        <app-text-field
+      <app-panel title="Language and labels" badge="playground">
+        <app-choice-text-field
           label="locale"
           [hint]="localeHint"
           [value]="state().locale"
-          [suggestions]="locales"
+          [options]="locales"
+          [optionLabels]="localeOptions"
           (valueChange)="updateLocale($event)"
         />
       </app-panel>
@@ -156,6 +160,7 @@ export class ControlsComponent {
 
   readonly localeHint = LOCALE_HINT
   readonly locales = LOCALES
+  readonly localeOptions = LOCALE_OPTIONS
 
   updateStyle(style: string): void {
     this.#playground.update({ style: style as Style })

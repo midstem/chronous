@@ -14,8 +14,7 @@ import {
   MIN_BOX_HEIGHT,
   SCROLL_TO_HOUR,
   formatDay,
-  formatTime,
-  toneOf
+  formatTime
 } from '@midstem/playground-core'
 import type { EventData } from '@midstem/playground-core'
 
@@ -99,10 +98,7 @@ import { AlldayComponent } from '../allday/allday.component'
           class="hover:z-20"
         >
           <div
-            [class]="
-              'h-full overflow-hidden rounded-md border border-surface px-1.5 py-px text-[11px] leading-[1.35] shadow-sm transition-[filter] hover:brightness-110 ' +
-              toneOf(event.id)
-            "
+            [class]="'h-full overflow-hidden rounded-md border border-surface bg-event-timed px-1.5 py-px text-[11px] leading-[1.35] text-event-timed-ink shadow-sm transition-[filter] hover:brightness-110'"
             [attr.title]="boxTitle(event, box)"
           >
             <span class="block truncate font-semibold">
@@ -133,8 +129,6 @@ export class SlottedComponent {
 
   readonly formatDay = formatDay
   readonly formatTime = formatTime
-  readonly toneOf = toneOf
-
   edge(shown: boolean): string {
     return shown ? CONTINUES : ''
   }

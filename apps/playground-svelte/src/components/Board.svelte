@@ -108,39 +108,52 @@
           >
         </div>
         <h2 class="mr-auto truncate text-lg font-semibold">{calendarTitle}</h2>
-        {#if isSlotted(range.view)}<div
-            class="flex items-center gap-0.5 rounded-md border border-line bg-surface p-0.5"
+        {#if isSlotted(range.view)}
+          <div class="flex flex-col gap-1">
+            <span class="px-1 text-[10px] font-medium text-muted"
+              >Row height</span
+            >
+            <div
+              class="flex items-center gap-0.5 rounded-lg border border-line bg-surface p-0.5"
+              role="group"
+              aria-label={DENSITY_LABEL}
+            >
+              {#each DENSITIES as option (option.value)}
+                <button
+                  type="button"
+                  title={`${option.value} row height · ${option.hourHeight}px per hour`}
+                  class={`rounded-md px-2 py-1 text-xs font-medium ${
+                    option.value === density
+                      ? 'bg-accent-soft text-accent'
+                      : 'text-muted hover:text-ink'
+                  }`}
+                  aria-pressed={option.value === density}
+                  onclick={() => onDensity(option.value)}>{option.label}</button
+                >
+              {/each}
+            </div>
+          </div>
+        {/if}
+        <div class="flex flex-col gap-1">
+          <span class="px-1 text-[10px] font-medium text-muted">View</span>
+          <div
+            class="flex items-center gap-0.5 rounded-lg border border-line bg-surface p-0.5"
             role="group"
-            aria-label={DENSITY_LABEL}
+            aria-label="View"
           >
-            {#each DENSITIES as option (option.value)}
+            {#each VIEWS as view (view)}
               <button
                 type="button"
-                class={`rounded px-2 py-1 text-xs font-medium ${
-                  option.value === density
+                class={`rounded-md px-2.5 py-1 text-xs font-medium capitalize ${
+                  view === shown.view
                     ? 'bg-accent-soft text-accent'
                     : 'text-muted hover:text-ink'
                 }`}
-                aria-pressed={option.value === density}
-                onclick={() => onDensity(option.value)}>{option.label}</button
+                aria-pressed={view === shown.view}
+                onclick={() => goTo(nav.withView(view))}>{view}</button
               >
             {/each}
-          </div>{/if}
-        <div
-          class="flex items-center gap-0.5 rounded-md border border-line bg-surface p-0.5"
-        >
-          {#each VIEWS as view (view)}
-            <button
-              type="button"
-              class={`rounded px-2.5 py-1 text-xs font-medium capitalize ${
-                view === shown.view
-                  ? 'bg-accent-soft text-accent'
-                  : 'text-muted hover:text-ink'
-              }`}
-              aria-pressed={view === shown.view}
-              onclick={() => goTo(nav.withView(view))}>{view}</button
-            >
-          {/each}
+          </div>
         </div>
       </header>
     {/snippet}

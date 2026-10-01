@@ -13,8 +13,7 @@
     MIN_LANES,
     SCROLL_TO_HOUR,
     formatDay,
-    formatTime,
-    toneOf
+    formatTime
   } from '@midstem/playground-core'
   import type { EventData } from '@midstem/playground-core'
   const C = createCalendarComponents<EventData>()
@@ -62,7 +61,7 @@
       >{/snippet}
     <C.AllDayEvents gap={ALL_DAY_BAR_GAP} class="px-px py-px"
       >{#snippet children({ event, bar })}<span
-          class={`flex h-full items-center truncate rounded-md px-2 text-[11px] font-medium ${plain ? 'border-b border-line' : toneOf(event.id)}`}
+          class={`flex h-full items-center truncate rounded-md px-2 text-[11px] font-medium ${plain ? 'border-b border-line' : 'bg-event-all-day text-event-all-day-ink'}`}
           title={event.data?.title ?? event.id}
           >{edge(bar.continuesBefore)}
           {event.data?.title ?? event.id}
@@ -88,7 +87,7 @@
     >
     <C.TimedEvents class="hover:z-20" minHeight={MIN_BOX_HEIGHT} gap={BOX_GAP}
       >{#snippet children({ event, box })}<div
-          class={`h-full overflow-hidden rounded-md border border-surface px-1.5 py-px text-[11px] leading-[1.35] shadow-sm transition-[filter] hover:brightness-110 ${plain ? 'border-line bg-surface text-ink' : toneOf(event.id)}`}
+          class={`h-full overflow-hidden rounded-md border border-surface px-1.5 py-px text-[11px] leading-[1.35] shadow-sm transition-[filter] hover:brightness-110 ${plain ? 'border-line bg-surface text-ink' : 'bg-event-timed text-event-timed-ink'}`}
           title={`${event.data?.title ?? event.id}\n${formatTime(box.start, locale)} – ${formatTime(box.end, locale)}`}
         >
           <span class="block truncate font-semibold"

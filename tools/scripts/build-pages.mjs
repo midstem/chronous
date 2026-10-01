@@ -38,10 +38,15 @@ const buildPlayground = ({ id }) => {
   )
 }
 
-const toCard = ({ id, title, packageName }) => `
-      <a class="card" href="./${id}/">
-        <span class="card__title">${title}</span>
+const toCard = ({ id, title, packageName }, index) => `
+      <a class="card card--${id}" href="./${id}/">
+        <div class="card__top">
+          <span class="card__mark" aria-hidden="true">${title.slice(0, 1)}</span>
+          <span class="card__number" aria-hidden="true">0${index + 1}</span>
+        </div>
+        <h2>${title}</h2>
         <code class="card__package">${packageName}</code>
+        <span class="card__action">Open playground <span aria-hidden="true">↗</span></span>
       </a>`
 
 const buildIndex = () => `<!doctype html>
@@ -50,101 +55,105 @@ const buildIndex = () => `<!doctype html>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
+    <meta name="description" content="Explore Chronous in React, Angular, Vue and Svelte. Try calendar views, event examples and live options with generated code." />
     <title>Chronous playgrounds</title>
     <style>
       :root {
         color-scheme: light dark;
-        --color-canvas: #f4f4f5;
-        --color-surface: #ffffff;
-        --color-line: #e4e4e7;
-        --color-ink: #18181b;
-        --color-muted: #71717a;
-        --color-accent: #1d4ed8;
+        --canvas: light-dark(#f8fafc, #020617);
+        --surface: light-dark(#ffffff, #0b1225);
+        --line: light-dark(#e2e8f0, #ffffff26);
+        --ink: light-dark(#0f172a, #e2e8f0);
+        --muted: light-dark(#64748b, #94a3b8);
+        --accent: light-dark(#7c3aed, #a78bfa);
       }
-
-      @media (prefers-color-scheme: dark) {
-        :root {
-          --color-canvas: #09090b;
-          --color-surface: #18181b;
-          --color-line: #3f3f46;
-          --color-ink: #f4f4f5;
-          --color-muted: #a1a1aa;
-          --color-accent: #93c5fd;
-        }
-      }
-
+      * { box-sizing: border-box; }
       body {
         margin: 0;
-        padding: 48px 20px;
-        background: var(--color-canvas);
-        color: var(--color-ink);
-        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        padding: 0 24px;
+        background: var(--canvas);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         -webkit-font-smoothing: antialiased;
       }
-
-      main {
-        max-width: 720px;
-        margin: 0 auto;
-      }
-
-      h1 {
-        margin: 0 0 8px;
-        font-size: 28px;
-        font-weight: 600;
-        letter-spacing: -0.02em;
-      }
-
-      p {
-        margin: 0 0 32px;
-        color: var(--color-muted);
-        font-size: 15px;
-        line-height: 1.5;
-      }
-
-      .cards {
-        display: grid;
-        gap: 12px;
-      }
-
-      .card {
+      main { max-width: 1000px; margin: 0 auto; }
+      .masthead {
         display: flex;
-        flex-wrap: wrap;
-        gap: 8px 16px;
         align-items: center;
         justify-content: space-between;
-        padding: 16px 20px;
-        color: inherit;
-        text-decoration: none;
-        background: var(--color-surface);
-        border: 1px solid var(--color-line);
-        border-radius: 10px;
-        transition: border-color 0.15s ease;
+        gap: 20px;
+        padding: 28px 0;
+        border-bottom: 1px solid var(--line);
       }
-
-      .card:hover {
-        border-color: var(--color-accent);
-      }
-
-      .card__title {
-        font-size: 16px;
+      .brand { font-size: 18px; font-weight: 700; letter-spacing: -0.04em; }
+      .brand span { color: var(--accent); }
+      .docs { color: var(--muted); font-size: 13px; text-decoration: none; }
+      .docs:hover { color: var(--ink); }
+      .intro { max-width: 740px; padding: 64px 0 36px; }
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 20px;
+        color: var(--accent);
+        font-size: 12px;
         font-weight: 600;
       }
-
-      .card__package {
-        color: var(--color-muted);
-        font-size: 13px;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      .eyebrow::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+      h1 { margin: 0 0 18px; max-width: 680px; font-size: clamp(32px, 5vw, 52px); line-height: 1.12; font-weight: 650; letter-spacing: -0.045em; }
+      .intro p { margin: 0; max-width: 580px; color: var(--muted); font-size: 16px; line-height: 1.7; }
+      .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+      .card {
+        --tint: light-dark(#1d4ed8, #93c5fd);
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        padding: 24px;
+        color: inherit;
+        text-decoration: none;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        transition: border-color 150ms ease, transform 150ms ease;
       }
+      .card--angular { --tint: light-dark(#be123c, #fda4af); }
+      .card--vue { --tint: light-dark(#047857, #6ee7b7); }
+      .card--svelte { --tint: light-dark(#c2410c, #fdba74); }
+      .card:hover { border-color: var(--tint); transform: translateY(-2px); }
+      a:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; border-radius: 12px; }
+      .card__top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+      .card__mark { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid var(--line); border-radius: 10px; color: var(--tint); font-size: 20px; font-weight: 600; }
+      .card__number { color: var(--muted); font: 11px ui-monospace, monospace; }
+      h2 { margin: 0 0 8px; font-size: 21px; font-weight: 600; letter-spacing: -0.025em; }
+      .card__package { color: var(--muted); font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; overflow-wrap: anywhere; }
+      .card__action { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--tint); font-size: 13px; font-weight: 600; }
+      footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; padding: 28px 0 40px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+      @media (max-width: 560px) {
+        body { padding: 0 18px; }
+        .intro { padding-top: 40px; }
+        .cards { grid-template-columns: 1fr; }
+        .card { padding: 20px; }
+      }
+      @media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover { transform: none; } }
     </style>
   </head>
   <body>
     <main>
-      <h1>Chronous playgrounds</h1>
-      <p>
-        The same playground built against every adapter — explore each framework integration.
-      </p>
-      <div class="cards">${PLAYGROUNDS.map(toCard).join('')}
-      </div>
+      <header class="masthead">
+        <div class="brand">Chronous<span>.</span></div>
+        <a class="docs" href="https://github.com/midstem/chronous#readme">Documentation ↗</a>
+      </header>
+      <section class="intro" aria-labelledby="title">
+        <div class="eyebrow">Interactive playgrounds</div>
+        <h1 id="title">Your framework.<br />Your calendar.</h1>
+        <p>Explore the same Chronous calendar in four frameworks. Try event examples, adjust calendar options, and see the code behind every view.</p>
+      </section>
+      <nav class="cards" aria-label="Choose a framework">${PLAYGROUNDS.map(toCard).join('')}
+      </nav>
+      <footer>
+        <span>One scheduling engine. Four framework integrations.</span>
+        <span>Day · Week · Month · Agenda</span>
+      </footer>
     </main>
   </body>
 </html>

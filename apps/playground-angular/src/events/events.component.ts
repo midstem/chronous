@@ -19,7 +19,7 @@ import { PlaygroundService } from '../playground/playground.service'
     <div class="flex min-h-0 flex-1 flex-col gap-2">
       <p class="text-[11px] leading-4 text-muted">{{ hint() }}</p>
       <p class="font-mono text-[10px] text-faint">
-        EventInput[] · {{ count() }} on the board
+        Events JSON · {{ count() }} on the calendar
       </p>
       <textarea
         [class]="

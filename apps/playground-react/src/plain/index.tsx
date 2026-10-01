@@ -21,7 +21,7 @@ export const PlainSlotted = ({ hourHeight }: SlottedProps): ReactElement => (
           <span className="pl-2 text-[10px] text-faint">all-day</span>
         }
       >
-        <Calendar.AllDayEvents className="truncate rounded bg-tone-2 px-2 text-[11px] leading-6 text-tone-2-ink">
+        <Calendar.AllDayEvents className="truncate rounded bg-event-all-day px-2 text-[11px] leading-6 text-event-all-day-ink">
           {({ event }) => event.data?.title}
         </Calendar.AllDayEvents>
       </Calendar.AllDayRow>
@@ -35,7 +35,7 @@ export const PlainSlotted = ({ hourHeight }: SlottedProps): ReactElement => (
       <Calendar.DayColumns className="border-l border-hair">
         <Calendar.TimeSlots className="border-t border-hair" />
 
-        <Calendar.TimedEvents className="truncate rounded-md bg-tone-1 px-1.5 text-[11px] leading-[1.35] font-medium text-tone-1-ink">
+        <Calendar.TimedEvents className="truncate rounded-md bg-event-timed px-1.5 text-[11px] leading-[1.35] font-medium text-event-timed-ink">
           {({ event }) => event.data?.title}
         </Calendar.TimedEvents>
       </Calendar.DayColumns>
@@ -56,14 +56,14 @@ export const PlainMonth = (): ReactElement => (
               {dayLabel}
             </div>
             <div style={{ height: lanes * LANE_HEIGHT }} />
-            <Calendar.MonthTimedEvents className="truncate rounded bg-tone-1 px-1 text-[11px] leading-5 text-tone-1-ink">
+            <Calendar.MonthTimedEvents className="truncate rounded bg-event-timed px-1 text-[11px] leading-5 text-event-timed-ink">
               {({ event }) => event.data?.title}
             </Calendar.MonthTimedEvents>
           </>
         )}
       </Calendar.MonthDays>
 
-      <Calendar.MonthAllDayEvents className="truncate rounded bg-tone-2 px-1.5 text-[11px] leading-5 text-tone-2-ink">
+      <Calendar.MonthAllDayEvents className="truncate rounded bg-event-all-day px-1.5 text-[11px] leading-5 text-event-all-day-ink">
         {({ event }) => event.data?.title}
       </Calendar.MonthAllDayEvents>
     </Calendar.MonthRows>

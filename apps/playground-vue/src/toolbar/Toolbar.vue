@@ -60,47 +60,55 @@ const emit = defineEmits<{
 
     <h2 class="mr-auto truncate text-lg font-semibold">{{ title }}</h2>
 
-    <div
-      v-if="slotted"
-      class="flex items-center gap-0.5 rounded-md border border-line bg-surface p-0.5"
-      role="group"
-      :aria-label="DENSITY_LABEL"
-    >
-      <button
-        v-for="option of DENSITIES"
-        :key="option.value"
-        type="button"
-        :aria-pressed="option.value === density"
-        :class="[
-          'rounded px-2 py-1 text-xs font-medium',
-          option.value === density
-            ? 'bg-accent-soft text-accent'
-            : 'text-muted hover:text-ink'
-        ]"
-        @click="emit('density', option.value)"
+    <div v-if="slotted" class="flex flex-col gap-1">
+      <span class="px-1 text-[10px] font-medium text-muted">Row height</span>
+      <div
+        class="flex items-center gap-0.5 rounded-lg border border-line bg-surface p-0.5"
+        role="group"
+        :aria-label="DENSITY_LABEL"
       >
-        {{ option.label }}
-      </button>
+        <button
+          v-for="option of DENSITIES"
+          :key="option.value"
+          type="button"
+          :title="`${option.value} row height · ${option.hourHeight}px per hour`"
+          :aria-pressed="option.value === density"
+          :class="[
+            'rounded-md px-2 py-1 text-xs font-medium',
+            option.value === density
+              ? 'bg-accent-soft text-accent'
+              : 'text-muted hover:text-ink'
+          ]"
+          @click="emit('density', option.value)"
+        >
+          {{ option.label }}
+        </button>
+      </div>
     </div>
 
-    <div
-      class="flex items-center gap-0.5 rounded-md border border-line bg-surface p-0.5"
-    >
-      <button
-        v-for="kind of VIEWS"
-        :key="kind"
-        type="button"
-        :aria-pressed="kind === view"
-        :class="[
-          'rounded px-2.5 py-1 text-xs font-medium capitalize',
-          kind === view
-            ? 'bg-accent-soft text-accent'
-            : 'text-muted hover:text-ink'
-        ]"
-        @click="emit('navigate', navigation.withView(kind))"
+    <div class="flex flex-col gap-1">
+      <span class="px-1 text-[10px] font-medium text-muted">View</span>
+      <div
+        class="flex items-center gap-0.5 rounded-lg border border-line bg-surface p-0.5"
+        role="group"
+        aria-label="View"
       >
-        {{ kind }}
-      </button>
+        <button
+          v-for="kind of VIEWS"
+          :key="kind"
+          type="button"
+          :aria-pressed="kind === view"
+          :class="[
+            'rounded-md px-2.5 py-1 text-xs font-medium capitalize',
+            kind === view
+              ? 'bg-accent-soft text-accent'
+              : 'text-muted hover:text-ink'
+          ]"
+          @click="emit('navigate', navigation.withView(kind))"
+        >
+          {{ kind }}
+        </button>
+      </div>
     </div>
   </header>
 </template>

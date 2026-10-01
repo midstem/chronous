@@ -8,9 +8,7 @@
     MONTH_LANE_HEIGHT,
     MONTH_MAX_LANES,
     NUMBER_HEIGHT,
-    WEEK_COLUMNS,
-    dotOf,
-    toneOf
+    WEEK_COLUMNS
   } from '@midstem/playground-core'
   import type { EventData } from '@midstem/playground-core'
   const C = createCalendarComponents<EventData>()
@@ -52,10 +50,8 @@
           >{/if}<span class="flex flex-col gap-0.5"
           ><C.MonthTimedEvents
             as="span"
-            class="flex items-center gap-1 truncate rounded px-1 text-[11px] leading-5 hover:bg-raised"
-            >{#snippet children({ event })}{#if !plain}<span
-                  class={`size-1.5 shrink-0 rounded-full ${dotOf(event.id)}`}
-                ></span>{/if}<span class="truncate"
+            class="flex items-center gap-1 truncate rounded bg-event-timed px-1 text-[11px] leading-5 text-event-timed-ink hover:brightness-110"
+            >{#snippet children({ event })}<span class="truncate"
                 >{event.data?.title ?? event.id}</span
               >{/snippet}</C.MonthTimedEvents
           ></span
@@ -63,7 +59,7 @@
     >
     <C.MonthAllDayEvents gap={MONTH_BAR_GAP} lanesTopOffset={NUMBER_HEIGHT}
       >{#snippet children({ event, bar })}<span
-          class={`flex h-full items-center truncate px-1.5 text-[11px] font-medium ${plain ? 'border-b border-line' : `rounded ${toneOf(event.id)}`}`}
+          class={`flex h-full items-center truncate px-1.5 text-[11px] font-medium ${plain ? 'border-b border-line' : 'rounded bg-event-all-day text-event-all-day-ink'}`}
           >{edge(bar.continuesBefore)}
           {event.data?.title ?? event.id}
           {edge(bar.continuesAfter)}</span

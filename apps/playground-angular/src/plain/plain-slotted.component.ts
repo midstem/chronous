@@ -32,7 +32,7 @@ import { CALENDAR_DIRECTIVES } from '@midstem/chronous-angular'
 
         <div
           *chronousAllDayEvents="let event"
-          class="truncate rounded bg-tone-2 px-2 text-[11px] leading-6 text-tone-2-ink"
+          class="truncate rounded bg-event-all-day px-2 text-[11px] leading-6 text-event-all-day-ink"
         >
           {{ event.data?.title ?? event.id }}
         </div>
@@ -54,7 +54,7 @@ import { CALENDAR_DIRECTIVES } from '@midstem/chronous-angular'
 
         <div
           *chronousTimedEvents="day; let event"
-          class="truncate rounded-md bg-tone-1 px-1.5 text-[11px] leading-[1.35] font-medium text-tone-1-ink"
+          class="truncate rounded-md bg-event-timed px-1.5 text-[11px] leading-[1.35] font-medium text-event-timed-ink"
         >
           {{ event.data?.title ?? event.id }}
         </div>

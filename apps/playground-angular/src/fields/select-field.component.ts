@@ -34,7 +34,7 @@ let nextId = 0
         (change)="onChange($event)"
       >
         @for (option of options(); track option.value) {
-          <option [value]="option.value">
+          <option [value]="option.value" [selected]="option.value === value()">
             {{ option.label }}
           </option>
         }

@@ -6,6 +6,7 @@ import {
   DISAMBIGUATION_HINT,
   DISAMBIGUATION_OPTIONS,
   LOCALES,
+  LOCALE_OPTIONS,
   LOCALE_HINT,
   PRESET_HINT,
   PRESET_OPTIONS,
@@ -22,6 +23,7 @@ import {
 import type { PresetId, Style } from '@midstem/playground-core'
 
 import NumberField from '../fields/NumberField.vue'
+import ChoiceTextField from '../fields/ChoiceTextField.vue'
 import SelectField from '../fields/SelectField.vue'
 import TextField from '../fields/TextField.vue'
 import Panel from '../panel/Panel.vue'
@@ -73,7 +75,7 @@ const updateLocale = (locale: string): void => {
 
 <template>
   <div class="flex min-h-0 flex-1 flex-col gap-3 overflow-auto">
-    <Panel title="Style" badge="playground only">
+    <Panel title="Appearance" badge="playground">
       <SelectField
         label="style"
         :label-hidden="true"
@@ -84,7 +86,7 @@ const updateLocale = (locale: string): void => {
       />
     </Panel>
 
-    <Panel title="Fixture" badge="playground only">
+    <Panel title="Event examples" badge="loads sample data">
       <SelectField
         label="preset"
         :hint="PRESET_HINT"
@@ -94,7 +96,7 @@ const updateLocale = (locale: string): void => {
       />
     </Panel>
 
-    <Panel title="CalendarRange" badge="buildCalendar argument">
+    <Panel title="Calendar options" badge="buildCalendar range">
       <SelectField
         label="view"
         :hint="VIEW_HINT"
@@ -109,11 +111,11 @@ const updateLocale = (locale: string): void => {
         :value="state.currentDate"
         @update:value="updateCurrentDate"
       />
-      <TextField
+      <ChoiceTextField
         label="timeZone"
         :hint="TIME_ZONE_HINT"
         :value="state.timeZone"
-        :suggestions="ZONES"
+        :options="ZONES"
         @update:value="updateTimeZone"
       />
       <SelectField
@@ -146,12 +148,13 @@ const updateLocale = (locale: string): void => {
       />
     </Panel>
 
-    <Panel title="Labels" badge="playground only">
-      <TextField
+    <Panel title="Language and labels" badge="playground">
+      <ChoiceTextField
         label="locale"
         :hint="LOCALE_HINT"
         :value="state.locale"
-        :suggestions="LOCALES"
+        :options="LOCALES"
+        :option-labels="LOCALE_OPTIONS"
         @update:value="updateLocale"
       />
     </Panel>

@@ -1,5 +1,5 @@
 const BUTTON =
-  'rounded-md border border-zinc-200 bg-white px-2.5 py-1 text-sm disabled:opacity-40 dark:border-zinc-700 dark:bg-zinc-900'
+  'rounded-md border border-slate-200 bg-white px-2.5 py-1 text-sm disabled:opacity-40 dark:border-white/15 dark:bg-slate-950'
 
 export const OPENING: readonly string[] = [
   '@Component({',
@@ -9,7 +9,7 @@ export const OPENING: readonly string[] = [
   '  template: `',
   '    <div',
   '      *chronousCalendar="range(); events: events(); locale: LOCALE; gutterWidth: \'66px\'"',
-  '      class="flex h-full flex-col p-4 text-zinc-900 dark:text-zinc-100"',
+  '      class="flex h-full flex-col p-4 text-slate-900 dark:text-slate-200"',
   '    >',
   '      <div',
   '        *chronousToolbar="let navigation; let title = title"',
@@ -47,7 +47,7 @@ export const OPENING: readonly string[] = [
   '        <h2 class="mr-auto truncate text-lg font-semibold">{{ title }}</h2>',
   '',
   '        <div',
-  '          class="flex items-center gap-0.5 rounded-md border border-zinc-200 bg-white p-0.5 dark:border-zinc-700 dark:bg-zinc-900"',
+  '          class="flex items-center gap-0.5 rounded-md border border-slate-200 bg-white p-0.5 dark:border-white/15 dark:bg-slate-950"',
   '        >',
   '          @for (kind of views; track kind) {',
   '            <button',
@@ -62,7 +62,7 @@ export const OPENING: readonly string[] = [
   '      </div>',
   '',
   '      <section',
-  '        class="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-900"',
+  '        class="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/15 dark:bg-slate-950"',
   '      >',
   '        <div class="min-h-0 flex-1 overflow-auto">'
 ]

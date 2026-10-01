@@ -5,7 +5,7 @@ import {
   output
 } from '@angular/core'
 import {
-  DOCS_LABEL,
+  MASTHEAD_DOCS_LABEL as DOCS_LABEL,
   FRAMEWORK_NAV_LABEL,
   HEADLINE,
   MODES,
