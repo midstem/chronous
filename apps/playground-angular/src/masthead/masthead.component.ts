@@ -58,7 +58,8 @@ import { ThemeToggleComponent } from '../theme/theme-toggle.component'
       </h1>
 
       <nav
-        class="ml-2 flex items-center gap-0.5 rounded-md border border-line bg-raised p-0.5"
+        class="ml-2 flex items-center gap-0.5 rounded-md border border-line bg-raised p-0.5 embed:hidden"
+        data-framework-nav
         [attr.aria-label]="frameworkNavLabel"
       >
         @for (link of frameworks; track link.id) {

@@ -12,6 +12,7 @@ export * from './runtime'
 export * from './state'
 export * from './playground'
 export * from './frameworks'
+export * from './embed'
 export * from './styles'
 
 export * from './sidebar/constants'

@@ -68,7 +68,6 @@
     {@render Toolbar(titleOf(calendar, locale))}
     <section
       class="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-line bg-surface shadow-sm"
-      class:plain
     >
       <div data-scroller class="min-h-0 flex-1 overflow-auto">
         {#if isSlotted(range.view)}
@@ -90,15 +89,18 @@
       <header class="flex flex-wrap items-center gap-3 pb-3">
         <div class="flex items-center gap-1">
           <button
+            type="button"
             class="ghost-button"
             aria-label={BACK_LABEL}
             disabled={!nav.prev}
             onclick={() => nav.prev && goTo(nav.prev)}>‹</button
           ><button
+            type="button"
             class="ghost-button"
             disabled={!nav.today}
             onclick={() => nav.today && goTo(nav.today())}>Today</button
           ><button
+            type="button"
             class="ghost-button"
             aria-label={NEXT_LABEL}
             disabled={!nav.next}
@@ -111,35 +113,36 @@
             role="group"
             aria-label={DENSITY_LABEL}
           >
-            {#each DENSITIES as option (option.value)}<button
-                class="rounded px-2 py-1 text-xs font-medium"
-                class:chosen={option.value === density}
+            {#each DENSITIES as option (option.value)}
+              <button
+                type="button"
+                class={`rounded px-2 py-1 text-xs font-medium ${
+                  option.value === density
+                    ? 'bg-accent-soft text-accent'
+                    : 'text-muted hover:text-ink'
+                }`}
                 aria-pressed={option.value === density}
                 onclick={() => onDensity(option.value)}>{option.label}</button
-              >{/each}
+              >
+            {/each}
           </div>{/if}
         <div
           class="flex items-center gap-0.5 rounded-md border border-line bg-surface p-0.5"
         >
-          {#each VIEWS as view (view)}<button
-              class="rounded px-2.5 py-1 text-xs font-medium capitalize"
-              class:chosen={view === shown.view}
+          {#each VIEWS as view (view)}
+            <button
+              type="button"
+              class={`rounded px-2.5 py-1 text-xs font-medium capitalize ${
+                view === shown.view
+                  ? 'bg-accent-soft text-accent'
+                  : 'text-muted hover:text-ink'
+              }`}
               aria-pressed={view === shown.view}
               onclick={() => goTo(nav.withView(view))}>{view}</button
-            >{/each}
+            >
+          {/each}
         </div>
       </header>
     {/snippet}
   </C.Toolbar>
 {/snippet}
-
-<style>
-  .chosen {
-    background: var(--color-accent-soft);
-    color: var(--color-accent);
-  }
-  .plain {
-    border-radius: 0;
-    box-shadow: none;
-  }
-</style>

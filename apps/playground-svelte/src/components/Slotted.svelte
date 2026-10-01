@@ -43,8 +43,10 @@
             class="text-[10px] font-medium tracking-wide text-muted uppercase"
             >{weekdayLabel}</span
           ><span
-            class="flex size-7 items-center justify-center text-sm font-semibold"
-            class:today={day.date === today}>{dayLabel}</span
+            class={day.date === today
+              ? 'flex size-7 items-center justify-center rounded-full bg-accent text-sm font-semibold text-surface'
+              : 'flex size-7 items-center justify-center text-sm font-semibold'}
+            >{dayLabel}</span
           >
         </div>{/snippet}</C.DayHeadings
     ></C.Header
@@ -86,7 +88,7 @@
     >
     <C.TimedEvents class="hover:z-20" minHeight={MIN_BOX_HEIGHT} gap={BOX_GAP}
       >{#snippet children({ event, box })}<div
-          class={`h-full overflow-hidden rounded-md border border-surface px-1.5 py-px text-[11px] leading-[1.35] shadow-sm ${plain ? 'border-line bg-surface text-ink' : toneOf(event.id)}`}
+          class={`h-full overflow-hidden rounded-md border border-surface px-1.5 py-px text-[11px] leading-[1.35] shadow-sm transition-[filter] hover:brightness-110 ${plain ? 'border-line bg-surface text-ink' : toneOf(event.id)}`}
           title={`${event.data?.title ?? event.id}\n${formatTime(box.start, locale)} – ${formatTime(box.end, locale)}`}
         >
           <span class="block truncate font-semibold"
@@ -104,10 +106,3 @@
     >
   </C.DayColumns>
 </C.TimeGrid>
-
-<style>
-  .today {
-    background: var(--color-accent);
-    color: var(--color-surface);
-  }
-</style>

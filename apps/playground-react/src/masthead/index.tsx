@@ -80,7 +80,8 @@ export const Masthead = ({
     </h1>
 
     <nav
-      className="ml-2 flex items-center gap-0.5 rounded-md border border-line bg-raised p-0.5"
+      className="ml-2 flex items-center gap-0.5 rounded-md border border-line bg-raised p-0.5 embed:hidden"
+      data-framework-nav
       aria-label={FRAMEWORK_NAV_LABEL}
     >
       {FRAMEWORKS.map((link) => (
