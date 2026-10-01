@@ -32,11 +32,13 @@ describe('Svelte playground', () => {
     render(App)
     const zoneSelect = screen.getByLabelText('timeZone common values')
     await fireEvent.change(zoneSelect, { target: { value: '__custom__' } })
-    const zoneInput = screen.getByLabelText('timeZone custom value')
-    expect((zoneInput as HTMLInputElement).value).toBe('Europe/Kyiv')
+    const zoneInput = screen.getByLabelText<HTMLInputElement>(
+      'timeZone custom value'
+    )
+    expect(zoneInput.value).toBe('Europe/Kyiv')
     await fireEvent.input(zoneInput, { target: { value: 'UTC' } })
     expect(
-      (screen.getByLabelText('timeZone custom value') as HTMLInputElement).value
+      screen.getByLabelText<HTMLInputElement>('timeZone custom value').value
     ).toBe('UTC')
 
     const localeSelect = screen.getByLabelText('locale common values')
@@ -44,7 +46,7 @@ describe('Svelte playground', () => {
     const localeInput = screen.getByLabelText('locale custom value')
     await fireEvent.input(localeInput, { target: { value: 'en-GB' } })
     expect(
-      (screen.getByLabelText('locale custom value') as HTMLInputElement).value
+      screen.getByLabelText<HTMLInputElement>('locale custom value').value
     ).toBe('en-GB')
 
     await fireEvent.change(screen.getByLabelText('preset'), {
@@ -53,11 +55,10 @@ describe('Svelte playground', () => {
     expect(screen.queryByLabelText('timeZone custom value')).toBeNull()
     expect(screen.queryByLabelText('locale custom value')).toBeNull()
     expect(
-      (screen.getByLabelText('timeZone common values') as HTMLSelectElement)
-        .value
+      screen.getByLabelText<HTMLSelectElement>('timeZone common values').value
     ).toBe('Europe/Kyiv')
     expect(
-      (screen.getByLabelText('locale common values') as HTMLSelectElement).value
+      screen.getByLabelText<HTMLSelectElement>('locale common values').value
     ).toBe('en-GB')
   })
 
