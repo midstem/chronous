@@ -1,7 +1,7 @@
 export const AGENDA_HELPERS: readonly string[] = []
 
 export const AGENDA_BODY: readonly string[] = [
-  '    <Calendar.AgendaList as="ul" className="divide-y divide-zinc-100 dark:divide-zinc-800">',
+  '    <Calendar.AgendaList as="ul" className="divide-y divide-slate-100 dark:divide-white/5">',
   '      <Calendar.AgendaDays as="li" className="flex gap-4 px-4 py-3">',
   '        {({ dayLabel, weekdayLabel }) => (',
   '          <>',

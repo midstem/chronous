@@ -32,7 +32,7 @@ const LANE_HEIGHT = 20
           <div [style.height.px]="lanes * laneHeight"></div>
           <div
             *chronousMonthTimedEvents="day; let event"
-            class="truncate rounded bg-tone-1 px-1 text-[11px] leading-5 text-tone-1-ink"
+            class="truncate rounded bg-event-timed px-1 text-[11px] leading-5 text-event-timed-ink"
           >
             {{ event.data?.title ?? event.id }}
           </div>
@@ -40,7 +40,7 @@ const LANE_HEIGHT = 20
 
         <div
           *chronousMonthAllDayEvents="row; let event"
-          class="truncate rounded bg-tone-2 px-1.5 text-[11px] leading-5 text-tone-2-ink"
+          class="truncate rounded bg-event-all-day px-1.5 text-[11px] leading-5 text-event-all-day-ink"
         >
           {{ event.data?.title ?? event.id }}
         </div>

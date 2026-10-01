@@ -1,7 +1,7 @@
 import type { ViewKind } from '@midstem/chronous-react'
 import type { ReactElement } from 'react'
 
-import { NumberField, SelectField, TextField } from '../fields'
+import { ChoiceTextField, NumberField, SelectField, TextField } from '../fields'
 import { PRESET_OPTIONS } from '@midstem/playground-core'
 import type { PresetId } from '../fixtures'
 import { Panel } from '../panel'
@@ -15,6 +15,7 @@ import {
   DISAMBIGUATION_HINT,
   DISAMBIGUATION_OPTIONS,
   LOCALES,
+  LOCALE_OPTIONS,
   LOCALE_HINT,
   PRESET_HINT,
   STYLE_HINT,
@@ -39,7 +40,7 @@ export const Controls = ({
   choosePreset
 }: ControlsProps): ReactElement => (
   <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-auto">
-    <Panel title="Style" badge="playground only">
+    <Panel title="Appearance" badge="playground">
       <SelectField
         label="style"
         labelHidden
@@ -50,7 +51,7 @@ export const Controls = ({
       />
     </Panel>
 
-    <Panel title="Fixture" badge="playground only">
+    <Panel title="Event examples" badge="loads sample data">
       <SelectField
         label="preset"
         hint={PRESET_HINT}
@@ -60,7 +61,7 @@ export const Controls = ({
       />
     </Panel>
 
-    <Panel title="CalendarRange" badge="buildCalendar argument">
+    <Panel title="Calendar options" badge="buildCalendar range">
       <SelectField
         label="view"
         hint={VIEW_HINT}
@@ -75,11 +76,11 @@ export const Controls = ({
         value={state.currentDate}
         onChange={(currentDate) => update({ currentDate })}
       />
-      <TextField
+      <ChoiceTextField
         label="timeZone"
         hint={TIME_ZONE_HINT}
         value={state.timeZone}
-        suggestions={ZONES}
+        options={ZONES}
         onChange={(timeZone) => update({ timeZone })}
       />
       <SelectField
@@ -112,12 +113,13 @@ export const Controls = ({
       />
     </Panel>
 
-    <Panel title="Labels" badge="playground only">
-      <TextField
+    <Panel title="Language and labels" badge="playground">
+      <ChoiceTextField
         label="locale"
         hint={LOCALE_HINT}
         value={state.locale}
-        suggestions={LOCALES}
+        options={LOCALES}
+        optionLabels={LOCALE_OPTIONS}
         onChange={(locale) => update({ locale })}
       />
     </Panel>

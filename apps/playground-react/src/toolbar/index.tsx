@@ -59,37 +59,50 @@ export const Toolbar = ({
     <h2 className="mr-auto truncate text-lg font-semibold">{title}</h2>
 
     {slotted && (
-      <div
-        className="flex items-center gap-0.5 rounded-md border border-line bg-surface p-0.5"
-        role="group"
-        aria-label={DENSITY_LABEL}
-      >
-        {DENSITIES.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            aria-pressed={option.value === density}
-            className={`rounded px-2 py-1 text-xs font-medium ${option.value === density ? 'bg-accent-soft text-accent' : 'text-muted hover:text-ink'}`}
-            onClick={() => onDensity(option.value)}
-          >
-            {option.label}
-          </button>
-        ))}
+      <div className="flex flex-col gap-1">
+        <span className="px-1 text-[10px] font-medium text-muted">
+          Row height
+        </span>
+        <div
+          className="flex items-center gap-0.5 rounded-lg border border-line bg-surface p-0.5"
+          role="group"
+          aria-label={DENSITY_LABEL}
+        >
+          {DENSITIES.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              title={`${option.value} row height · ${option.hourHeight}px per hour`}
+              aria-pressed={option.value === density}
+              className={`rounded-md px-2 py-1 text-xs font-medium ${option.value === density ? 'bg-accent-soft text-accent' : 'text-muted hover:text-ink'}`}
+              onClick={() => onDensity(option.value)}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
       </div>
     )}
 
-    <div className="flex items-center gap-0.5 rounded-md border border-line bg-surface p-0.5">
-      {VIEWS.map((kind) => (
-        <button
-          key={kind}
-          type="button"
-          aria-pressed={kind === view}
-          className={`rounded px-2.5 py-1 text-xs font-medium capitalize ${kind === view ? 'bg-accent-soft text-accent' : 'text-muted hover:text-ink'}`}
-          onClick={() => onChange(navigation.withView(kind))}
-        >
-          {kind}
-        </button>
-      ))}
+    <div className="flex flex-col gap-1">
+      <span className="px-1 text-[10px] font-medium text-muted">View</span>
+      <div
+        className="flex items-center gap-0.5 rounded-lg border border-line bg-surface p-0.5"
+        role="group"
+        aria-label="View"
+      >
+        {VIEWS.map((kind) => (
+          <button
+            key={kind}
+            type="button"
+            aria-pressed={kind === view}
+            className={`rounded-md px-2.5 py-1 text-xs font-medium capitalize ${kind === view ? 'bg-accent-soft text-accent' : 'text-muted hover:text-ink'}`}
+            onClick={() => onChange(navigation.withView(kind))}
+          >
+            {kind}
+          </button>
+        ))}
+      </div>
     </div>
   </header>
 )

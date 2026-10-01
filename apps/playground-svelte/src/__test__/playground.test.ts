@@ -28,17 +28,51 @@ describe('Svelte playground', () => {
     expect(screen.getByText('April 2026')).toBeTruthy()
   })
 
+  it('keeps custom zone and locale fields editable and restores example defaults', async () => {
+    render(App)
+    const zoneSelect = screen.getByLabelText('timeZone common values')
+    await fireEvent.change(zoneSelect, { target: { value: '__custom__' } })
+    const zoneInput = screen.getByLabelText<HTMLInputElement>(
+      'timeZone custom value'
+    )
+    expect(zoneInput.value).toBe('Europe/Kyiv')
+    await fireEvent.input(zoneInput, { target: { value: 'UTC' } })
+    expect(
+      screen.getByLabelText<HTMLInputElement>('timeZone custom value').value
+    ).toBe('UTC')
+
+    const localeSelect = screen.getByLabelText('locale common values')
+    await fireEvent.change(localeSelect, { target: { value: '__custom__' } })
+    const localeInput = screen.getByLabelText('locale custom value')
+    await fireEvent.input(localeInput, { target: { value: 'en-GB' } })
+    expect(
+      screen.getByLabelText<HTMLInputElement>('locale custom value').value
+    ).toBe('en-GB')
+
+    await fireEvent.change(screen.getByLabelText('preset'), {
+      target: { value: 'dst' }
+    })
+    expect(screen.queryByLabelText('timeZone custom value')).toBeNull()
+    expect(screen.queryByLabelText('locale custom value')).toBeNull()
+    expect(
+      screen.getByLabelText<HTMLSelectElement>('timeZone common values').value
+    ).toBe('Europe/Kyiv')
+    expect(
+      screen.getByLabelText<HTMLSelectElement>('locale common values').value
+    ).toBe('en-GB')
+  })
+
   it('keeps the last valid events after invalid JSON and recovers on correction', async () => {
     render(App)
     await fireEvent.click(screen.getByRole('button', { name: 'Events' }))
     const json = screen.getByLabelText('Events JSON')
-    expect(screen.getByText(/on the board/)).toBeTruthy()
+    expect(screen.getByText(/on the calendar/)).toBeTruthy()
     await fireEvent.input(json, { target: { value: '{' } })
     expect(screen.getByRole('alert')).toBeTruthy()
-    expect(screen.getByText(/on the board/)).toBeTruthy()
+    expect(screen.getByText(/on the calendar/)).toBeTruthy()
     await fireEvent.input(json, { target: { value: '[]' } })
     expect(screen.queryByRole('alert')).toBeNull()
-    expect(screen.getByText(/0 on the board/)).toBeTruthy()
+    expect(screen.getByText(/0 on the calendar/)).toBeTruthy()
   })
 
   it('updates generated source, switches modes, navigates, and resets', async () => {

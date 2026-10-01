@@ -39,3 +39,12 @@ export type TextFieldProps = {
   placeholder?: string
   onChange: (value: string) => void
 }
+
+export type ChoiceTextFieldProps = {
+  label: string
+  hint?: string
+  value: string
+  options: readonly string[]
+  optionLabels?: readonly Option[]
+  onChange: (value: string) => void
+}

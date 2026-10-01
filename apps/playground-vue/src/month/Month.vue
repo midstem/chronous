@@ -8,9 +8,7 @@ import {
   MONTH_LANE_HEIGHT,
   MONTH_MAX_LANES,
   NUMBER_HEIGHT,
-  WEEK_COLUMNS,
-  dotOf,
-  toneOf
+  WEEK_COLUMNS
 } from '@midstem/playground-core'
 
 defineProps<{
@@ -56,7 +54,10 @@ const numberClass = (isToday: boolean): string =>
           </span>
         </span>
 
-        <span class="block" :style="{ height: `${lanes * MONTH_LANE_HEIGHT}px` }" />
+        <span
+          class="block"
+          :style="{ height: `${lanes * MONTH_LANE_HEIGHT}px` }"
+        />
 
         <span
           v-if="hiddenBars.length > 0"
@@ -68,10 +69,9 @@ const numberClass = (isToday: boolean): string =>
         <span class="flex flex-col gap-0.5">
           <Calendar.MonthTimedEvents
             as="span"
-            class="flex items-center gap-1 truncate rounded px-1 text-[11px] leading-5 hover:bg-raised"
+            class="flex items-center gap-1 truncate rounded bg-event-timed px-1 text-[11px] leading-5 text-event-timed-ink hover:brightness-110"
             v-slot="{ event }"
           >
-            <span :class="['size-1.5 shrink-0 rounded-full', dotOf(event.id)]" />
             <span class="truncate" :title="event.data?.title ?? event.id">
               {{ event.data?.title ?? event.id }}
             </span>
@@ -86,8 +86,7 @@ const numberClass = (isToday: boolean): string =>
       >
         <span
           :class="[
-            'flex h-full items-center truncate rounded px-1.5 text-[11px] font-medium',
-            toneOf(event.id)
+            'flex h-full items-center truncate rounded bg-event-all-day px-1.5 text-[11px] font-medium text-event-all-day-ink'
           ]"
           :title="event.data?.title ?? event.id"
         >

@@ -25,8 +25,7 @@ export const ZONES: readonly TimeZoneId[] = [
   'Australia/Lord_Howe',
   'Asia/Kolkata',
   'Pacific/Kiritimati',
-  'UTC',
-  'Not/AZone'
+  'UTC'
 ]
 
 export const LOCALES: readonly LocaleId[] = [
@@ -36,6 +35,15 @@ export const LOCALES: readonly LocaleId[] = [
   'de-DE',
   'ja-JP',
   'ar-EG'
+]
+
+export const LOCALE_OPTIONS: readonly Option[] = [
+  { value: 'en-GB', label: 'English (UK) — en-GB' },
+  { value: 'en-US', label: 'English (US) — en-US' },
+  { value: 'uk-UA', label: 'Ukrainian — uk-UA' },
+  { value: 'de-DE', label: 'German — de-DE' },
+  { value: 'ja-JP', label: 'Japanese — ja-JP' },
+  { value: 'ar-EG', label: 'Arabic (Egypt) — ar-EG' }
 ]
 
 export const WEEK_STARTS_ON_OPTIONS: readonly Option[] = [
@@ -50,38 +58,39 @@ export const WEEK_STARTS_ON_OPTIONS: readonly Option[] = [
 ]
 
 export const DISAMBIGUATION_OPTIONS: readonly Option[] = [
-  { value: UNSET, label: 'default — compatible' },
-  { value: 'compatible', label: 'compatible' },
-  { value: 'earlier', label: 'earlier' },
-  { value: 'later', label: 'later' },
-  { value: 'reject', label: 'reject' }
+  { value: UNSET, label: 'Default — compatible' },
+  { value: 'compatible', label: 'Compatible — earlier / move forward' },
+  { value: 'earlier', label: 'Earlier — first matching time' },
+  { value: 'later', label: 'Later — last matching time' },
+  { value: 'reject', label: 'Reject — report missing or repeated time' }
 ]
 
 export const VIEW_HINT =
-  'day, week and days draw a slotted grid; month and agenda only draw lanes.'
+  'Choose the calendar layout. Day, week and days show an hourly grid; month and agenda show event lanes.'
 
 export const DATE_HINT =
-  'The date the calendar is on. The period drawn is the one containing it: week snaps to the containing week, month to the containing month.'
+  'The date in focus. Week and month views expand to include the selected date.'
 
 export const TIME_ZONE_HINT =
-  'Any IANA id. Not/AZone is in the list on purpose — it raises InvalidRangeError.'
+  'Controls which local time appears in the calendar. Choose a common zone or enter any IANA time-zone ID.'
 
 export const WEEK_STARTS_ON_HINT =
-  'Reads only in week and month, where it moves the first column of the grid.'
+  'Sets the first weekday in week and month views. Leave on default to use Monday.'
 
 export const DAY_COUNT_HINT =
-  'Reads only in days and agenda. Leave empty for 7 and 30. 0 raises InvalidRangeError.'
+  'Sets the number of days shown in days and agenda views. Defaults to 7 days or 30 agenda days.'
 
 export const SLOT_MINUTES_HINT =
-  'Reads only in the slotted views. Leave empty for 60. Anything outside 1…1440 raises InvalidRangeError.'
+  'Sets the duration of each time slot in day, week and days views. Defaults to 60 minutes; row height is adjusted above the calendar.'
 
 export const DISAMBIGUATION_HINT =
-  'Which real moment a wall time means when DST repeated it or skipped it. compatible takes the earlier of a repeated pair and pushes a skipped time forward; reject raises InvalidEventError. Read on events only — the grid rows never read it.'
+  'Resolves event times that repeat or disappear during daylight-saving clock changes. Applies to events only; the time grid is unchanged.'
 
 export const LOCALE_HINT =
-  'Passed to formatIso for every heading, gutter label and cell number. The engine never reads it.'
+  'Changes the language and date formatting used in calendar headings and labels. Choose a common locale or enter any BCP 47 tag.'
 
-export const PRESET_HINT = 'Replaces the events below with a ready fixture.'
+export const PRESET_HINT =
+  'Event examples replace any edited events, then reset the date, view and time zone. The View buttons above the calendar only change how the current dates are displayed.'
 
 export const PRESET_OPTIONS: readonly Option[] = PRESETS.map(
   ({ id, label }) => ({
@@ -91,4 +100,4 @@ export const PRESET_OPTIONS: readonly Option[] = PRESETS.map(
 )
 
 export const STYLE_HINT =
-  'How the board draws itself, and which file the Code tab prints. Simple keeps the same components with plain markup on them.'
+  'Choose the calendar markup style. The Code tab updates to show the matching example.'

@@ -3,7 +3,6 @@ import type { ReactElement } from 'react'
 
 import { Calendar } from '../calendar'
 import { CONTINUES } from '../constants'
-import { dotOf, toneOf } from '../tone'
 
 import {
   BAR_GAP,
@@ -66,20 +65,15 @@ export const Month = ({ today }: MonthProps): ReactElement => (
             <span className="flex flex-col gap-0.5">
               <Calendar.MonthTimedEvents
                 as="span"
-                className="flex items-center gap-1 truncate rounded px-1 text-[11px] leading-5 hover:bg-raised"
+                className="flex items-center gap-1 truncate rounded bg-event-timed px-1 text-[11px] leading-5 text-event-timed-ink hover:brightness-110"
               >
                 {({ event }) => (
-                  <>
-                    <span
-                      className={`size-1.5 shrink-0 rounded-full ${dotOf(event.id)}`}
-                    />
-                    <span
-                      className="truncate"
-                      title={event.data?.title ?? event.id}
-                    >
-                      {event.data?.title ?? event.id}
-                    </span>
-                  </>
+                  <span
+                    className="truncate"
+                    title={event.data?.title ?? event.id}
+                  >
+                    {event.data?.title ?? event.id}
+                  </span>
                 )}
               </Calendar.MonthTimedEvents>
             </span>
@@ -90,7 +84,7 @@ export const Month = ({ today }: MonthProps): ReactElement => (
       <Calendar.MonthAllDayEvents gap={BAR_GAP} lanesTopOffset={NUMBER_HEIGHT}>
         {({ event, bar }) => (
           <span
-            className={`flex h-full items-center truncate rounded px-1.5 text-[11px] font-medium ${toneOf(event.id)}`}
+            className="flex h-full items-center truncate rounded bg-event-all-day px-1.5 text-[11px] font-medium text-event-all-day-ink"
             title={event.data?.title ?? event.id}
           >
             {edge(bar.continuesBefore)}

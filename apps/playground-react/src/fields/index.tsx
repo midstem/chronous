@@ -1,8 +1,9 @@
-import { useId } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import type { ReactElement } from 'react'
 
 import type {
   FrameProps,
+  ChoiceTextFieldProps,
   NumberFieldProps,
   SelectFieldProps,
   TextFieldProps
@@ -111,6 +112,65 @@ export const TextField = ({
             <option key={suggestion} value={suggestion} />
           ))}
         </datalist>
+      )}
+    </Frame>
+  )
+}
+
+export const ChoiceTextField = ({
+  label,
+  hint,
+  value,
+  options,
+  optionLabels,
+  onChange
+}: ChoiceTextFieldProps): ReactElement => {
+  const id = useId()
+  const [custom, setCustom] = useState(!options.includes(value))
+  const internalUpdate = useRef(false)
+
+  useEffect(() => {
+    if (!internalUpdate.current) setCustom(!options.includes(value))
+    internalUpdate.current = false
+  }, [options, value])
+
+  return (
+    <Frame id={id} label={label} hint={hint}>
+      <select
+        id={id}
+        className="field-control"
+        aria-label={`${label} common values`}
+        value={custom ? '__custom__' : value}
+        onChange={(event) => {
+          if (event.target.value === '__custom__') {
+            setCustom(true)
+            return
+          }
+          setCustom(false)
+          internalUpdate.current = true
+          onChange(event.target.value)
+        }}
+      >
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {optionLabels?.find((item) => item.value === option)?.label ??
+              option}
+          </option>
+        ))}
+        <option value="__custom__">Custom value…</option>
+      </select>
+      {custom && (
+        <input
+          className="field-control"
+          type="text"
+          aria-label={`${label} custom value`}
+          placeholder={`Enter ${label}`}
+          value={value}
+          onChange={(event) => {
+            internalUpdate.current = true
+            onChange(event.target.value)
+          }}
+        />
       )}
     </Frame>
   )

@@ -16,7 +16,7 @@ const props = defineProps<{
 }>()
 
 const copied = ref(false)
-const tokens = computed(() => highlight(props.source))
+const tokens = computed(() => highlight(props.source, 'vue'))
 
 const copy = (): void => {
   void navigator.clipboard.writeText(props.source).then(() => {

@@ -1,5 +1,5 @@
 const BUTTON =
-  'rounded-md border border-zinc-200 bg-white px-2.5 py-1 text-sm disabled:opacity-40 dark:border-zinc-700 dark:bg-zinc-900'
+  'rounded-md border border-slate-200 bg-white px-2.5 py-1 text-sm disabled:opacity-40 dark:border-white/15 dark:bg-slate-950'
 
 export const OPENING: readonly string[] = [
   'export const Board = () => {',
@@ -11,7 +11,7 @@ export const OPENING: readonly string[] = [
   '      events={EVENTS}',
   '      locale={LOCALE}',
   '      gutterWidth="66px"',
-  '      className="flex h-full flex-col p-4 text-zinc-900 dark:text-zinc-100"',
+  '      className="flex h-full flex-col p-4 text-slate-900 dark:text-slate-200"',
   '      renderError={(error) => (',
   '        <p',
   '          role="alert"',
@@ -59,13 +59,13 @@ export const OPENING: readonly string[] = [
   '',
   '            <h2 className="mr-auto truncate text-lg font-semibold">{title}</h2>',
   '',
-  '            <div className="flex items-center gap-0.5 rounded-md border border-zinc-200 bg-white p-0.5 dark:border-zinc-700 dark:bg-zinc-900">',
+  '            <div className="flex items-center gap-0.5 rounded-md border border-slate-200 bg-white p-0.5 dark:border-white/15 dark:bg-slate-950">',
   '              {VIEWS.map((kind) => (',
   '                <button',
   '                  key={kind}',
   '                  type="button"',
   '                  aria-pressed={kind === shown.view}',
-  '                  className={`rounded px-2.5 py-1 text-xs font-medium capitalize ${kind === shown.view ? "bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300" : "text-zinc-500 dark:text-zinc-400"}`}',
+  '                  className={`rounded px-2.5 py-1 text-xs font-medium capitalize ${kind === shown.view ? "bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300" : "text-slate-500 dark:text-slate-400"}`}',
   '                  onClick={() => goTo(navigation.withView(kind))}',
   '                >',
   '                  {kind}',
@@ -76,7 +76,7 @@ export const OPENING: readonly string[] = [
   '        )}',
   '      </Calendar.Toolbar>',
   '',
-  '      <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-900">',
+  '      <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/15 dark:bg-slate-950">',
   '        <div className="min-h-0 flex-1 overflow-auto">'
 ]
 

@@ -55,13 +55,13 @@ export const snippetOf = (
         '  </C.TimeGrid>'
       ]
     : [
-        '  <div class="sticky top-0 z-20 bg-white dark:bg-zinc-900"><C.Header class="border-b border-zinc-200 dark:border-zinc-700"><C.DayHeadings class="border-l border-zinc-100 py-2 dark:border-zinc-800">{#snippet children({ weekdayLabel, dayLabel })}<div class="flex flex-col items-center"><span class="text-xs text-zinc-500">{weekdayLabel}</span><strong>{dayLabel}</strong></div>{/snippet}</C.DayHeadings></C.Header>',
-        `    <C.AllDayRow laneHeight={${ALL_DAY_LANE_HEIGHT}} class="border-b border-zinc-200 dark:border-zinc-700"><C.AllDayEvents>{#snippet children({ event })}<span class="block h-full truncate rounded bg-blue-700 px-2 text-xs text-white dark:bg-blue-900">{event.data?.title ?? event.id}</span>{/snippet}</C.AllDayEvents></C.AllDayRow>`,
+        '  <div class="sticky top-0 z-20 bg-white dark:bg-slate-950"><C.Header class="border-b border-slate-200 dark:border-white/15"><C.DayHeadings class="border-l border-slate-100 py-2 dark:border-white/5">{#snippet children({ weekdayLabel, dayLabel })}<div class="flex flex-col items-center"><span class="text-xs text-slate-500">{weekdayLabel}</span><strong>{dayLabel}</strong></div>{/snippet}</C.DayHeadings></C.Header>',
+        `    <C.AllDayRow laneHeight={${ALL_DAY_LANE_HEIGHT}} class="border-b border-slate-200 dark:border-white/15"><C.AllDayEvents>{#snippet children({ event })}<span class="block h-full truncate rounded bg-blue-700 px-2 text-xs text-white dark:bg-blue-300 dark:text-slate-950">{event.data?.title ?? event.id}</span>{/snippet}</C.AllDayEvents></C.AllDayRow>`,
         '  </div>',
         `  <C.TimeGrid hourHeight={${hourHeight}} scrollToHour={7}>`,
-        '    <C.TimeAxis><C.TimeLabels class="right-2 text-xs text-zinc-400" /></C.TimeAxis>',
-        '    <C.DayColumns class="border-l border-zinc-100 dark:border-zinc-800"><C.TimeSlots class="border-t border-zinc-100 dark:border-zinc-800" /><C.NowMarker class="border-t-2 border-red-600" />',
-        `      <C.TimedEvents minHeight={${MIN_BOX_HEIGHT}} gap={${BOX_GAP}}>{#snippet children({ event })}<article class="h-full overflow-hidden rounded border border-white bg-blue-700 px-2 py-1 text-xs text-white shadow dark:border-zinc-900 dark:bg-blue-900">{event.data?.title ?? event.id}</article>{/snippet}</C.TimedEvents>`,
+        '    <C.TimeAxis><C.TimeLabels class="right-2 text-xs text-slate-400" /></C.TimeAxis>',
+        '    <C.DayColumns class="border-l border-slate-100 dark:border-white/5"><C.TimeSlots class="border-t border-slate-100 dark:border-white/5" /><C.NowMarker class="border-t-2 border-orange-400" />',
+        `      <C.TimedEvents minHeight={${MIN_BOX_HEIGHT}} gap={${BOX_GAP}}>{#snippet children({ event })}<article class="h-full overflow-hidden rounded border border-white bg-violet-700 px-2 py-1 text-xs text-white shadow dark:border-slate-950 dark:bg-violet-400 dark:text-slate-950">{event.data?.title ?? event.id}</article>{/snippet}</C.TimedEvents>`,
         '    </C.DayColumns>',
         '  </C.TimeGrid>'
       ]
@@ -73,8 +73,8 @@ export const snippetOf = (
         '  </C.MonthGrid>'
       ]
     : [
-        '  <C.MonthGrid><div class="grid grid-cols-7 border-b border-zinc-200 dark:border-zinc-700"><C.MonthWeekdays class="py-2 text-center text-xs uppercase text-zinc-500" /></div>',
-        `    <C.MonthRows laneHeight={${MONTH_LANE_HEIGHT}} class="border-b border-zinc-200 dark:border-zinc-700"><C.MonthDays class="flex flex-col border-l border-zinc-100 p-1 dark:border-zinc-800">{#snippet children({ dayLabel, lanes })}<span class="text-center text-xs">{dayLabel}</span><span style={\`height:\${lanes * ${MONTH_LANE_HEIGHT}}px\`}></span><C.MonthTimedEvents class="truncate text-xs">{#snippet children({ event })}<span class="block truncate">{event.data?.title ?? event.id}</span>{/snippet}</C.MonthTimedEvents>{/snippet}</C.MonthDays><C.MonthAllDayEvents>{#snippet children({ event })}<span class="block h-full truncate rounded bg-blue-700 px-1 text-xs text-white dark:bg-blue-900">{event.data?.title ?? event.id}</span>{/snippet}</C.MonthAllDayEvents></C.MonthRows>`,
+        '  <C.MonthGrid><div class="grid grid-cols-7 border-b border-slate-200 dark:border-white/15"><C.MonthWeekdays class="py-2 text-center text-xs uppercase text-slate-500" /></div>',
+        `    <C.MonthRows laneHeight={${MONTH_LANE_HEIGHT}} class="border-b border-slate-200 dark:border-white/15"><C.MonthDays class="flex flex-col border-l border-slate-100 p-1 dark:border-white/5">{#snippet children({ dayLabel, lanes })}<span class="text-center text-xs">{dayLabel}</span><span style={\`height:\${lanes * ${MONTH_LANE_HEIGHT}}px\`}></span><C.MonthTimedEvents class="truncate rounded px-1 text-xs bg-violet-700 text-white dark:bg-violet-400 dark:text-slate-950">{#snippet children({ event })}<span class="block truncate">{event.data?.title ?? event.id}</span>{/snippet}</C.MonthTimedEvents>{/snippet}</C.MonthDays><C.MonthAllDayEvents>{#snippet children({ event })}<span class="block h-full truncate rounded bg-blue-700 px-1 text-xs text-white dark:bg-blue-300 dark:text-slate-950">{event.data?.title ?? event.id}</span>{/snippet}</C.MonthAllDayEvents></C.MonthRows>`,
         '  </C.MonthGrid>'
       ]
 
@@ -83,7 +83,7 @@ export const snippetOf = (
         '  <C.AgendaList><C.AgendaDays showEmptyDays>{#snippet children({ weekdayLabel, dayLabel })}<section><h2>{weekdayLabel} {dayLabel}</h2><C.AgendaAllDayEvents>{#snippet children({ event })}<p>{event.data?.title ?? event.id}</p>{/snippet}</C.AgendaAllDayEvents><C.AgendaTimedEvents>{#snippet children({ event, timeRangeLabel })}<p>{timeRangeLabel}: {event.data?.title ?? event.id}</p>{/snippet}</C.AgendaTimedEvents></section>{/snippet}</C.AgendaDays></C.AgendaList>'
       ]
     : [
-        '  <C.AgendaList class="divide-y divide-zinc-200 dark:divide-zinc-800"><C.AgendaDays showEmptyDays class="grid grid-cols-[88px_1fr] gap-4 px-4 py-3">{#snippet children({ weekdayLabel, dayLabel, bars, boxes })}<div class="text-sm font-semibold">{weekdayLabel} {dayLabel}</div><div class="flex flex-col gap-1">{#if !bars.length && !boxes.length}<span class="text-sm text-zinc-400">Nothing on this day</span>{/if}<C.AgendaAllDayEvents class="text-sm">{#snippet children({ event })}<p>{event.data?.title ?? event.id}</p>{/snippet}</C.AgendaAllDayEvents><C.AgendaTimedEvents class="text-sm">{#snippet children({ event, timeRangeLabel })}<p><span class="mr-3 font-mono text-xs">{timeRangeLabel}</span>{event.data?.title ?? event.id}</p>{/snippet}</C.AgendaTimedEvents></div>{/snippet}</C.AgendaDays></C.AgendaList>'
+        '  <C.AgendaList class="divide-y divide-slate-200 dark:divide-white/5"><C.AgendaDays showEmptyDays class="grid grid-cols-[88px_1fr] gap-4 px-4 py-3">{#snippet children({ weekdayLabel, dayLabel, bars, boxes })}<div class="text-sm font-semibold">{weekdayLabel} {dayLabel}</div><div class="flex flex-col gap-1">{#if !bars.length && !boxes.length}<span class="text-sm text-slate-400">Nothing on this day</span>{/if}<C.AgendaAllDayEvents class="text-sm">{#snippet children({ event })}<p>{event.data?.title ?? event.id}</p>{/snippet}</C.AgendaAllDayEvents><C.AgendaTimedEvents class="text-sm">{#snippet children({ event, timeRangeLabel })}<p><span class="mr-3 font-mono text-xs">{timeRangeLabel}</span>{event.data?.title ?? event.id}</p>{/snippet}</C.AgendaTimedEvents></div>{/snippet}</C.AgendaDays></C.AgendaList>'
       ]
 
   const body = plain
@@ -134,7 +134,7 @@ export const snippetOf = (
         ]),
     '</script>',
     '',
-    '<C.Root {range} {events} {locale} class="flex h-full flex-col overflow-auto p-4">',
+    '<C.Root {range} {events} {locale} class="flex h-full flex-col overflow-auto bg-white p-4 text-slate-900 dark:bg-slate-950 dark:text-slate-200">',
     '  {#snippet renderError(error)}<p role="alert">{error.name}: {error.message}</p>{/snippet}',
     ...toolbar,
     ...body,

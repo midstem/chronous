@@ -61,47 +61,63 @@ import type { Density } from '@midstem/playground-core'
       <h2 class="mr-auto truncate text-lg font-semibold">{{ title() }}</h2>
 
       @if (slotted()) {
-        <div
-          class="flex items-center gap-0.5 rounded-md border border-line bg-surface p-0.5"
-          role="group"
-          [attr.aria-label]="densityLabel"
-        >
-          @for (option of densities; track option.value) {
-            <button
-              type="button"
-              [attr.aria-pressed]="option.value === density()"
-              [class]="
-                'rounded px-2 py-1 text-xs font-medium ' +
-                (option.value === density()
-                  ? 'bg-accent-soft text-accent'
-                  : 'text-muted hover:text-ink')
-              "
-              (click)="densityChange.emit(option.value)"
-            >
-              {{ option.label }}
-            </button>
-          }
+        <div class="flex flex-col gap-1">
+          <span class="px-1 text-[10px] font-medium text-muted"
+            >Row height</span
+          >
+          <div
+            class="flex items-center gap-0.5 rounded-lg border border-line bg-surface p-0.5"
+            role="group"
+            [attr.aria-label]="densityLabel"
+          >
+            @for (option of densities; track option.value) {
+              <button
+                type="button"
+                [title]="
+                  option.value +
+                  ' row height · ' +
+                  option.hourHeight +
+                  'px per hour'
+                "
+                [attr.aria-pressed]="option.value === density()"
+                [class]="
+                  'rounded-md px-2 py-1 text-xs font-medium ' +
+                  (option.value === density()
+                    ? 'bg-accent-soft text-accent'
+                    : 'text-muted hover:text-ink')
+                "
+                (click)="densityChange.emit(option.value)"
+              >
+                {{ option.label }}
+              </button>
+            }
+          </div>
         </div>
       }
 
-      <div
-        class="flex items-center gap-0.5 rounded-md border border-line bg-surface p-0.5"
-      >
-        @for (kind of views; track kind) {
-          <button
-            type="button"
-            [attr.aria-pressed]="kind === view()"
-            [class]="
-              'rounded px-2.5 py-1 text-xs font-medium capitalize ' +
-              (kind === view()
-                ? 'bg-accent-soft text-accent'
-                : 'text-muted hover:text-ink')
-            "
-            (click)="rangeChange.emit(navigation().withView(kind))"
-          >
-            {{ kind }}
-          </button>
-        }
+      <div class="flex flex-col gap-1">
+        <span class="px-1 text-[10px] font-medium text-muted">View</span>
+        <div
+          class="flex items-center gap-0.5 rounded-lg border border-line bg-surface p-0.5"
+          role="group"
+          aria-label="View"
+        >
+          @for (kind of views; track kind) {
+            <button
+              type="button"
+              [attr.aria-pressed]="kind === view()"
+              [class]="
+                'rounded-md px-2.5 py-1 text-xs font-medium capitalize ' +
+                (kind === view()
+                  ? 'bg-accent-soft text-accent'
+                  : 'text-muted hover:text-ink')
+              "
+              (click)="rangeChange.emit(navigation().withView(kind))"
+            >
+              {{ kind }}
+            </button>
+          }
+        </div>
       </div>
     </header>
   `

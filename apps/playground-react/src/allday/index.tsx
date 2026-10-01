@@ -2,7 +2,6 @@ import type { ReactElement } from 'react'
 
 import { Calendar } from '../calendar'
 import { CONTINUES } from '../constants'
-import { toneOf } from '../tone'
 
 import { ALL_DAY_LABEL, BAR_GAP, LANE_HEIGHT, MIN_LANES } from './constants'
 
@@ -22,7 +21,7 @@ export const AllDay = (): ReactElement => (
     <Calendar.AllDayEvents gap={BAR_GAP} className="px-px py-px">
       {({ event, bar }) => (
         <span
-          className={`flex h-full items-center truncate rounded-md px-2 text-[11px] font-medium ${toneOf(event.id)}`}
+          className="flex h-full items-center truncate rounded-md bg-event-all-day px-2 text-[11px] font-medium text-event-all-day-ink"
           title={event.data?.title ?? event.id}
         >
           {edge(bar.continuesBefore)}

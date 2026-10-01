@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from 'svelte'
   import type { EventInput, ViewKind } from '@midstem/chronous-svelte'
   import {
     DEFAULT_TAB,
@@ -20,6 +21,7 @@
     DISAMBIGUATION_OPTIONS,
     LOCALE_HINT,
     LOCALES,
+    LOCALE_OPTIONS,
     EVENTS_HINT,
     ROWS,
     presetOf
@@ -52,9 +54,71 @@
   } = $props()
 
   let tab = $state<TabId>(DEFAULT_TAB)
+  let timeZoneCustom = $state(untrack(() => !ZONES.includes(config.timeZone)))
+  let localeCustom = $state(untrack(() => !LOCALES.includes(config.locale)))
+  let lastTimeZonePreset = untrack(() => config.preset)
+  let lastLocalePreset = untrack(() => config.preset)
+  let localTimeZoneEdit = false
+  let localLocaleEdit = false
   const presets = PRESET_OPTIONS
   const input = (event: Event): string =>
     (event.currentTarget as HTMLInputElement).value
+
+  $effect(() => {
+    const preset = config.preset
+    const timeZone = config.timeZone
+    if (preset !== lastTimeZonePreset) {
+      timeZoneCustom = !ZONES.includes(timeZone)
+      lastTimeZonePreset = preset
+    } else if (!localTimeZoneEdit) {
+      timeZoneCustom = !ZONES.includes(timeZone)
+    }
+    localTimeZoneEdit = false
+  })
+
+  $effect(() => {
+    const preset = config.preset
+    const locale = config.locale
+    if (preset !== lastLocalePreset) {
+      localeCustom = !LOCALES.includes(locale)
+      lastLocalePreset = preset
+    } else if (!localLocaleEdit) {
+      localeCustom = !LOCALES.includes(locale)
+    }
+    localLocaleEdit = false
+  })
+
+  const changeTimeZone = (event: Event): void => {
+    const value = input(event)
+    if (value === '__custom__') {
+      timeZoneCustom = true
+      return
+    }
+    timeZoneCustom = false
+    localTimeZoneEdit = true
+    update({ timeZone: value })
+  }
+
+  const editTimeZone = (event: Event): void => {
+    localTimeZoneEdit = true
+    update({ timeZone: input(event) })
+  }
+
+  const changeLocale = (event: Event): void => {
+    const value = input(event)
+    if (value === '__custom__') {
+      localeCustom = true
+      return
+    }
+    localeCustom = false
+    localLocaleEdit = true
+    update({ locale: value })
+  }
+
+  const editLocale = (event: Event): void => {
+    localLocaleEdit = true
+    update({ locale: input(event) })
+  }
 </script>
 
 <aside class="flex min-h-0 flex-col border-r border-line bg-raised">
@@ -78,7 +142,7 @@
   <div class="flex min-h-0 flex-1 flex-col p-3">
     {#if tab === 'range'}
       <div class="flex min-h-0 flex-1 flex-col gap-3 overflow-auto">
-        <Panel title="Style" badge="playground only">
+        <Panel title="Appearance" badge="playground">
           <div class="flex flex-col gap-1">
             <label class="sr-only" for="style">style</label>
             <select
@@ -95,7 +159,7 @@
           </div>
         </Panel>
 
-        <Panel title="Fixture" badge="playground only">
+        <Panel title="Event examples" badge="loads sample data">
           <div class="flex flex-col gap-1">
             <label
               class="font-mono text-xs font-semibold tracking-tight text-ink"
@@ -117,7 +181,7 @@
           </div>
         </Panel>
 
-        <Panel title="CalendarRange" badge="buildCalendar argument">
+        <Panel title="Calendar options" badge="buildCalendar range">
           <div class="flex flex-col gap-1">
             <label
               class="font-mono text-xs font-semibold tracking-tight text-ink"
@@ -162,18 +226,28 @@
             >
               timeZone
             </label>
-            <input
+            <select
               id="timeZone"
               class="field-control"
-              list="zones"
-              value={config.timeZone}
-              oninput={(e) => update({ timeZone: input(e) })}
-            />
-            <datalist id="zones">
+              aria-label="timeZone common values"
+              value={timeZoneCustom ? '__custom__' : config.timeZone}
+              onchange={changeTimeZone}
+            >
               {#each ZONES as zone (zone)}
-                <option value={zone}></option>
+                <option value={zone}>{zone}</option>
               {/each}
-            </datalist>
+              <option value="__custom__">Custom value…</option>
+            </select>
+            {#if timeZoneCustom}
+              <input
+                class="field-control"
+                type="text"
+                aria-label="timeZone custom value"
+                placeholder="Enter timeZone"
+                value={config.timeZone}
+                oninput={editTimeZone}
+              />
+            {/if}
             <span class="text-[11px] leading-4 text-muted"
               >{TIME_ZONE_HINT}</span
             >
@@ -264,7 +338,7 @@
           </div>
         </Panel>
 
-        <Panel title="Labels" badge="playground only">
+        <Panel title="Language and labels" badge="playground">
           <div class="flex flex-col gap-1">
             <label
               class="font-mono text-xs font-semibold tracking-tight text-ink"
@@ -272,18 +346,28 @@
             >
               locale
             </label>
-            <input
+            <select
               id="locale"
               class="field-control"
-              list="locales"
-              value={config.locale}
-              oninput={(e) => update({ locale: input(e) })}
-            />
-            <datalist id="locales">
-              {#each LOCALES as locale (locale)}
-                <option value={locale}></option>
+              aria-label="locale common values"
+              value={localeCustom ? '__custom__' : config.locale}
+              onchange={changeLocale}
+            >
+              {#each LOCALE_OPTIONS as option (option.value)}
+                <option value={option.value}>{option.label}</option>
               {/each}
-            </datalist>
+              <option value="__custom__">Custom value…</option>
+            </select>
+            {#if localeCustom}
+              <input
+                class="field-control"
+                type="text"
+                aria-label="locale custom value"
+                placeholder="Enter locale"
+                value={config.locale}
+                oninput={editLocale}
+              />
+            {/if}
             <span class="text-[11px] leading-4 text-muted">{LOCALE_HINT}</span>
           </div>
         </Panel>
@@ -294,7 +378,7 @@
           {presetOf(config.preset).hint}
         </p>
         <p class="font-mono text-[10px] text-faint">
-          EventInput[] · {events.length} on the board
+          Events JSON · {events.length} on the calendar
         </p>
         <textarea
           class={`field-control min-h-0 flex-1 resize-none font-mono text-[11px] leading-5 ${problem ? 'border-danger' : ''}`}

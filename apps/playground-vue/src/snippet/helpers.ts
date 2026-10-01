@@ -18,20 +18,20 @@ type Template = {
 const templateOf = (range: CalendarRange, hourHeight: number): Template => {
   if (SLOTTED_VIEWS.includes(range.view))
     return {
-      needs: { tones: true, clock: true },
+      needs: { clock: true },
       helpers: slottedHelpers(hourHeight),
       body: SLOTTED_BODY
     }
 
   if (range.view === MONTH_VIEW)
     return {
-      needs: { tones: true, clock: false },
+      needs: { clock: false },
       helpers: MONTH_HELPERS,
       body: MONTH_BODY
     }
 
   return {
-    needs: { tones: false, clock: false },
+    needs: { clock: false },
     helpers: [],
     body: AGENDA_BODY
   }

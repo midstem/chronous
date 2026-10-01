@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  DOCS_LABEL,
+  MASTHEAD_DOCS_LABEL as DOCS_LABEL,
   FRAMEWORK_NAV_LABEL,
   HEADLINE,
   MODES,

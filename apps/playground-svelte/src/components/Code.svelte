@@ -26,7 +26,7 @@
     hourHeight: number
   } = $props()
   let copied = $state(false)
-  let tokens = $derived(highlight(source))
+  let tokens = $derived(highlight(source, 'svelte'))
   let badge = $derived(
     `${range.view} · ${hourHeight}px per hour · ${locale} · ${events.length} events`
   )

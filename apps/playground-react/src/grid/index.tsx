@@ -5,7 +5,6 @@ import { AllDay } from '../allday'
 import { Calendar } from '../calendar'
 import { CONTINUES } from '../constants'
 import { formatDay, formatTime } from '../labels'
-import { toneOf } from '../tone'
 
 import {
   BOX_GAP,
@@ -83,7 +82,7 @@ export const Slotted = ({
 
             return (
               <div
-                className={`h-full overflow-hidden rounded-md border border-surface px-1.5 py-px text-[11px] leading-[1.35] shadow-sm transition-[filter] hover:brightness-110 ${toneOf(event.id)}`}
+                className="h-full overflow-hidden rounded-md border border-surface bg-event-timed px-1.5 py-px text-[11px] leading-[1.35] text-event-timed-ink shadow-sm transition-[filter] hover:brightness-110"
                 title={`${title}\n${from} – ${to}`}
               >
                 <span className="block truncate font-semibold">
