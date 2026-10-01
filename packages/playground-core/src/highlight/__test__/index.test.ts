@@ -80,4 +80,69 @@ describe('highlight', () => {
   it('leaves an unterminated block comment as a comment', () => {
     expect(kindOf(highlight('/* open'), '/* open')).toBe('comment')
   })
+
+  it('highlights script and template sections in Vue single-file components', () => {
+    const source = `<script setup lang="ts">\nconst title = 'Board'\n</script>\n<template><button class="action" @click="save">{{ title }}</button></template>`
+    const tokens = highlight(source, 'vue')
+
+    expect(sourceOf(tokens)).toBe(source)
+    expect(kindOf(tokens, 'const')).toBe('keyword')
+    expect(kindOf(tokens, 'template')).toBe('tag')
+    expect(kindOf(tokens, 'class')).toBe('attribute')
+    expect(kindOf(tokens, '"action"')).toBe('string')
+  })
+
+  it('highlights script and template sections in Svelte components', () => {
+    const source = `<script lang="ts">\nlet count = 1\n</script>\n<button on:click={increment()}>{count}</button>`
+    const tokens = highlight(source, 'svelte')
+
+    expect(sourceOf(tokens)).toBe(source)
+    expect(kindOf(tokens, 'let')).toBe('keyword')
+    expect(kindOf(tokens, 'button')).toBe('tag')
+    expect(kindOf(tokens, 'on:click')).toBe('attribute')
+    expect(kindOf(tokens, 'increment')).toBe('function')
+    expect(kindOf(tokens, 'count')).toBe('plain')
+  })
+
+  it('highlights Angular inline template markup while preserving TypeScript strings', () => {
+    const source = `const label = 'Board'\n@Component({\n  template: \`<button class="action">{{ label }}</button>\`\n})`
+    const tokens = highlight(source)
+
+    expect(sourceOf(tokens)).toBe(source)
+    expect(kindOf(tokens, 'const')).toBe('keyword')
+    expect(kindOf(tokens, "'Board'")).toBe('string')
+    expect(kindOf(tokens, 'button')).toBe('tag')
+    expect(kindOf(tokens, 'class')).toBe('attribute')
+    expect(kindOf(tokens, '"action"')).toBe('string')
+  })
+
+  it('does not end an Angular inline template at an escaped backtick', () => {
+    const source = 'template: `text \\`<span>still in template</span>`'
+    const tokens = highlight(source)
+
+    expect(sourceOf(tokens)).toBe(source)
+    expect(kindOf(tokens, 'span')).toBe('tag')
+  })
+
+  it('highlights Angular binding attribute names and their quoted values', () => {
+    const source = `template: \`<button [value]="range" (click)="save()" *chronousFor="items"></button>\``
+    const tokens = highlight(source)
+
+    expect(sourceOf(tokens)).toBe(source)
+    expect(kindOf(tokens, '[value]')).toBe('attribute')
+    expect(kindOf(tokens, '(click)')).toBe('attribute')
+    expect(kindOf(tokens, '*chronousFor')).toBe('attribute')
+    expect(kindOf(tokens, '"range"')).toBe('string')
+    expect(kindOf(tokens, '"save()"')).toBe('string')
+    expect(kindOf(tokens, '"items"')).toBe('string')
+  })
+
+  it('highlights Svelte shorthand attributes as expressions', () => {
+    const source = `<Widget {range} />`
+    const tokens = highlight(source, 'svelte')
+
+    expect(sourceOf(tokens)).toBe(source)
+    expect(kindOf(tokens, 'Widget')).toBe('tag')
+    expect(kindOf(tokens, 'range')).toBe('plain')
+  })
 })

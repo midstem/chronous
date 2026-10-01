@@ -29,6 +29,9 @@ import {
 } from './helpers'
 import type { CodeStop, CodeToken, Cursor } from './types'
 
+const MARKUP_ATTRIBUTE_NAME =
+  /(?:\[[A-Za-z_][\w.:-]*\]|\([A-Za-z_][\w.:-]*\)|[@*]?[A-Za-z_][\w.:-]*)/y
+
 const opensElement = (cursor: Cursor): boolean =>
   JSX_AFTER_ANGLE.test(peek(cursor, ONE_CHAR)) && !AFTER_VALUE.test(cursor.last)
 
@@ -76,6 +79,138 @@ const readExpression = (cursor: Cursor): void => {
   readCode(cursor, 'brace')
 
   if (peek(cursor) === '}') push(cursor, take(cursor, ONE_CHAR), 'punctuation')
+}
+
+const readMarkupTag = (cursor: Cursor): void => {
+  push(cursor, take(cursor, ONE_CHAR), 'punctuation')
+
+  if (peek(cursor) === '/') push(cursor, take(cursor, ONE_CHAR), 'punctuation')
+
+  const name = read(cursor, TAG_NAME)
+  push(cursor, name, 'tag')
+
+  while (!isDone(cursor)) {
+    const spaces = read(cursor, WHITESPACE)
+    push(cursor, spaces, 'plain')
+
+    if (starts(cursor, '/>')) {
+      push(cursor, take(cursor, TWO_CHARS), 'punctuation')
+      return
+    }
+
+    if (peek(cursor) === '>') {
+      push(cursor, take(cursor, ONE_CHAR), 'punctuation')
+      return
+    }
+
+    if (peek(cursor) === '{') {
+      readExpression(cursor)
+      continue
+    }
+
+    const attribute = read(cursor, MARKUP_ATTRIBUTE_NAME)
+    if (!attribute) {
+      push(cursor, take(cursor, ONE_CHAR), 'plain')
+      continue
+    }
+
+    push(cursor, attribute, 'attribute')
+    if (peek(cursor) !== '=') continue
+
+    push(cursor, take(cursor, ONE_CHAR), 'punctuation')
+    if (peek(cursor) === '{') {
+      readExpression(cursor)
+      continue
+    }
+
+    const quoted = read(cursor, QUOTED)
+    if (quoted) push(cursor, quoted, 'string')
+  }
+}
+
+const readMarkup = (cursor: Cursor): void => {
+  while (!isDone(cursor)) {
+    if (starts(cursor, '<!--')) {
+      const end = cursor.source.indexOf('-->', cursor.pos + 4)
+      const stop = end < 0 ? cursor.source.length : end + 3
+      push(cursor, cursor.source.slice(cursor.pos, stop), 'comment')
+      cursor.pos = stop
+      continue
+    }
+
+    if (peek(cursor) === '<' && JSX_AFTER_ANGLE.test(peek(cursor, ONE_CHAR))) {
+      readMarkupTag(cursor)
+      continue
+    }
+
+    if (peek(cursor) === '{') {
+      readExpression(cursor)
+      continue
+    }
+
+    push(cursor, read(cursor, MARKUP_TEXT) || take(cursor, ONE_CHAR), 'plain')
+  }
+}
+
+const readSingleFileComponent = (source: string): CodeToken[] => {
+  const cursor = cursorOf(source)
+
+  while (!isDone(cursor)) {
+    const open = /<script\b[^>]*>/gi
+    open.lastIndex = cursor.pos
+    const found = open.exec(source)
+
+    if (!found) {
+      readMarkup(cursor)
+      break
+    }
+
+    const tagStart = cursor.pos
+    cursor.pos = found.index
+    if (cursor.pos > tagStart) {
+      const markup = cursorOf(source.slice(tagStart, cursor.pos))
+      readMarkup(markup)
+      for (const token of markup.tokens) push(cursor, token.text, token.kind)
+    }
+
+    const openTag = cursorOf(found[0])
+    readMarkup(openTag)
+    for (const token of openTag.tokens) push(cursor, token.text, token.kind)
+    cursor.pos = found.index + found[0].length
+
+    const close = source.indexOf('</script', cursor.pos)
+    const scriptEnd = close < 0 ? source.length : close
+    const script = cursorOf(source.slice(cursor.pos, scriptEnd))
+    readCode(script)
+    for (const token of script.tokens) push(cursor, token.text, token.kind)
+    cursor.pos = scriptEnd
+  }
+
+  return cursor.tokens
+}
+
+const readAngularTemplate = (cursor: Cursor): void => {
+  push(cursor, take(cursor, ONE_CHAR), 'punctuation')
+  let templateEnd = cursor.pos
+  while (templateEnd < cursor.source.length) {
+    if (cursor.source[templateEnd] === '`') {
+      let backslashes = 0
+      for (
+        let index = templateEnd - 1;
+        index >= cursor.pos && cursor.source[index] === '\\';
+        index -= ONE_CHAR
+      )
+        backslashes += ONE_CHAR
+      if (backslashes % 2 === 0) break
+    }
+    templateEnd += ONE_CHAR
+  }
+  if (templateEnd === cursor.source.length) templateEnd = cursor.source.length
+  const template = cursorOf(cursor.source.slice(cursor.pos, templateEnd))
+  readMarkup(template)
+  for (const token of template.tokens) push(cursor, token.text, token.kind)
+  cursor.pos = templateEnd
+  if (peek(cursor) === '`') push(cursor, take(cursor, ONE_CHAR), 'punctuation')
 }
 
 const readClosingTag = (cursor: Cursor): void => {
@@ -211,6 +346,15 @@ const readCode = (cursor: Cursor, stop: CodeStop = 'none'): void => {
     }
 
     if (char === '`') {
+      if (
+        /template\s*:\s*$/.test(
+          cursor.source.slice(Math.max(0, cursor.pos - 32), cursor.pos)
+        )
+      ) {
+        readAngularTemplate(cursor)
+        continue
+      }
+
       readTemplate(cursor)
       continue
     }
@@ -238,7 +382,13 @@ const readCode = (cursor: Cursor, stop: CodeStop = 'none'): void => {
   }
 }
 
-export const highlight = (source: string): CodeToken[] => {
+export const highlight = (
+  source: string,
+  format: 'code' | 'vue' | 'svelte' = 'code'
+): CodeToken[] => {
+  if (format === 'vue' || format === 'svelte')
+    return readSingleFileComponent(source)
+
   const cursor = cursorOf(source)
 
   readCode(cursor)

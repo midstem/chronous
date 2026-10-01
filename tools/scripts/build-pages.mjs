@@ -2,6 +2,7 @@ import { execFileSync } from 'node:child_process'
 import { cpSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { FRAMEWORK_LOGOS } from '../../packages/playground-core/src/frameworks/constants.ts'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
 
@@ -38,10 +39,18 @@ const buildPlayground = ({ id }) => {
   )
 }
 
+const logoOf = (id) => {
+  const { viewBox, svg } = FRAMEWORK_LOGOS[id]
+  const [x, y, width, height] = viewBox.split(' ').map(Number)
+  const paddedViewBox = `${x - 3} ${y - 3} ${width + 6} ${height + 6}`
+
+  return `<svg viewBox="${paddedViewBox}" width="32" height="32" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">${svg}</svg>`
+}
+
 const toCard = ({ id, title, packageName }, index) => `
       <a class="card card--${id}" href="./${id}/">
         <div class="card__top">
-          <span class="card__mark" aria-hidden="true">${title.slice(0, 1)}</span>
+          <span class="card__mark" aria-hidden="true">${logoOf(id)}</span>
           <span class="card__number" aria-hidden="true">0${index + 1}</span>
         </div>
         <h2>${title}</h2>
@@ -122,7 +131,8 @@ const buildIndex = () => `<!doctype html>
       .card:hover { border-color: var(--tint); transform: translateY(-2px); }
       a:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; border-radius: 12px; }
       .card__top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
-      .card__mark { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid var(--line); border-radius: 10px; color: var(--tint); font-size: 20px; font-weight: 600; }
+      .card__mark { display: grid; place-items: center; width: 48px; height: 48px; border: 1px solid var(--line); border-radius: 10px; }
+      .card__mark svg { display: block; }
       .card__number { color: var(--muted); font: 11px ui-monospace, monospace; }
       h2 { margin: 0 0 8px; font-size: 21px; font-weight: 600; letter-spacing: -0.025em; }
       .card__package { color: var(--muted); font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; overflow-wrap: anywhere; }
