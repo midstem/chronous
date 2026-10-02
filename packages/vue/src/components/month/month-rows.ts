@@ -19,7 +19,12 @@ export const MonthRowProvider = defineComponent({
     }
   },
   setup(props, { slots }) {
-    provideMonthRowContext(props.value)
+    provideMonthRowContext({
+      row: computed(() => props.value.row.value),
+      days: computed(() => props.value.days.value),
+      maxLanes: computed(() => props.value.maxLanes.value),
+      laneHeight: computed(() => props.value.laneHeight.value)
+    })
     return () => slots.default?.()
   }
 })

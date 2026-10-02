@@ -39,4 +39,47 @@ jobs:
         run: npm run test
 
       - name: Build the playgrounds
-        run: npm run build --workspace @midstem/chronous-playground-react && npm run build --workspace @midstem/chronous-playground-angular && npm run build --workspace @midstem/chronous-playground-vue && npm run build --workspace @midstem/chronous-playground-svelte && npm run build --workspace @midstem/chronous-playground-vanilla
+        run: npm run build --workspace apps
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        playground: [react, angular, vue, svelte, vanilla]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.x
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build the packages
+        run: npm run build
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        env:
+          PLAYGROUND: ${{ matrix.playground }}
+        run: npm run test:e2e -- --project=${{ matrix.playground }}
+
+      - name: Upload Playwright artifacts
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-${{ matrix.playground }}
+          path: |
+            tools/e2e/playwright-report/
+            tools/e2e/test-results/
+          if-no-files-found: ignore
+          retention-days: 14
+

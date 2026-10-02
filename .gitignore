@@ -33,3 +33,9 @@ packages/*/LICENSE
 .claude
 # Svelte packaging cache
 .svelte-kit
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/

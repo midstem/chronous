@@ -24,7 +24,11 @@ export const AgendaDayProvider = defineComponent({
     }
   },
   setup(props, { slots }) {
-    provideAgendaDayContext(props.value)
+    provideAgendaDayContext({
+      day: computed(() => props.value.day.value),
+      bars: computed(() => props.value.bars.value),
+      boxes: computed(() => props.value.boxes.value)
+    })
     return () => slots.default?.()
   }
 })

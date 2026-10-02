@@ -28,7 +28,12 @@ export const MonthDayProvider = defineComponent({
     }
   },
   setup(props, { slots }) {
-    provideMonthDayContext(props.value)
+    provideMonthDayContext({
+      day: computed(() => props.value.day.value),
+      boxes: computed(() => props.value.boxes.value),
+      bars: computed(() => props.value.bars.value),
+      hiddenBars: computed(() => props.value.hiddenBars.value)
+    })
     return () => slots.default?.()
   }
 })
