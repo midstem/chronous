@@ -1,49 +1,50 @@
-import { expect, test } from '@playwright/test'
-import {
-  getActiveView,
-  openPlayground,
-  resetPlayground,
-  selectView,
-  settle,
-  switchMode
-} from './helpers'
+import { expect, test } from './fixtures'
 
 test.describe('stage modes and reset', () => {
-  test('switches between Calendar and Code modes', async ({ page }) => {
-    await openPlayground(page)
+  test('switches between calendar and code modes', async ({ playground }) => {
+    await playground.goto()
 
-    // Initially in Calendar mode
-    await expect(page.locator('main header h2')).toBeVisible()
+    await expect(playground.title).toBeVisible()
 
-    // Switch to Code mode
-    await switchMode(page, 'Code')
-    await settle(page)
+    await playground.switchMode('Code')
 
-    // Code snippet should be visible
-    const code = page.locator('pre code, pre')
-    await expect(code.first()).toBeVisible()
-    const codeText = await code.first().innerText()
+    await expect(playground.codeSnippet.first()).toBeVisible()
+    const codeText = await playground.codeSnippet.first().innerText()
     expect(codeText).toContain('@midstem/chronous')
 
-    // Switch back to Calendar mode
-    await switchMode(page, 'Calendar')
-    await settle(page)
-    await expect(page.locator('main header h2')).toBeVisible()
+    await playground.switchMode('Calendar')
+    await expect(playground.title).toBeVisible()
   })
 
-  test('reset button restores initial state', async ({ page }) => {
-    await openPlayground(page)
+  test('restores defaults and clears json error when clicking reset', async ({
+    playground
+  }) => {
+    await playground.goto()
 
-    // Change to month view
-    await selectView(page, 'month')
-    await settle(page)
-    expect(await getActiveView(page)).toBe('month')
+    await playground.selectView('month')
+    await playground.setCurrentDate('2026-11-15')
+    await playground.selectPreset('overlaps')
+    await playground.selectTimeZone('UTC')
+    await playground.selectDensity('compact')
+    await playground.selectStyle('simple')
 
-    // Click Reset
-    await resetPlayground(page)
-    await settle(page)
+    await playground.editEventsJson('{ unparseable json')
+    await expect(playground.alerts).toBeVisible()
 
-    // Should return to default week view
-    expect(await getActiveView(page)).toBe('week')
+    await playground.reset()
+
+    await expect(playground.alerts).toHaveCount(0)
+
+    await playground.switchSidebarTab('Options')
+    await expect.poll(async () => playground.getActiveView()).toBe('week')
+    await expect(playground.currentDateInput).toHaveValue('2026-03-25')
+    await expect(playground.presetSelect).toHaveValue('showcase')
+    await expect(playground.timeZoneSelect).toHaveValue('Europe/Kyiv')
+    await expect(playground.densityButton('cosy')).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    )
+    await expect(playground.styleSelect).toHaveValue('default')
+    await expect(playground.eventsByTitle('Standup').first()).toBeVisible()
   })
 })

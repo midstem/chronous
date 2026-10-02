@@ -1,67 +1,71 @@
-import { expect, test } from '@playwright/test'
-import { getActiveView, openPlayground, selectView, settle } from './helpers'
+import { expect, test } from './fixtures'
 
 test.describe('calendar views', () => {
-  test('switches between all 5 views via toolbar buttons', async ({ page }) => {
-    await openPlayground(page)
+  test('switches across calendar views updating ranges and visible events', async ({
+    playground
+  }) => {
+    await playground.goto()
 
-    // Default view is week
-    expect(await getActiveView(page)).toBe('week')
+    await expect.poll(async () => playground.getActiveView()).toBe('week')
+    await expect(playground.metric('days')).toHaveText('7')
+    await expect(playground.eventsByTitle('Standup').first()).toBeVisible()
+    await expect(playground.dayHeading('2026-03-23')).toBeVisible()
+    await expect(playground.dayHeading('2026-03-29')).toBeVisible()
 
-    // 1. Month view
-    await selectView(page, 'month')
-    await settle(page)
-    expect(await getActiveView(page)).toBe('month')
-    const monthDays = page.locator('[data-in-current-period]')
-    await expect(monthDays.first()).toBeVisible()
+    await playground.selectView('month')
+    await expect.poll(async () => playground.getActiveView()).toBe('month')
+    await expect(playground.metric('view')).toHaveText('month')
+    await expect(playground.title).toHaveText(/March 2026/)
+    await expect(playground.monthDays.first()).toBeVisible()
 
-    // 2. Day view
-    await selectView(page, 'day')
-    await settle(page)
-    expect(await getActiveView(page)).toBe('day')
-    await expect(page.locator('text=09:00').first()).toBeVisible()
-
-    // 3. Days view
-    await selectView(page, 'days')
-    await settle(page)
-    expect(await getActiveView(page)).toBe('days')
-    await expect(page.locator('text=09:00').first()).toBeVisible()
-
-    // 4. Agenda view
-    await selectView(page, 'agenda')
-    await settle(page)
-    expect(await getActiveView(page)).toBe('agenda')
-
-    // 5. Back to week view
-    await selectView(page, 'week')
-    await settle(page)
-    expect(await getActiveView(page)).toBe('week')
+    await playground.selectView('day')
+    await expect.poll(async () => playground.getActiveView()).toBe('day')
+    await expect(playground.metric('view')).toHaveText('day')
+    await expect(playground.metric('days')).toHaveText('1')
+    const march25Column = playground.dayColumn('2026-03-25')
+    await expect(march25Column).toBeVisible()
+    await expect(playground.eventsByTitle('Standup', '2026-03-25')).toHaveCount(
+      0
+    )
     await expect(
-      page.locator('main').getByText('Standup').first()
+      playground.eventsByTitle('Night shift', '2026-03-25')
     ).toBeVisible()
+
+    await playground.selectView('days')
+    await expect.poll(async () => playground.getActiveView()).toBe('days')
+    await expect(playground.metric('view')).toHaveText('days')
+    await expect(playground.metric('days')).toHaveText('7')
+    await expect(playground.dayHeading('2026-03-25')).toBeVisible()
+    await expect(playground.dayHeading('2026-03-31')).toBeVisible()
+
+    await playground.selectView('agenda')
+    await expect.poll(async () => playground.getActiveView()).toBe('agenda')
+    await expect(playground.metric('view')).toHaveText('agenda')
+    await expect(playground.agendaDays.first()).toBeVisible()
+
+    await playground.selectView('week')
+    await expect.poll(async () => playground.getActiveView()).toBe('week')
+    await expect(playground.metric('view')).toHaveText('week')
+    await expect(playground.eventsByTitle('Standup').first()).toBeVisible()
   })
 
-  test('synchronizes view change from sidebar select', async ({ page }) => {
-    await openPlayground(page)
+  test('synchronizes view selection from sidebar dropdown', async ({
+    playground
+  }) => {
+    await playground.goto()
 
-    const viewSelect = page
-      .getByLabel('view')
-      .or(page.locator('select#view, select[data-field="view"]'))
-    await expect(viewSelect.first()).toBeVisible()
+    await expect(playground.viewSelect).toBeVisible()
 
-    // Switch to month via sidebar
-    await viewSelect.first().selectOption('month')
-    await settle(page)
-    expect(await getActiveView(page)).toBe('month')
+    await playground.selectSidebarView('month')
+    await expect.poll(async () => playground.getActiveView()).toBe('month')
+    await expect(playground.metric('view')).toHaveText('month')
 
-    // Switch to agenda via sidebar
-    await viewSelect.first().selectOption('agenda')
-    await settle(page)
-    expect(await getActiveView(page)).toBe('agenda')
+    await playground.selectSidebarView('agenda')
+    await expect.poll(async () => playground.getActiveView()).toBe('agenda')
+    await expect(playground.metric('view')).toHaveText('agenda')
 
-    // Switch back to week via sidebar
-    await viewSelect.first().selectOption('week')
-    await settle(page)
-    expect(await getActiveView(page)).toBe('week')
+    await playground.selectSidebarView('week')
+    await expect.poll(async () => playground.getActiveView()).toBe('week')
+    await expect(playground.metric('view')).toHaveText('week')
   })
 })

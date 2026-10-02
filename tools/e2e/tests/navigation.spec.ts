@@ -1,69 +1,68 @@
-import { expect, test } from '@playwright/test'
-import {
-  getCalendarTitle,
-  navigatePeriod,
-  openPlayground,
-  selectView,
-  settle
-} from './helpers'
+import { expect, test } from './fixtures'
 
 test.describe('period navigation', () => {
-  test('navigates next and previous period in month view', async ({ page }) => {
-    await openPlayground(page)
+  test('navigates periods in month view with exact dates', async ({
+    playground,
+    page
+  }) => {
+    await page.clock.setFixedTime('2026-03-25T12:00:00Z')
+    await playground.goto()
 
-    await selectView(page, 'month')
-    await settle(page)
+    await playground.selectView('month')
+    const initialTitle = (await playground.title.innerText()).trim()
+    expect(initialTitle).toContain('March 2026')
+    await expect(playground.currentDateInput).toHaveValue('2026-03-25')
 
-    const initialTitle = await getCalendarTitle(page)
+    await playground.navigatePeriod('next')
+    await expect(playground.title).toHaveText(/April 2026/)
+    await expect(playground.currentDateInput).toHaveValue('2026-04-01')
 
-    // Navigate to next month
-    await navigatePeriod(page, 'next')
-    await settle(page)
-    const nextTitle = await getCalendarTitle(page)
-    expect(nextTitle).not.toBe(initialTitle)
-
-    // Navigate back to initial month
-    await navigatePeriod(page, 'prev')
-    await settle(page)
-    const prevTitle = await getCalendarTitle(page)
-    expect(prevTitle).toBe(initialTitle)
+    await playground.navigatePeriod('prev')
+    await expect(playground.title).toHaveText(/March 2026/)
+    await expect(playground.currentDateInput).toHaveValue('2026-03-01')
   })
 
-  test('navigates next and previous period in week view', async ({ page }) => {
-    await openPlayground(page)
+  test('navigates periods in week view with exact dates', async ({
+    playground,
+    page
+  }) => {
+    await page.clock.setFixedTime('2026-03-25T12:00:00Z')
+    await playground.goto()
 
-    const initialTitle = await getCalendarTitle(page)
+    await expect(playground.currentDateInput).toHaveValue('2026-03-25')
+    await expect(playground.metric('start')).toContainText('2026-03-23')
+    await expect(playground.dayHeading('2026-03-23')).toBeVisible()
+    await expect(playground.dayHeading('2026-03-29')).toBeVisible()
 
-    // Next week
-    await navigatePeriod(page, 'next')
-    await settle(page)
-    const nextTitle = await getCalendarTitle(page)
-    expect(nextTitle).not.toBe(initialTitle)
+    await playground.navigatePeriod('next')
+    await expect(playground.currentDateInput).toHaveValue('2026-04-01')
+    await expect(playground.metric('start')).toContainText('2026-03-30')
+    await expect(playground.dayHeading('2026-03-30')).toBeVisible()
+    await expect(playground.dayHeading('2026-04-05')).toBeVisible()
 
-    // Previous week
-    await navigatePeriod(page, 'prev')
-    await settle(page)
-    expect(await getCalendarTitle(page)).toBe(initialTitle)
+    await playground.navigatePeriod('prev')
+    await expect(playground.currentDateInput).toHaveValue('2026-03-25')
+    await expect(playground.metric('start')).toContainText('2026-03-23')
+    await expect(playground.dayHeading('2026-03-23')).toBeVisible()
   })
 
-  test('today button navigates back to current period', async ({ page }) => {
-    await openPlayground(page)
+  test('restores fixed current period when clicking today', async ({
+    playground,
+    page
+  }) => {
+    await page.clock.setFixedTime('2026-03-25T12:00:00Z')
+    await playground.goto()
 
-    // Click next period 3 times to move ahead
-    await navigatePeriod(page, 'next')
-    await settle(page)
-    await navigatePeriod(page, 'next')
-    await settle(page)
-    await navigatePeriod(page, 'next')
-    await settle(page)
+    await playground.navigatePeriod('next')
+    await playground.navigatePeriod('next')
+    await playground.navigatePeriod('next')
 
-    const forwardTitle = await getCalendarTitle(page)
+    await expect(playground.currentDateInput).toHaveValue('2026-04-15')
+    await expect(playground.metric('start')).toContainText('2026-04-13')
 
-    // Click Today
-    await navigatePeriod(page, 'today')
-    await settle(page)
-    const todayTitle = await getCalendarTitle(page)
-
-    expect(todayTitle).not.toBe(forwardTitle)
+    await playground.navigatePeriod('today')
+    await expect(playground.currentDateInput).toHaveValue('2026-03-25')
+    await expect(playground.metric('start')).toContainText('2026-03-23')
+    await expect(playground.title).toHaveText(/March 2026/)
   })
 })
