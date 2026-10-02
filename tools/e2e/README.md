@@ -18,11 +18,13 @@ It verifies that Chronous functions identically and without regressions across a
 ## 🚀 Running Tests
 
 ### Run all frameworks in parallel
+
 ```bash
 npm run test:e2e
 ```
 
 ### Run against a specific framework
+
 ```bash
 npm run test:e2e -- --project=react
 npm run test:e2e -- --project=angular
@@ -32,12 +34,14 @@ npm run test:e2e -- --project=vanilla
 ```
 
 ### Run on different browsers
+
 ```bash
 npm run test:e2e:firefox
 npm run test:e2e --workspace @tools/e2e -- --project=react --browser=webkit
 ```
 
 ### Run in UI / debug mode
+
 ```bash
 npm run test:e2e --workspace @tools/e2e -- --ui
 ```
