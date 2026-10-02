@@ -29,6 +29,7 @@ that draws a calendar.
 
 ## Playgrounds
 
+[`apps/playground-vanilla`](apps/playground-vanilla) (Vanilla JS),
 [`apps/playground-react`](apps/playground-react) (React),
 [`apps/playground-angular`](apps/playground-angular) (Angular),
 [`apps/playground-vue`](apps/playground-vue) (Vue), and
@@ -40,6 +41,7 @@ playgrounds to [GitHub Pages](https://midstem.github.io/chronous/).
 ```bash
 npm install
 npm run build
+npm run start:vanilla # Vanilla JS playground
 npm run start         # React playground
 npm run start:angular # Angular playground
 npm run start:vue     # Vue playground

@@ -12,7 +12,8 @@ const PLAYGROUNDS = [
   { id: 'react', title: 'React', packageName: '@midstem/chronous-react' },
   { id: 'angular', title: 'Angular', packageName: '@midstem/chronous-angular' },
   { id: 'vue', title: 'Vue', packageName: '@midstem/chronous-vue' },
-  { id: 'svelte', title: 'Svelte', packageName: '@midstem/chronous-svelte' }
+  { id: 'svelte', title: 'Svelte', packageName: '@midstem/chronous-svelte' },
+  { id: 'vanilla', title: 'Vanilla JS', packageName: '@midstem/chronous' }
 ]
 
 const run = (workspace) =>
@@ -64,7 +65,7 @@ const buildIndex = () => `<!doctype html>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
-    <meta name="description" content="Explore Chronous in React, Angular, Vue and Svelte. Try calendar views, event examples and live options with generated code." />
+    <meta name="description" content="Explore Chronous in vanilla JavaScript, React, Angular, Vue and Svelte. Try calendar views, event examples and live options with generated code." />
     <title>Chronous playgrounds</title>
     <style>
       :root {
@@ -128,6 +129,7 @@ const buildIndex = () => `<!doctype html>
       .card--angular { --tint: light-dark(#be123c, #fda4af); }
       .card--vue { --tint: light-dark(#047857, #6ee7b7); }
       .card--svelte { --tint: light-dark(#c2410c, #fdba74); }
+      .card--vanilla { --tint: light-dark(#ca8a04, #facc15); }
       .card:hover { border-color: var(--tint); transform: translateY(-2px); }
       a:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; border-radius: 12px; }
       .card__top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
@@ -156,17 +158,18 @@ const buildIndex = () => `<!doctype html>
       <section class="intro" aria-labelledby="title">
         <div class="eyebrow">Interactive playgrounds</div>
         <h1 id="title">Your framework.<br />Your calendar.</h1>
-        <p>Explore the same Chronous calendar in four frameworks. Try event examples, adjust calendar options, and see the code behind every view.</p>
+        <p>Explore the same Chronous calendar in vanilla JavaScript and four frameworks. Try event examples, adjust calendar options, and see the code behind every view.</p>
       </section>
       <nav class="cards" aria-label="Choose a framework">${PLAYGROUNDS.map(toCard).join('')}
       </nav>
       <footer>
-        <span>One scheduling engine. Four framework integrations.</span>
+        <span>One scheduling engine. Four framework integrations and vanilla JavaScript.</span>
         <span>Day · Week · Month · Agenda</span>
       </footer>
     </main>
   </body>
 </html>
+
 `
 
 rmSync(OUTPUT, { recursive: true, force: true })

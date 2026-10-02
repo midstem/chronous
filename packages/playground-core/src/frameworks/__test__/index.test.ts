@@ -15,11 +15,17 @@ describe('frameworks', () => {
 
   it('contains all framework entries', () => {
     const ids = PLAYGROUND_FRAMEWORKS.map((f) => f.id)
-    expect(ids).toEqual(['react', 'angular', 'vue', 'svelte'])
+    expect(ids).toEqual(['react', 'angular', 'vue', 'svelte', 'vanilla'])
   })
 
   it('provides logos for each framework', () => {
-    for (const framework of ['react', 'angular', 'vue', 'svelte'] as const) {
+    for (const framework of [
+      'react',
+      'angular',
+      'vue',
+      'svelte',
+      'vanilla'
+    ] as const) {
       const logo = getFrameworkLogo(framework)
       expect(logo).toBe(FRAMEWORK_LOGOS[framework])
       expect(logo.viewBox).toBeTruthy()
@@ -57,6 +63,13 @@ describe('frameworks', () => {
         packageName: '@midstem/chronous-svelte',
         href: '../svelte/',
         isCurrent: false
+      },
+      {
+        id: 'vanilla',
+        title: 'Vanilla JS',
+        packageName: '@midstem/chronous',
+        href: '../vanilla/',
+        isCurrent: false
       }
     ])
 
@@ -74,5 +87,10 @@ describe('frameworks', () => {
     expect(vueLinks[0].isCurrent).toBe(false)
     expect(vueLinks[1].isCurrent).toBe(false)
     expect(vueLinks[2].isCurrent).toBe(true)
+
+    const vanillaLinks = getFrameworkLinks('vanilla')
+    expect(
+      vanillaLinks.filter((link) => link.isCurrent).map((link) => link.id)
+    ).toEqual(['vanilla'])
   })
 })

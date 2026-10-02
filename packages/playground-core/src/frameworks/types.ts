@@ -1,4 +1,5 @@
-export type PlaygroundFramework = 'react' | 'angular' | 'vue' | 'svelte'
+export type PlaygroundFramework =
+  'react' | 'angular' | 'vue' | 'svelte' | 'vanilla'
 
 export type FrameworkLogoData = {
   viewBox: string
