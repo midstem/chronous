@@ -93,9 +93,26 @@
   font-size: 0.8125rem;
   line-height: 1.25rem;
 
+  &:where(select) {
+    appearance: none;
+    padding-right: 2rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='m5 7.5 5 5 5-5' stroke='%2371717a' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1rem 1rem;
+  }
+
   &:focus-visible {
     outline: 2px solid var(--color-accent);
     outline-offset: -1px;
+  }
+}
+
+@media (forced-colors: active) {
+  .field-control:where(select) {
+    appearance: auto;
+    background-image: none;
+    padding-right: 0.5rem;
   }
 }
 

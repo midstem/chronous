@@ -7,10 +7,9 @@ import type {
 import { JSON_INDENT } from '../constants'
 import type { EventData } from '../types'
 
-import { KEY_PATTERN, KEY_REPLACEMENT, RANGE_INDENT } from './constants'
+import { RANGE_INDENT } from './constants'
 
-const literal = (value: unknown): string =>
-  typeof value === 'number' ? String(value) : `'${String(value)}'`
+const literal = (value: unknown): string => JSON.stringify(value)
 
 const rangeLines = (range: CalendarRange): string =>
   Object.entries(range)
@@ -18,24 +17,22 @@ const rangeLines = (range: CalendarRange): string =>
     .join(',\n')
 
 const eventLines = (events: readonly EventInput<EventData>[]): string =>
-  JSON.stringify(events, null, JSON_INDENT).replace(
-    KEY_PATTERN,
-    KEY_REPLACEMENT
-  )
+  JSON.stringify(events, null, JSON_INDENT)
 
 export const preambleOf = (
   range: CalendarRange,
   events: readonly EventInput<EventData>[],
   locale: LocaleId
 ): readonly string[] => [
+  "import 'temporal-polyfill/global'",
   "import { createCalendarComponents } from '@midstem/chronous-react'",
   "import type { CalendarRange, EventInput } from '@midstem/chronous-react'",
   '',
-  'type EventData = { title: string }',
+  'type EventData = { title?: string }',
   '',
   'const Calendar = createCalendarComponents<EventData>()',
   '',
-  `const LOCALE = '${locale}'`,
+  `const LOCALE = ${JSON.stringify(locale)}`,
   '',
   'const RANGE: CalendarRange = {',
   rangeLines(range),

@@ -27,6 +27,7 @@ const SIMPLE_CLOSING: readonly string[] = [
   'export class BoardComponent {',
   '  readonly range = signal<CalendarRange>(INITIAL_RANGE)',
   '  readonly events = signal<EventInput<EventData>[]>(EVENTS)',
+  '  readonly LOCALE = LOCALE',
   '}'
 ]
 
@@ -48,7 +49,7 @@ const SLOTTED_BODY = (hourHeight: number): readonly string[] => [
   '            *chronousAllDayEvents="let event"',
   '            class="truncate rounded bg-blue-700 px-2 text-[11px] leading-6 text-white dark:bg-blue-300 dark:text-slate-950"',
   '          >',
-  '            {{ event.data.title }}',
+  '            {{ event.data?.title ?? event.id }}',
   '          </div>',
   '        </chronous-all-day-row>',
   '      </div>',
@@ -67,7 +68,7 @@ const SLOTTED_BODY = (hourHeight: number): readonly string[] => [
   '            *chronousTimedEvents="day; let event"',
   '            class="truncate rounded-md bg-violet-700 px-1.5 text-[11px] leading-[1.35] font-medium text-white dark:bg-violet-400 dark:text-slate-950"',
   '          >',
-  '            {{ event.data.title }}',
+  '            {{ event.data?.title ?? event.id }}',
   '          </div>',
   '        </div>',
   '      </chronous-time-grid>'
@@ -86,7 +87,7 @@ const MONTH_BODY: readonly string[] = [
   '              *chronousMonthTimedEvents="day; let event"',
   '              class="truncate rounded bg-violet-700 px-1 text-[11px] leading-5 text-white dark:bg-violet-400 dark:text-slate-950"',
   '            >',
-  '              {{ event.data.title }}',
+  '              {{ event.data?.title ?? event.id }}',
   '            </div>',
   '          </div>',
   '',
@@ -94,7 +95,7 @@ const MONTH_BODY: readonly string[] = [
   '            *chronousMonthAllDayEvents="row; let event"',
   '            class="truncate rounded bg-blue-700 px-1.5 text-[11px] leading-5 text-white dark:bg-blue-300 dark:text-slate-950"',
   '          >',
-  '            {{ event.data.title }}',
+  '            {{ event.data?.title ?? event.id }}',
   '          </div>',
   '        </div>',
   '      </div>'
@@ -106,10 +107,10 @@ const AGENDA_BODY: readonly string[] = [
   '          <span class="w-16 shrink-0 text-sm font-semibold">{{ weekdayLabel }} {{ dayLabel }}</span>',
   '          <span class="flex flex-col gap-1">',
   '            <span *chronousAgendaAllDayEvents="bars; let event" class="text-[13px]">',
-  '              {{ event.data.title }} · all-day',
+  '              {{ event.data?.title ?? event.id }} · all-day',
   '            </span>',
   '            <span *chronousAgendaTimedEvents="day; let event; let timeRangeLabel = timeRangeLabel" class="text-[13px]">',
-  '              {{ event.data.title }} · {{ timeRangeLabel }}',
+  '              {{ event.data?.title ?? event.id }} · {{ timeRangeLabel }}',
   '            </span>',
   '          </span>',
   '        </li>',
@@ -129,7 +130,7 @@ export const simpleOf = (
       : AGENDA_BODY
 
   return [
-    ...preambleOf(range, events, locale, { clock: false }),
+    ...preambleOf(range, events, locale, false),
     ...SIMPLE_OPENING,
     ...body,
     ...SIMPLE_CLOSING

@@ -1,10 +1,11 @@
 import type { CalendarLayout } from '@midstem/chronous'
 import { STATE_HINT, jsonOf, summaryOf } from '@midstem/playground-core'
 import type { EventData } from '@midstem/playground-core'
+import { escapeHtml } from '../views/helpers'
 
 export const createStateInspector = (
   calendar: CalendarLayout<EventData>
-): HTMLElement => {
+): HTMLDetailsElement => {
   const details = document.createElement('details')
   details.className = 'shrink-0 border-t border-line bg-raised'
 
@@ -25,7 +26,7 @@ export const createStateInspector = (
     </summary>
     <div class="flex flex-col gap-2 px-3 pb-3">
       <p class="text-[11px] text-muted">${STATE_HINT}</p>
-      <pre class="max-h-80 overflow-auto rounded-md bg-sunken p-3 font-mono text-[11px] leading-5">${jsonContent}</pre>
+      <pre class="max-h-80 overflow-auto rounded-md bg-sunken p-3 font-mono text-[11px] leading-5">${escapeHtml(jsonContent)}</pre>
     </div>
   `
 

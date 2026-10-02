@@ -28,7 +28,7 @@ export type PlaygroundStore = {
   choosePreset: (id: PresetId) => void
   applyRange: (next: CalendarRange) => void
   reset: () => void
-  subscribe: (listener: () => void) => () => void
+  subscribe: (listener: (reason?: 'preset' | 'reset') => void) => () => void
 }
 
 export const createPlaygroundStore = (): PlaygroundStore => {
@@ -37,10 +37,10 @@ export const createPlaygroundStore = (): PlaygroundStore => {
   let events: readonly EventInput<EventData>[] = DEFAULT_PRESET.events
   let problem: string | null = null
   let mode: Mode = DEFAULT_MODE
-  const listeners = new Set<() => void>()
+  const listeners = new Set<(reason?: 'preset' | 'reset') => void>()
 
-  const notify = (): void => {
-    listeners.forEach((fn) => fn())
+  const notify = (reason?: 'preset' | 'reset'): void => {
+    listeners.forEach((fn) => fn(reason))
   }
 
   const update = (patch: Partial<PlaygroundState>): void => {
@@ -70,7 +70,7 @@ export const createPlaygroundStore = (): PlaygroundStore => {
     source = sourceOf(preset.events)
     events = preset.events
     problem = null
-    notify()
+    notify('preset')
   }
 
   const applyRange = (next: CalendarRange): void => {
@@ -86,7 +86,7 @@ export const createPlaygroundStore = (): PlaygroundStore => {
     source = sourceOf(DEFAULT_PRESET.events)
     events = DEFAULT_PRESET.events
     problem = null
-    notify()
+    notify('reset')
   }
 
   const setMode = (nextMode: Mode): void => {

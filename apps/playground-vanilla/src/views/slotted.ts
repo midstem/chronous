@@ -16,7 +16,7 @@ import {
 import type { EventData } from '@midstem/playground-core'
 
 import type { CalendarNow } from './helpers'
-import { edge, minutePercentOf, percentOf } from './helpers'
+import { edge, escapeHtml, minutePercentOf, percentOf } from './helpers'
 
 const numberClass = (isToday: boolean): string =>
   isToday
@@ -33,7 +33,7 @@ export const renderSlotted = (
   const days = calendar.days
   const dayHeight = hourHeight * HOURS_IN_DAY
   const row = calendar.rows[0]
-  const lanes = row ? row.lanes : 0
+  const lanes = Math.max(row?.lanes ?? 0, 1)
   const colsTemplate = `${GUTTER} repeat(${days.length}, minmax(0, 1fr))`
 
   const dayHeadingsHtml = days
@@ -78,10 +78,12 @@ export const renderSlotted = (
         <div style="grid-column: 2 / -1; position: relative; height: ${lanes * ALL_DAY_LANE_HEIGHT}px;">
           ${row.bars
             .map((bar) => {
-              const title = bar.event.data?.title ?? bar.event.id
+              const title = escapeHtml(
+                String(bar.event.data?.title ?? bar.event.id)
+              )
               return `
             <div
-              data-event-id="${bar.event.id}"
+              data-event-id="${escapeHtml(bar.event.id)}"
               data-continues-before="${bar.continuesBefore}"
               data-continues-after="${bar.continuesAfter}"
               class="px-px py-px"
@@ -143,14 +145,16 @@ export const renderSlotted = (
 
       const boxesHtml = day.boxes
         .map((box) => {
-          const title = box.event.data?.title ?? box.event.id
+          const title = escapeHtml(
+            String(box.event.data?.title ?? box.event.id)
+          )
           const from = formatTime(box.start, locale)
           const to = formatTime(box.end, locale)
           const roomy = box.height * hourHeight * HOURS_IN_DAY
 
           return `
           <div
-            data-event-id="${box.event.id}"
+            data-event-id="${escapeHtml(box.event.id)}"
             data-continues-before="${box.continuesBefore}"
             data-continues-after="${box.continuesAfter}"
             class="hover:z-20"

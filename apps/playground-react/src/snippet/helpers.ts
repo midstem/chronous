@@ -4,43 +4,34 @@ import type {
   LocaleId
 } from '@midstem/chronous-react'
 
-import { MONTH_VIEW, SLOTTED_VIEWS } from '../board'
 import type { EventData } from '../types'
 
 import { AGENDA_BODY } from './agenda'
 import { MONTH_BODY, MONTH_HELPERS } from './month'
 import { preambleOf } from './preamble'
-import type { Needs } from './preamble'
 import { CLOSING, OPENING } from './shell'
 import { SLOTTED_BODY, slottedHelpers } from './slotted'
 
-type Template = {
-  needs: Needs
-  helpers: readonly string[]
-  body: readonly string[]
-}
+const helpers = (hourHeight: number): readonly string[] => [
+  ...slottedHelpers(hourHeight),
+  ...MONTH_HELPERS
+]
 
-const templateOf = (range: CalendarRange, hourHeight: number): Template => {
-  if (SLOTTED_VIEWS.includes(range.view))
-    return {
-      needs: { clock: true },
-      helpers: slottedHelpers(hourHeight),
-      body: SLOTTED_BODY
-    }
-
-  if (range.view === MONTH_VIEW)
-    return {
-      needs: { clock: false },
-      helpers: MONTH_HELPERS,
-      body: MONTH_BODY
-    }
-
-  return {
-    needs: { clock: false },
-    helpers: [],
-    body: AGENDA_BODY
-  }
-}
+const body: readonly string[] = [
+  '          {SLOTTED_VIEWS.includes(range.view) ? (',
+  '            <>',
+  ...SLOTTED_BODY,
+  '            </>',
+  '          ) : range.view === "month" ? (',
+  '            <>',
+  ...MONTH_BODY,
+  '            </>',
+  '          ) : (',
+  '            <>',
+  ...AGENDA_BODY,
+  '            </>',
+  '          )}'
+]
 
 export const snippetOf = (
   range: CalendarRange,
@@ -48,11 +39,9 @@ export const snippetOf = (
   locale: LocaleId,
   hourHeight: number
 ): string => {
-  const { needs, helpers, body } = templateOf(range, hourHeight)
-
   return [
-    ...preambleOf(range, events, locale, needs),
-    ...helpers,
+    ...preambleOf(range, events, locale, { clock: true }),
+    ...helpers(hourHeight),
     ...OPENING,
     ...body,
     ...CLOSING

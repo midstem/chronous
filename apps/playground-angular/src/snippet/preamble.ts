@@ -6,14 +6,9 @@ import type {
 import { JSON_INDENT } from '@midstem/playground-core'
 import type { EventData } from '@midstem/playground-core'
 
-import { KEY_PATTERN, KEY_REPLACEMENT, RANGE_INDENT } from './constants'
+import { RANGE_INDENT } from './constants'
 
-export type Needs = {
-  clock: boolean
-}
-
-const literal = (value: unknown): string =>
-  typeof value === 'number' ? String(value) : `'${String(value)}'`
+const literal = (value: unknown): string => JSON.stringify(value)
 
 const rangeLines = (range: CalendarRange): string =>
   Object.entries(range)
@@ -21,44 +16,35 @@ const rangeLines = (range: CalendarRange): string =>
     .join(',\n')
 
 const eventLines = (events: readonly EventInput<EventData>[]): string =>
-  JSON.stringify(events, null, JSON_INDENT).replace(
-    KEY_PATTERN,
-    KEY_REPLACEMENT
-  )
+  JSON.stringify(events, null, JSON_INDENT)
 
-const importsOf = (needs: Needs): readonly string[] => [
+const importsOf = (needsClock: boolean): readonly string[] => [
+  "import 'temporal-polyfill/global'",
   "import { Component, signal } from '@angular/core'",
-  needs.clock
-    ? "import { CALENDAR_DIRECTIVES, formatIso } from '@midstem/chronous-angular'"
+  needsClock
+    ? "import { CALENDAR_DIRECTIVES, formatIso, injectNow } from '@midstem/chronous-angular'"
     : "import { CALENDAR_DIRECTIVES } from '@midstem/chronous-angular'",
-  needs.clock
+  needsClock
     ? "import type { CalendarRange, EventInput, IsoDateTime, ViewKind } from '@midstem/chronous-angular'"
-    : "import type { CalendarRange, EventInput, ViewKind } from '@midstem/chronous-angular'"
-]
-
-const clockLines = (locale: LocaleId): readonly string[] => [
-  `const clock = (iso: IsoDateTime): string =>`,
-  `  formatIso(iso, { locale: '${locale}', options: { hour: '2-digit', minute: '2-digit' } })`,
-  ''
+    : "import type { CalendarRange, EventInput } from '@midstem/chronous-angular'"
 ]
 
 export const preambleOf = (
   range: CalendarRange,
   events: readonly EventInput<EventData>[],
   locale: LocaleId,
-  needs: Needs
+  needsClock = true
 ): readonly string[] => [
-  ...importsOf(needs),
+  ...importsOf(needsClock),
   '',
-  'type EventData = { title: string }',
+  'type EventData = { title?: string }',
   '',
-  `const LOCALE: string = '${locale}'`,
+  `const LOCALE: string = ${JSON.stringify(locale)}`,
   '',
   'const INITIAL_RANGE: CalendarRange = {',
   rangeLines(range),
   '}',
   '',
   `const EVENTS: EventInput<EventData>[] = ${eventLines(events)}`,
-  '',
-  ...(needs.clock ? clockLines(locale) : [])
+  ''
 ]

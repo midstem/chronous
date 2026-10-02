@@ -2,7 +2,7 @@ import type { CalendarLayout, LocaleId } from '@midstem/chronous'
 import { formatNumber } from '@midstem/playground-core'
 import type { EventData } from '@midstem/playground-core'
 
-import { percentOf, rowsWithDays } from './helpers'
+import { escapeHtml, percentOf, rowsWithDays } from './helpers'
 
 const LANE_HEIGHT = 20
 const GAP = 4
@@ -22,10 +22,12 @@ export const renderPlainMonth = (
 
           const timedHtml = day.boxes
             .map((box) => {
-              const title = box.event.data?.title ?? box.event.id
+              const title = escapeHtml(
+                String(box.event.data?.title ?? box.event.id)
+              )
               return `
               <div
-                data-event-id="${box.event.id}"
+                data-event-id="${escapeHtml(box.event.id)}"
                 class="truncate rounded bg-event-timed px-1 text-[11px] leading-5 text-event-timed-ink"
               >
                 ${title}
@@ -50,10 +52,12 @@ export const renderPlainMonth = (
 
       const allDayBarsHtml = row.bars
         .map((bar) => {
-          const title = bar.event.data?.title ?? bar.event.id
+          const title = escapeHtml(
+            String(bar.event.data?.title ?? bar.event.id)
+          )
           return `
           <div
-            data-event-id="${bar.event.id}"
+            data-event-id="${escapeHtml(bar.event.id)}"
             data-continues-before="${bar.continuesBefore}"
             data-continues-after="${bar.continuesAfter}"
             class="truncate rounded bg-event-all-day px-1.5 text-[11px] leading-5 text-event-all-day-ink"

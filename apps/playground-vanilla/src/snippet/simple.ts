@@ -1,7 +1,7 @@
 import type { CalendarRange, EventInput, LocaleId } from '@midstem/chronous'
 import type { EventData } from '@midstem/playground-core'
 
-import { eventLines, rangeLines } from './preamble'
+import { ESCAPE_HTML_SOURCE, eventLines, rangeLines } from './preamble'
 
 export const simpleOf = (
   range: CalendarRange,
@@ -9,94 +9,158 @@ export const simpleOf = (
   locale: LocaleId,
   hourHeight: number
 ): string => {
-  const isSlotted = range.view !== 'month' && range.view !== 'agenda'
-
-  return [
+  const common = [
     "import 'temporal-polyfill/global'",
     "import { buildCalendar, formatIso } from '@midstem/chronous'",
-    "import type { CalendarRange, EventInput } from '@midstem/chronous'",
     '',
-    'type EventData = { title: string }',
+    `const LOCALE = ${JSON.stringify(locale)}`,
+    `const RANGE = {\n${rangeLines(range)}\n}`,
+    `const EVENTS = ${eventLines(events)}`,
     '',
-    `const LOCALE = '${locale}'`,
+    'const BOX_GAP = 3',
+    'const MIN_BOX_HEIGHT = 22',
+    'const ALL_DAY_BAR_GAP = 5',
     '',
-    'const RANGE: CalendarRange = {',
-    rangeLines(range),
+    ESCAPE_HTML_SOURCE,
+    '',
+    'export const renderCalendar = (container) => {',
+    '  const calendar = buildCalendar(RANGE, EVENTS)',
+    ''
+  ]
+
+  const render =
+    range.view === 'month'
+      ? [
+          '  let taken = 0',
+          '  const rows = calendar.rows.map((row) => {',
+          '    const days = calendar.days.slice(taken, taken + row.dayCount)',
+          '    taken += row.dayCount',
+          '    return { row, days }',
+          '  })',
+          '  const rowsHtml = rows.map(({ row, days }) => {',
+          '    const daysHtml = days.map((day) => {',
+          '      const timed = day.boxes.map((box) => `',
+          '        <div class="truncate rounded bg-violet-700 px-1 text-[11px] leading-5 text-white">',
+          '          ${escapeHtml(box.event.data?.title ?? box.event.id)}',
+          '        </div>`).join("")',
+          '      const number = formatIso(day.date, { locale: LOCALE, options: { day: "numeric" } })',
+          '      return `',
+          '        <div class="border-l border-slate-200 p-1 first:border-l-0">',
+          '          <div class="h-7 text-center text-xs font-medium">${number}</div>',
+          '          <div style="height:${row.lanes * 20}px"></div>',
+          '          <div class="flex flex-col gap-0.5">${timed}</div>',
+          '        </div>`',
+          '    }).join("")',
+          '    const bars = row.bars.map((bar) => `',
+          '      <div style="position:absolute;left:calc(${bar.left * 100}% + 2px);width:calc(${bar.width * 100}% - 4px);top:${28 + bar.lane * 20}px;height:20px"',
+          '        class="truncate rounded bg-blue-700 px-1.5 text-[11px] leading-5 text-white">',
+          '        ${escapeHtml(bar.event.data?.title ?? bar.event.id)}',
+          '      </div>`).join("")',
+          '    return `',
+          '      <div class="border-b border-slate-200 last:border-b-0"',
+          '        style="position:relative;display:grid;grid-template-columns:repeat(${days.length},minmax(0,1fr));min-height:112px">',
+          '        ${daysHtml}${bars}',
+          '      </div>`',
+          '  }).join("")',
+          '  container.innerHTML = `',
+          '    <div class="overflow-auto rounded-xl border border-slate-200 bg-white">',
+          '      ${rowsHtml}',
+          '    </div>`'
+        ]
+      : range.view === 'agenda'
+        ? [
+            '  const barsByDay = calendar.days.map(() => [])',
+            '  let taken = 0',
+            '  for (const row of calendar.rows) {',
+            '    for (const bar of row.bars) {',
+            '      for (let offset = bar.startDay; offset < bar.endDay; offset += 1) {',
+            '        barsByDay[taken + offset]?.push(bar)',
+            '      }',
+            '    }',
+            '    taken += row.dayCount',
+            '  }',
+            '  const items = calendar.days.map((day, index) => {',
+            '    const title = formatIso(day.date, { locale: LOCALE, options: { weekday: "short", day: "numeric" } })',
+            '    const allDay = (barsByDay[index] ?? []).map((bar) => `',
+            '      <div>${escapeHtml(bar.event.data?.title ?? bar.event.id)} · all-day</div>',
+            '    `).join("")',
+            '    const timed = day.boxes.map((box) => {',
+            '      const options = { hour: "2-digit", minute: "2-digit" }',
+            '      const from = formatIso(box.start, { locale: LOCALE, options })',
+            '      const to = formatIso(box.end, { locale: LOCALE, options })',
+            '      return `<div>${escapeHtml(box.event.data?.title ?? box.event.id)} · ${from} – ${to}</div>`',
+            '    }).join("")',
+            '    return `',
+            '      <li class="flex gap-4 px-4 py-3">',
+            '        <span class="w-16 shrink-0 text-sm font-semibold">${title}</span>',
+            '        <div class="flex flex-col gap-1">${allDay}${timed}</div>',
+            '      </li>`',
+            '  }).join("")',
+            '  container.innerHTML = `<ul class="divide-y divide-slate-200">${items}</ul>`'
+          ]
+        : [
+            `  const dayHeight = ${hourHeight * 24}`,
+            '  const columns = `66px repeat(${calendar.days.length}, minmax(0, 1fr))`',
+            '  const row = calendar.rows[0]',
+            '  const lanes = row?.lanes ?? 0',
+            '  const headings = calendar.days.map((day) => {',
+            '    const label = formatIso(day.date, { locale: LOCALE, options: { weekday: "short", day: "numeric" } })',
+            '    return `<div class="border-l border-slate-200 py-2 text-center text-sm">${label}</div>`',
+            '  }).join("")',
+            '  const allDay = lanes > 0 ? `',
+            '    <div class="border-b border-slate-200 py-1" style="display:grid;grid-template-columns:${columns}">',
+            '      <span class="pr-2 text-right text-[10px] text-slate-400">all-day</span>',
+            '      <div style="grid-column:2/-1;position:relative;height:${lanes * 24}px">',
+            '        ${(row?.bars ?? []).map((bar) => `',
+            '          <div style="position:absolute;left:calc(${bar.left * 100}% + ${ALL_DAY_BAR_GAP / 2}px);width:calc(${bar.width * 100}% - ${ALL_DAY_BAR_GAP}px);top:${bar.lane * 24}px;height:24px"',
+            '            class="truncate rounded bg-blue-700 px-1.5 text-[11px] leading-5 text-white">',
+            '            ${escapeHtml(bar.event.data?.title ?? bar.event.id)}',
+            '          </div>`).join("")}',
+            '      </div>',
+            '    </div>` : ""',
+            '  const labels = calendar.days[0]?.slots',
+            '    .map((slot) => {',
+            '      const at = formatIso(slot.start, { locale: LOCALE, options: { hour: "2-digit", minute: "2-digit" } })',
+            '      return `<div style="position:absolute;top:${(slot.minuteOfDay / 1440) * 100}%;transform:translateY(-50%)" class="right-2 text-[10px] text-slate-400">${at}</div>`',
+            '    }).join("") ?? ""',
+            '  const dayColumns = calendar.days.map((day) => {',
+            '    const slots = day.slots.map((slot) => `',
+            '      <span style="position:absolute;left:0;right:0;top:${(slot.minuteOfDay / 1440) * 100}%"',
+            '        class="border-t border-slate-100"></span>',
+            '    `).join("")',
+            '    const boxes = day.boxes.map((box) => {',
+            '      const title = escapeHtml(box.event.data?.title ?? box.event.id)',
+            '      return `',
+            '        <div style="position:absolute;overflow:hidden;top:${box.top * 100}%;height:${box.height * 100}%;left:${box.left * 100}%;width:calc(${box.width * 100}% - ${BOX_GAP}px);min-height:${MIN_BOX_HEIGHT}px"',
+            '          class="truncate rounded-md bg-violet-700 px-1.5 text-[11px] font-medium text-violet-950">',
+            '          <span class="block truncate font-semibold">${title}</span>',
+            '        </div>`',
+            '    }).join("")',
+            '    return `<div class="border-l border-slate-200" style="position:relative;height:${dayHeight}px">${slots}${boxes}</div>`',
+            '  }).join("")',
+            '  container.innerHTML = `',
+            '    <div class="h-full overflow-auto rounded-xl border border-slate-200 bg-white">',
+            '      <div class="sticky top-0 bg-white">',
+            '        <div style="display:grid;grid-template-columns:${columns}" class="border-b border-slate-200">',
+            '          <div></div>${headings}',
+            '        </div>',
+            '        ${allDay}',
+            '      </div>',
+            '      <div style="display:grid;grid-template-columns:${columns}">',
+            '        <div style="position:relative;height:${dayHeight}px">${labels}</div>',
+            '        ${dayColumns}',
+            '      </div>',
+            '    </div>`'
+          ]
+
+  return [
+    ...common,
+    ...render,
     '}',
     '',
-    `const EVENTS: EventInput<EventData>[] = ${eventLines(events)}`,
-    '',
-    'export const renderCalendar = (container: HTMLElement): void => {',
-    '  const calendar = buildCalendar(RANGE, EVENTS)',
-    '',
-    isSlotted
-      ? `  const dayHeight = ${hourHeight * 24}
-  const cols = \`66px repeat(\${calendar.days.length}, minmax(0, 1fr))\`
-
-  const headings = calendar.days
-    .map(
-      (d) =>
-        \`<div class="border-l border-slate-200 py-2 text-center text-sm font-medium">\${formatIso(d.date, { locale: LOCALE, options: { weekday: 'short', day: 'numeric' } })}</div>\`
-    )
-    .join('')
-
-  const columns = calendar.days
-    .map((d) => {
-      const boxes = d.boxes
-        .map(
-          (b) =>
-            \`<div style="position: absolute; top: \${b.top * 100}%; height: \${b.height * 100}%; left: \${b.left * 100}%; width: \${b.width * 100}%;" class="truncate rounded bg-violet-700 px-1.5 text-xs text-white">\${b.event.data?.title ?? b.event.id}</div>\`
-        )
-        .join('')
-      return \`<div class="border-l border-slate-200" style="position: relative; height: \${dayHeight}px;">\${boxes}</div>\`
-    })
-    .join('')
-
-  container.innerHTML = \`
-    <div class="h-full overflow-auto rounded-xl border border-slate-200 bg-white">
-      <div style="display: grid; grid-template-columns: \${cols};" class="sticky top-0 border-b border-slate-200 bg-white">
-        <div></div>
-        \${headings}
-      </div>
-      <div style="display: grid; grid-template-columns: \${cols};">
-        <div style="height: \${dayHeight}px;"></div>
-        \${columns}
-      </div>
-    </div>\`
-}`
-      : range.view === 'month'
-        ? `  let taken = 0
-  const rows = calendar.rows.map((row) => {
-    const days = calendar.days.slice(taken, taken + row.dayCount)
-    taken += row.dayCount
-    return { row, days }
-  })
-
-  const rowsHtml = rows
-    .map(({ days }) => {
-      const daysHtml = days
-        .map(
-          (d) =>
-            \`<div class="min-h-28 border-l border-slate-200 p-1">\${formatIso(d.date, { locale: LOCALE, options: { day: 'numeric' } })}</div>\`
-        )
-        .join('')
-      return \`<div class="border-b border-slate-200 last:border-b-0" style="display: grid; grid-template-columns: repeat(\${days.length}, minmax(0, 1fr));">\${daysHtml}</div>\`
-    })
-    .join('')
-
-  container.innerHTML = \`<div class="h-full overflow-auto rounded-xl border border-slate-200 bg-white">\${rowsHtml}</div>\`
-}`
-        : `  const items = calendar.days
-    .map((d) => {
-      const title = formatIso(d.date, { locale: LOCALE, options: { weekday: 'short', day: 'numeric' } })
-      const events = d.boxes
-        .map((b) => \`<div>\${b.event.data?.title ?? b.event.id}</div>\`)
-        .join('')
-      return \`<li class="flex gap-4 px-4 py-3"><span class="w-16 font-semibold">\${title}</span><div>\${events}</div></li>\`
-    })
-    .join('')
-
-  container.innerHTML = \`<ul class="divide-y divide-slate-200">\${items}</ul>\`
-}`
+    'const root = document.querySelector("#root") ?? document.body',
+    'root.style.height ||= "100vh"',
+    'renderCalendar(root)',
+    ''
   ].join('\n')
 }

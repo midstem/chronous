@@ -13,6 +13,7 @@ import type { EventData } from '@midstem/playground-core'
 
 import {
   edge,
+  escapeHtml,
   hiddenLanes,
   laneCount,
   percentOf,
@@ -59,10 +60,12 @@ export const renderMonth = (
 
           const timedHtml = day.boxes
             .map((box) => {
-              const title = box.event.data?.title ?? box.event.id
+              const title = escapeHtml(
+                String(box.event.data?.title ?? box.event.id)
+              )
               return `
               <span
-                data-event-id="${box.event.id}"
+                data-event-id="${escapeHtml(box.event.id)}"
                 class="flex items-center gap-1 truncate rounded bg-event-timed px-1 text-[11px] leading-5 text-event-timed-ink hover:brightness-110"
               >
                 <span class="truncate" title="${title}">
@@ -104,10 +107,12 @@ export const renderMonth = (
 
       const allDayBarsHtml = visibleLanes(row.bars, MONTH_MAX_LANES)
         .map((bar) => {
-          const title = bar.event.data?.title ?? bar.event.id
+          const title = escapeHtml(
+            String(bar.event.data?.title ?? bar.event.id)
+          )
           return `
           <div
-            data-event-id="${bar.event.id}"
+            data-event-id="${escapeHtml(bar.event.id)}"
             data-continues-before="${bar.continuesBefore}"
             data-continues-after="${bar.continuesAfter}"
             style="position: absolute; left: calc(${percentOf(bar.left)} + ${MONTH_BAR_GAP / 2}px); width: calc(${percentOf(bar.width)} - ${MONTH_BAR_GAP}px); top: ${NUMBER_HEIGHT + bar.lane * MONTH_LANE_HEIGHT}px; height: ${MONTH_LANE_HEIGHT}px; z-index: 1;"
