@@ -1,4 +1,5 @@
 import type { CalendarRange, EventInput, LocaleId } from '@midstem/chronous'
+import { MONTH_VIEW, isSlotted } from '@midstem/playground-core'
 import type { EventData } from '@midstem/playground-core'
 
 import { AGENDA_RENDER } from './agenda'
@@ -14,13 +15,70 @@ export const snippetOf = (
   locale: LocaleId,
   hourHeight: number
 ): string => {
-  const needs = { clock: true }
-  const preamble = preambleOf(range, events, locale, needs)
-
-  const helpers = [...slottedHelpers(hourHeight), ...MONTH_HELPERS]
-  const viewRender = [...SLOTTED_RENDER, ...MONTH_RENDER, ...AGENDA_RENDER]
-
-  const mainRunner = [
+  const slotted = isSlotted(range.view)
+  const month = range.view === MONTH_VIEW
+  const preamble = preambleOf(range, events, locale, {
+    clock: slotted,
+    now: true
+  })
+  const helpers = slotted
+    ? slottedHelpers(hourHeight)
+    : month
+      ? MONTH_HELPERS
+      : []
+  const renderer = slotted
+    ? SLOTTED_RENDER
+    : month
+      ? MONTH_RENDER
+      : AGENDA_RENDER
+  const renderView = slotted
+    ? 'renderSlotted(calendar, now)'
+    : month
+      ? 'renderMonth(calendar, now)'
+      : 'renderAgenda(calendar, now)'
+  const scrollOnRender = slotted
+    ? [
+        '      scroller.scrollTop = preserveScroll && previousScrollTop !== undefined',
+        '        ? previousScrollTop',
+        '        : HOUR_HEIGHT * SCROLL_TO_HOUR'
+      ]
+    : [
+        '      if (preserveScroll && previousScrollTop !== undefined) {',
+        '        scroller.scrollTop = previousScrollTop',
+        '      }'
+      ]
+  const titleHelper = [
+    'const titleFor = (calendar) => {',
+    ...(range.view === 'day' || month
+      ? [
+          '  const anchor = calendar.days.find((day) => day.inCurrentPeriod)?.date ?? calendar.days[0]?.date ?? INITIAL_RANGE.currentDate'
+        ]
+      : []),
+    ...(range.view === 'day'
+      ? [
+          '  return formatIso(anchor, {',
+          '    locale: LOCALE,',
+          '    options: { day: "numeric", month: "long", year: "numeric" }',
+          '  })'
+        ]
+      : month
+        ? [
+            '  return formatIso(anchor, { locale: LOCALE, options: { month: "long", year: "numeric" } })'
+          ]
+        : [
+            '  const first = formatIso(calendar.days[0].date, {',
+            '    locale: LOCALE,',
+            '    options: { day: "numeric", month: "short" }',
+            '  })',
+            '  const last = formatIso(calendar.days[calendar.days.length - 1].date, {',
+            '    locale: LOCALE,',
+            '    options: { day: "numeric", month: "long", year: "numeric" }',
+            '  })',
+            '  return `${first} – ${last}`'
+          ]),
+    '}'
+  ]
+  const main = [
     'export const renderCalendar = (container) => {',
     '  let currentRange = { ...INITIAL_RANGE }',
     '',
@@ -38,7 +96,7 @@ export const snippetOf = (
     '    const state = initialCalendarState(currentRange)',
     '    const nextRange = calendarReducer(state, { type: "next" }).range',
     '    const prevRange = calendarReducer(state, { type: "prev" }).range',
-    '    const heading = titleFor(calendar, currentRange)',
+    '    const heading = titleFor(calendar)',
     '',
     '    container.innerHTML = `',
     '      <div class="flex h-full flex-col p-4 text-slate-900 dark:text-slate-200">',
@@ -49,13 +107,10 @@ export const snippetOf = (
     '            <button type="button" aria-label="Next period" class="rounded-md border border-slate-200 bg-white px-2.5 py-1 text-sm dark:border-white/15 dark:bg-slate-950" data-nav="next">›</button>',
     '          </div>',
     '          <h2 class="mr-auto truncate text-lg font-semibold">${escapeHtml(heading)}</h2>',
-    '          <div class="flex items-center gap-0.5 rounded-md border border-slate-200 bg-white p-0.5 dark:border-white/15 dark:bg-slate-950">',
-    '            ${VIEWS.map((kind) => `<button type="button" aria-pressed="${kind === currentRange.view}" class="rounded px-2.5 py-1 text-xs font-medium capitalize ${kind === currentRange.view ? "bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300" : "text-slate-500 dark:text-slate-400"}" data-view="${kind}">${kind}</button>`).join("")}',
-    '          </div>',
     '        </header>',
     '        <section class="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/15 dark:bg-slate-950">',
     '          <div class="min-h-0 flex-1 overflow-auto" data-scroller>',
-    '            ${isSlottedView(currentRange.view) ? renderSlotted(calendar, now) : currentRange.view === "month" ? renderMonth(calendar, now) : renderAgenda(calendar, now)}',
+    '            ${' + renderView + '}',
     '          </div>',
     '        </section>',
     '      </div>`',
@@ -72,17 +127,9 @@ export const snippetOf = (
     '      currentRange = calendarReducer(state, { type: "today", now: new Date().toISOString() }).range',
     '      render()',
     '    })',
-    '    container.querySelectorAll("button[data-view]").forEach((btn) => {',
-    '      btn.addEventListener("click", () => {',
-    '        currentRange = calendarReducer(state, { type: "view", view: btn.dataset.view }).range',
-    '        render()',
-    '      })',
-    '    })',
     '    const scroller = container.querySelector("[data-scroller]")',
-    '    if (isSlottedView(currentRange.view) && scroller) {',
-    '      scroller.scrollTop = preserveScroll && previousScrollTop !== undefined',
-    '        ? previousScrollTop',
-    '        : HOUR_HEIGHT * SCROLL_TO_HOUR',
+    '    if (scroller) {',
+    ...scrollOnRender,
     '    }',
     '  }',
     '',
@@ -96,39 +143,9 @@ export const snippetOf = (
     '// Clear this interval when removing the calendar from the page.',
     'const stopCalendarClock = renderCalendar(root)',
     ''
-  ].filter(Boolean)
-
-  const navigationHelpers = [
-    'const isSlottedView = (view) => view === "day" || view === "week" || view === "days"',
-    '',
-    'const titleFor = (calendar, range) => {',
-    '  const anchor = calendar.days.find((day) => day.inCurrentPeriod)?.date ?? calendar.days[0]?.date ?? range.currentDate',
-    '  if (range.view === "day") {',
-    '    return formatIso(anchor, {',
-    '      locale: LOCALE,',
-    '      options: { day: "numeric", month: "long", year: "numeric" }',
-    '    })',
-    '  }',
-    '  if (range.view === "month") {',
-    '    return formatIso(anchor, { locale: LOCALE, options: { month: "long", year: "numeric" } })',
-    '  }',
-    '  const first = formatIso(calendar.days[0].date, {',
-    '    locale: LOCALE,',
-    '    options: { day: "numeric", month: "short" }',
-    '  })',
-    '  const last = formatIso(calendar.days[calendar.days.length - 1].date, {',
-    '    locale: LOCALE,',
-    '    options: { day: "numeric", month: "long", year: "numeric" }',
-    '  })',
-    '  return `${first} – ${last}`',
-    '}'
   ]
 
-  return [
-    ...preamble,
-    ...helpers,
-    ...viewRender,
-    ...navigationHelpers,
-    ...mainRunner
-  ].join('\n')
+  return [...preamble, ...helpers, ...renderer, ...titleHelper, ...main].join(
+    '\n'
+  )
 }

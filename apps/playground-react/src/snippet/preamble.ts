@@ -11,6 +11,7 @@ import { RANGE_INDENT } from './constants'
 
 export type Needs = {
   clock: boolean
+  today: boolean
 }
 
 const literal = (value: unknown): string => JSON.stringify(value)
@@ -29,10 +30,10 @@ const importsOf = (needs: Needs): readonly string[] => [
     ? "import { createCalendarComponents, formatIso } from '@midstem/chronous-react'"
     : "import { createCalendarComponents } from '@midstem/chronous-react'",
   needs.clock
-    ? "import type { CalendarRange, EventInput, IsoDateTime, ViewKind } from '@midstem/chronous-react'"
-    : "import type { CalendarRange, EventInput, ViewKind } from '@midstem/chronous-react'",
+    ? "import type { CalendarRange, EventInput, IsoDateTime } from '@midstem/chronous-react'"
+    : "import type { CalendarRange, EventInput } from '@midstem/chronous-react'",
   "import { useState } from 'react'",
-  "import { useNow } from '@midstem/chronous-react'"
+  ...(needs.today ? ["import { useNow } from '@midstem/chronous-react'"] : [])
 ]
 
 const CLOCK: readonly string[] = [
@@ -62,9 +63,6 @@ export const preambleOf = (
   'const Calendar = createCalendarComponents<EventData>()',
   '',
   `const LOCALE = ${JSON.stringify(locale)}`,
-  '',
-  "const VIEWS: ViewKind[] = ['day', 'week', 'days', 'month', 'agenda']",
-  "const SLOTTED_VIEWS: ViewKind[] = ['day', 'week', 'days']",
   '',
   ...(needs.clock ? CLOCK : []),
   'const INITIAL_RANGE: CalendarRange = {',

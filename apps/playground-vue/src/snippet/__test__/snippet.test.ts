@@ -21,40 +21,68 @@ const events = [
 ] as EventInput<EventData>[]
 
 const locale = "en-GB' ; throw new Error('bad')"
-const generated = snippetOf(range, events, locale, 60)
+const generatedOf = (view: CalendarRange['view']): string =>
+  snippetOf({ ...range, view }, events, locale, 60)
 
 describe('Vue copyable snippet', () => {
-  it('keeps all view renderers reactive and serializes user strings safely', () => {
-    expect(generated).toContain(
-      "v-if=\"['day', 'week', 'days'].includes(range.view)\""
-    )
-    expect(generated).toContain('v-else-if="range.view === \'month\'"')
-    expect(generated).toContain('<Calendar.AgendaList')
-    expect(generated).toContain('event.data?.title ?? event.id')
-    expect(generated).toContain(`const LOCALE = ${JSON.stringify(locale)}`)
-    expect(generated).toContain(
-      JSON.stringify(events[0].data?.title).replace(/</g, '\\u003c')
-    )
-    expect(generated.indexOf('const ALL_DAY_LANE_HEIGHT')).toBeLessThan(
-      generated.indexOf('</script>')
-    )
-    expect(generated).not.toContain('createCalendarComponents')
+  it('emits only the selected renderer with its required helpers', () => {
+    for (const view of ['day', 'week', 'days', 'month', 'agenda'] as const) {
+      const generated = generatedOf(view)
+      if (['day', 'week', 'days'].includes(view)) {
+        expect(generated).toContain('<Calendar.TimeGrid')
+        expect(generated).not.toContain('<Calendar.MonthGrid')
+        expect(generated).not.toContain('<Calendar.AgendaList')
+        expect(generated).toContain('const HOUR_HEIGHT = 60')
+        expect(generated).toContain('const clock =')
+      } else if (view === 'month') {
+        expect(generated).toContain('<Calendar.MonthGrid')
+        expect(generated).not.toContain('<Calendar.TimeGrid')
+        expect(generated).not.toContain('<Calendar.AgendaList')
+        expect(generated).toContain('const MONTH_LANE_HEIGHT =')
+        expect(generated).not.toContain('const HOUR_HEIGHT')
+        expect(generated).not.toContain('const clock =')
+      } else {
+        expect(generated).toContain('<Calendar.AgendaList')
+        expect(generated).not.toContain('<Calendar.TimeGrid')
+        expect(generated).not.toContain('<Calendar.MonthGrid')
+        expect(generated).not.toContain('const HOUR_HEIGHT')
+        expect(generated).not.toContain('const clock =')
+      }
+      expect(generated).not.toContain('VIEWS')
+      expect(generated).not.toContain('withView')
+      expect(generated).toContain('navigation.prev && goTo(navigation.prev)')
+      expect(generated).toContain('@navigate="range = $event"')
+      expect(generated).toContain('event.data?.title ?? event.id')
+      expect(generated).toContain(`const LOCALE = ${JSON.stringify(locale)}`)
+      expect(generated).toContain(
+        JSON.stringify(events[0].data?.title).replace(/</g, '\\u003c')
+      )
+      if (['day', 'week', 'days'].includes(view)) {
+        expect(generated.indexOf('const ALL_DAY_LANE_HEIGHT')).toBeLessThan(
+          generated.indexOf('</script>')
+        )
+      }
+      expect(generated).not.toContain('createCalendarComponents')
+    }
   })
 
-  it('compiles the generated SFC script and template', () => {
-    const { descriptor, errors } = parse(generated, {
-      filename: 'Calendar.vue'
-    })
-    expect(errors).toEqual([])
-    expect(descriptor.scriptSetup).not.toBeNull()
+  it('compiles every generated SFC script and template', () => {
+    for (const view of ['day', 'week', 'days', 'month', 'agenda'] as const) {
+      const generated = generatedOf(view)
+      const { descriptor, errors } = parse(generated, {
+        filename: 'Calendar.vue'
+      })
+      expect(errors, view).toEqual([])
+      expect(descriptor.scriptSetup, view).not.toBeNull()
 
-    const script = compileScript(descriptor, { id: 'generated-calendar' })
-    const template = compileTemplate({
-      source: descriptor.template?.content ?? '',
-      filename: 'Calendar.vue',
-      id: 'generated-calendar',
-      compilerOptions: { bindingMetadata: script.bindings }
-    })
-    expect(template.errors).toEqual([])
+      const script = compileScript(descriptor, { id: `generated-${view}` })
+      const template = compileTemplate({
+        source: descriptor.template?.content ?? '',
+        filename: 'Calendar.vue',
+        id: `generated-${view}`,
+        compilerOptions: { bindingMetadata: script.bindings }
+      })
+      expect(template.errors, view).toEqual([])
+    }
   })
 })

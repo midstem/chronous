@@ -46,19 +46,6 @@ export const OPENING: readonly string[] = [
   '',
   '        <h2 class="mr-auto truncate text-lg font-semibold">{{ title }}</h2>',
   '',
-  '        <div',
-  '          class="flex items-center gap-0.5 rounded-md border border-slate-200 bg-white p-0.5 dark:border-white/15 dark:bg-slate-950"',
-  '        >',
-  '          @for (kind of views; track kind) {',
-  '            <button',
-  '              type="button"',
-  '              class="rounded px-2.5 py-1 text-xs font-medium capitalize"',
-  '              (click)="range.set(navigation.withView(kind))"',
-  '            >',
-  '              {{ kind }}',
-  '            </button>',
-  '          }',
-  '        </div>',
   '      </div>',
   '',
   '      <section',
@@ -67,7 +54,7 @@ export const OPENING: readonly string[] = [
   '        <div class="min-h-0 flex-1 overflow-auto">'
 ]
 
-export const CLOSING: readonly string[] = [
+const CLOSING_BASE: readonly string[] = [
   '        </div>',
   '      </section>',
   '    </div>',
@@ -76,35 +63,43 @@ export const CLOSING: readonly string[] = [
   'export class BoardComponent {',
   '  readonly range = signal<CalendarRange>(INITIAL_RANGE)',
   '  readonly events = signal<EventInput<EventData>[]>(EVENTS)',
-  '  readonly LOCALE = LOCALE',
+  '  readonly LOCALE = LOCALE'
+]
+
+export const FULL_CLOSING = (renderer: {
+  clock: boolean
+  today: boolean
+  month: boolean
+}): readonly string[] => [
+  ...CLOSING_BASE,
+  ...(renderer.today
+    ? ['  readonly today = injectNow(() => this.range().timeZone)']
+    : []),
+  ...(renderer.month
+    ? [
+        '  readonly MONTH_LANE_HEIGHT = MONTH_LANE_HEIGHT',
+        '  readonly MONTH_MAX_LANES = MONTH_MAX_LANES',
+        '  readonly NUMBER_HEIGHT = NUMBER_HEIGHT',
+        '  readonly BAR_GAP = BAR_GAP'
+      ]
+    : []),
+  ...(renderer.today ? NUMBER_CLASS : []),
+  ...(renderer.clock
+    ? [
+        '  readonly HOUR_HEIGHT = HOUR_HEIGHT',
+        '  readonly ALL_DAY_LANE_HEIGHT = ALL_DAY_LANE_HEIGHT',
+        '  readonly MIN_BOX_HEIGHT = MIN_BOX_HEIGHT',
+        '  readonly COMPACT_BOX_HEIGHT = COMPACT_BOX_HEIGHT',
+        '  readonly BOX_GAP = BOX_GAP',
+        '  readonly SCROLL_TO_HOUR = SCROLL_TO_HOUR',
+        "  readonly clock = (at: IsoDateTime): string => formatIso(at, { locale: this.LOCALE, options: { hour: '2-digit', minute: '2-digit' } })"
+      ]
+    : []),
   '}'
 ]
 
-export const FULL_CLOSING: readonly string[] = [
-  '        </div>',
-  '      </section>',
-  '    </div>',
-  '  `',
-  '})',
-  'export class BoardComponent {',
-  '  readonly range = signal<CalendarRange>(INITIAL_RANGE)',
-  '  readonly today = injectNow(() => this.range().timeZone)',
-  '  readonly events = signal<EventInput<EventData>[]>(EVENTS)',
-  '  readonly LOCALE = LOCALE',
-  '  readonly HOUR_HEIGHT = HOUR_HEIGHT',
-  '  readonly ALL_DAY_LANE_HEIGHT = ALL_DAY_LANE_HEIGHT',
-  '  readonly MONTH_LANE_HEIGHT = MONTH_LANE_HEIGHT',
-  '  readonly MIN_BOX_HEIGHT = MIN_BOX_HEIGHT',
-  '  readonly COMPACT_BOX_HEIGHT = COMPACT_BOX_HEIGHT',
-  '  readonly BOX_GAP = BOX_GAP',
-  '  readonly SCROLL_TO_HOUR = SCROLL_TO_HOUR',
-  '  readonly MONTH_MAX_LANES = MONTH_MAX_LANES',
-  '  readonly NUMBER_HEIGHT = NUMBER_HEIGHT',
-  '  readonly BAR_GAP = BAR_GAP',
-  "  readonly views: readonly ViewKind[] = ['day', 'week', 'days', 'month', 'agenda']",
-  "  readonly clock = (at: IsoDateTime): string => formatIso(at, { locale: this.LOCALE, options: { hour: '2-digit', minute: '2-digit' } })",
+const NUMBER_CLASS: readonly string[] = [
   '  numberClass(isToday: boolean): string {',
   '    return isToday ? "flex size-6 items-center justify-center rounded-full bg-orange-100 text-xs font-semibold dark:bg-orange-900" : "flex size-6 items-center justify-center text-xs font-medium"',
-  '  }',
-  '}'
+  '  }'
 ]

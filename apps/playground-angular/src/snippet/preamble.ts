@@ -18,14 +18,15 @@ const rangeLines = (range: CalendarRange): string =>
 const eventLines = (events: readonly EventInput<EventData>[]): string =>
   JSON.stringify(events, null, JSON_INDENT)
 
-const importsOf = (needsClock: boolean): readonly string[] => [
+const importsOf = (
+  needsClock: boolean,
+  needsToday: boolean
+): readonly string[] => [
   "import 'temporal-polyfill/global'",
   "import { Component, signal } from '@angular/core'",
+  `import { CALENDAR_DIRECTIVES${needsClock ? ', formatIso' : ''}${needsToday ? ', injectNow' : ''} } from '@midstem/chronous-angular'`,
   needsClock
-    ? "import { CALENDAR_DIRECTIVES, formatIso, injectNow } from '@midstem/chronous-angular'"
-    : "import { CALENDAR_DIRECTIVES } from '@midstem/chronous-angular'",
-  needsClock
-    ? "import type { CalendarRange, EventInput, IsoDateTime, ViewKind } from '@midstem/chronous-angular'"
+    ? "import type { CalendarRange, EventInput, IsoDateTime } from '@midstem/chronous-angular'"
     : "import type { CalendarRange, EventInput } from '@midstem/chronous-angular'"
 ]
 
@@ -33,9 +34,10 @@ export const preambleOf = (
   range: CalendarRange,
   events: readonly EventInput<EventData>[],
   locale: LocaleId,
-  needsClock = true
+  needsClock = true,
+  needsToday = false
 ): readonly string[] => [
-  ...importsOf(needsClock),
+  ...importsOf(needsClock, needsToday),
   '',
   'type EventData = { title?: string }',
   '',

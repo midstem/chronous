@@ -126,47 +126,71 @@ const runGenerated = (
 }
 
 describe('generated vanilla snippets', () => {
-  it('switches full renderers with real DOM buttons and keeps event labels literal', () => {
-    const root = runGenerated(
-      snippetOf(range('week'), events, 'en-US', 48)
-    ).root
-    expect(root.querySelector('[data-scroller]')).not.toBeNull()
+  it('generates one navigable full renderer for each selected view', () => {
+    const renderers = {
+      day: 'renderSlotted',
+      week: 'renderSlotted',
+      days: 'renderSlotted',
+      month: 'renderMonth',
+      agenda: 'renderAgenda'
+    } as const
 
-    root.querySelector<HTMLButtonElement>('[data-view="month"]')!.click()
-    expect(root.textContent).toContain('All day <event>')
-    expect(root.querySelector('[data-scroller]')).not.toBeNull()
-    expect(root.innerHTML).toContain('grid-template-columns: repeat(7')
-    expect(root.querySelector('img')).toBeNull()
-    expect(root.textContent).toContain(
-      'Quote "and" slash \\ <img src=x onerror=alert(1)>'
-    )
+    for (const view of Object.keys(renderers) as (keyof typeof renderers)[]) {
+      const source = snippetOf(range(view), events, 'en-US', 48)
+      const selected = renderers[view]
+      expect(source).toContain(`const ${selected} =`)
+      expect(source).not.toContain('data-view')
+      expect(source).not.toContain('VIEWS')
+      expect(source).not.toContain('range.view')
+      for (const renderer of ['renderSlotted', 'renderMonth', 'renderAgenda']) {
+        if (renderer !== selected)
+          expect(source).not.toContain(`const ${renderer} =`)
+      }
+      if (selected === 'renderSlotted') {
+        expect(source).toContain('const SLOT_LANE_HEIGHT =')
+        expect(source).toContain('const clock =')
+        expect(source).not.toContain('MONTH_LANE_HEIGHT')
+      } else if (selected === 'renderMonth') {
+        expect(source).toContain('const MONTH_LANE_HEIGHT =')
+        expect(source).not.toContain('SLOT_LANE_HEIGHT')
+        expect(source).not.toContain('const clock =')
+      } else {
+        expect(source).not.toContain('MONTH_LANE_HEIGHT')
+        expect(source).not.toContain('SLOT_LANE_HEIGHT')
+        expect(source).not.toContain('const clock =')
+      }
+      expect(source.includes('const anchor =')).toBe(
+        view === 'day' || view === 'month'
+      )
 
-    root.querySelector<HTMLButtonElement>('[data-view="agenda"]')!.click()
-    expect(root.textContent).toContain('Timed "event" </script>')
-    expect(root.querySelector('ul.divide-y')).not.toBeNull()
-
-    for (const view of ['day', 'week', 'days']) {
-      root.querySelector<HTMLButtonElement>(`[data-view="${view}"]`)!.click()
-      expect(root.querySelector('[data-scroller]')).not.toBeNull()
-      expect(
-        root.querySelector(`[aria-pressed="true"][data-view="${view}"]`)
-      ).not.toBeNull()
+      const generated = runGenerated(source)
+      const { root } = generated
       expect(root.textContent).toContain('All day <event>')
       expect(root.textContent).toContain('Timed "event" </script>')
       expect(root.textContent).toContain(
         'Quote "and" slash \\ <img src=x onerror=alert(1)>'
       )
-      expect(
-        root.querySelectorAll('[data-scroller] span.border-t').length
-      ).toBeGreaterThan(1)
-    }
+      expect(root.querySelector('img')).toBeNull()
+      if (view === 'month') {
+        expect(root.innerHTML).toContain('grid-template-columns: repeat(7')
+      } else if (view === 'agenda') {
+        expect(root.querySelector('ul.divide-y')).not.toBeNull()
+      } else {
+        expect(
+          root.querySelectorAll('[data-scroller] span.border-t').length
+        ).toBeGreaterThan(1)
+      }
 
-    const before = root.querySelector('h2')?.textContent
-    root.querySelector<HTMLButtonElement>('[data-nav="next"]')!.click()
-    expect(root.querySelector('h2')?.textContent).not.toBe(before)
-    expect(root.querySelector<HTMLElement>('[data-scroller]')?.scrollTop).toBe(
-      336
-    )
+      const before = root.querySelector('h2')?.textContent
+      root.querySelector<HTMLButtonElement>('[data-nav="next"]')!.click()
+      expect(root.querySelector('h2')?.textContent).not.toBe(before)
+      if (view === 'day' || view === 'week' || view === 'days') {
+        expect(
+          root.querySelector<HTMLElement>('[data-scroller]')?.scrollTop
+        ).toBe(336)
+      }
+      generated.dispose()
+    }
   })
 
   it('renders all-day and timed events in all five simple variants as plain JavaScript', () => {
@@ -228,10 +252,10 @@ describe('generated vanilla snippets', () => {
     expect(scroller.scrollTop).toBe(336)
 
     scroller.scrollTop = 412
-    const oldButton = generated.root.querySelector('[data-view="week"]')
+    const oldButton = generated.root.querySelector('[data-nav="next"]')
     generated.tick()
 
-    expect(generated.root.querySelector('[data-view="week"]')).not.toBe(
+    expect(generated.root.querySelector('[data-nav="next"]')).not.toBe(
       oldButton
     )
     expect(

@@ -16,6 +16,7 @@ export const CONTINUATION_SOURCE =
 
 export type Needs = {
   clock: boolean
+  now: boolean
 }
 
 const literal = (value: unknown): string => JSON.stringify(value)
@@ -39,8 +40,6 @@ export const preambleOf = (
   '',
   `const LOCALE = ${JSON.stringify(locale)}`,
   '',
-  "const VIEWS = ['day', 'week', 'days', 'month', 'agenda']",
-  '',
   ...(needs.clock
     ? [
         'const clock = (at) => {',
@@ -53,7 +52,11 @@ export const preambleOf = (
         '    return at',
         '  }',
         '}',
-        '',
+        ''
+      ]
+    : []),
+  ...(needs.now
+    ? [
         'const getNow = (timeZone) => {',
         '  try {',
         '    const options = { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false, timeZone }',

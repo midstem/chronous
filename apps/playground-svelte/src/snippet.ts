@@ -36,12 +36,11 @@ export const snippetOf = (
   const toolbar = plain
     ? []
     : [
-        '  <C.Toolbar onNavigate={navigate} {views}>',
-        '    {#snippet children({ navigation, title, goTo, range: shown })}',
+        '  <C.Toolbar onNavigate={navigate}>',
+        '    {#snippet children({ navigation, title, goTo })}',
         '      <header class="flex flex-wrap items-center gap-3 pb-3">',
         '        <div class="flex items-center gap-1"><button class="rounded border px-2 py-1" disabled={!navigation.prev} onclick={() => navigation.prev && goTo(navigation.prev)}>‹</button><button class="rounded border px-2 py-1" disabled={!navigation.today} onclick={() => navigation.today && goTo(navigation.today())}>Today</button><button class="rounded border px-2 py-1" disabled={!navigation.next} onclick={() => navigation.next && goTo(navigation.next)}>›</button></div>',
         '        <h2 class="mr-auto text-lg font-semibold">{title}</h2>',
-        '        {#each views as view (view)}<button class="rounded border px-2 py-1 capitalize" aria-pressed={view === shown.view} onclick={() => goTo(navigation.withView(view))}>{view}</button>{/each}',
         '      </header>',
         '    {/snippet}',
         '  </C.Toolbar>'
@@ -139,21 +138,13 @@ export const snippetOf = (
     '  </C.AgendaList>'
   ]
 
-  const body = plain
-    ? slotted
-      ? slottedBody
-      : month
-        ? monthBody
-        : agendaBody
-    : [
-        "  {#if ['day', 'week', 'days'].includes(range.view)}",
-        ...slottedBody,
-        "  {:else if range.view === 'month'}",
-        ...monthBody,
-        '  {:else}',
-        ...agendaBody,
-        '  {/if}'
-      ]
+  const body = slotted ? slottedBody : month ? monthBody : agendaBody
+  const svelteImport = slotted
+    ? "import { createCalendarComponents, formatIso, useNow } from '@midstem/chronous-svelte'"
+    : "import { createCalendarComponents, useNow } from '@midstem/chronous-svelte'"
+  const svelteTypeImport = slotted
+    ? 'CalendarRange, EventInput, IsoDateTime'
+    : 'CalendarRange, EventInput'
   const rangeLines = Object.entries(range)
     .map(
       ([key, value]) =>
@@ -164,24 +155,23 @@ export const snippetOf = (
   return [
     '<script lang="ts">',
     "  import 'temporal-polyfill/global'",
-    "  import { createCalendarComponents, formatIso, useNow } from '@midstem/chronous-svelte'",
-    `  import type { CalendarRange, EventInput, IsoDateTime${plain ? '' : ', ViewKind'} } from '@midstem/chronous-svelte'`,
+    `  ${svelteImport}`,
+    `  import type { ${svelteTypeImport} } from '@midstem/chronous-svelte'`,
     '',
     '  type EventData = { title?: string }',
     '  const C = createCalendarComponents<EventData>()',
     `  const locale = ${quote(locale)}`,
-    '  const clock = (at: IsoDateTime): string => {',
-    '    try {',
-    '      return formatIso(at, { locale, options: { hour: "2-digit", minute: "2-digit" } })',
-    '    } catch {',
-    '      return at',
-    '    }',
-    '  }',
-    ...(plain
-      ? []
-      : [
-          "  const views: ViewKind[] = ['day', 'week', 'days', 'month', 'agenda']"
-        ]),
+    ...(slotted
+      ? [
+          '  const clock = (at: IsoDateTime): string => {',
+          '    try {',
+          '      return formatIso(at, { locale, options: { hour: "2-digit", minute: "2-digit" } })',
+          '    } catch {',
+          '      return at',
+          '    }',
+          '  }'
+        ]
+      : []),
     '  const initialRange: CalendarRange = {',
     rangeLines,
     '  }',

@@ -21,19 +21,44 @@ const events = [
 ] as EventInput<EventData>[]
 
 const locale = "en-GB' ; throw new Error('bad')"
-const generated = snippetOf(range, events, locale, 60)
+const generatedOf = (view: CalendarRange['view']): string =>
+  snippetOf({ ...range, view }, events, locale, 60)
 
 describe('React copyable snippet', () => {
-  it('keeps all view renderers reactive and serializes user strings safely', () => {
-    expect(generated).toContain('SLOTTED_VIEWS.includes(range.view)')
-    expect(generated).toContain('range.view === "month"')
-    expect(generated).toContain('<Calendar.AgendaList')
-    expect(generated).toContain('event.data?.title ?? event.id')
-    expect(generated).toContain(`const LOCALE = ${JSON.stringify(locale)}`)
-    expect(generated).toContain(JSON.stringify(events[0].data?.title))
+  it('emits only the selected renderer with its required helpers', () => {
+    for (const view of ['day', 'week', 'days', 'month', 'agenda'] as const) {
+      const generated = generatedOf(view)
+      if (['day', 'week', 'days'].includes(view)) {
+        expect(generated).toContain('<Calendar.TimeGrid')
+        expect(generated).not.toContain('<Calendar.MonthGrid')
+        expect(generated).not.toContain('<Calendar.AgendaList')
+        expect(generated).toContain('const HOUR_HEIGHT = 60')
+        expect(generated).toContain('const clock =')
+      } else if (view === 'month') {
+        expect(generated).toContain('<Calendar.MonthGrid')
+        expect(generated).not.toContain('<Calendar.TimeGrid')
+        expect(generated).not.toContain('<Calendar.AgendaList')
+        expect(generated).toContain('const MONTH_LANE_HEIGHT =')
+        expect(generated).not.toContain('const HOUR_HEIGHT')
+        expect(generated).not.toContain('const clock =')
+      } else {
+        expect(generated).toContain('<Calendar.AgendaList')
+        expect(generated).not.toContain('<Calendar.TimeGrid')
+        expect(generated).not.toContain('<Calendar.MonthGrid')
+        expect(generated).not.toContain('const HOUR_HEIGHT')
+        expect(generated).not.toContain('const clock =')
+      }
+      expect(generated).not.toContain('SLOTTED_VIEWS')
+      expect(generated).not.toContain('VIEWS')
+      expect(generated).not.toContain('withView')
+      expect(generated).toContain('navigation.prev && goTo(navigation.prev)')
+      expect(generated).toContain('event.data?.title ?? event.id')
+      expect(generated).toContain(`const LOCALE = ${JSON.stringify(locale)}`)
+      expect(generated).toContain(JSON.stringify(events[0].data?.title))
+    }
   })
 
-  it('passes TypeScript semantic checking as a standalone TSX file', () => {
+  it('passes TypeScript semantic checking for every generated view', () => {
     const projectRoot = new URL('../../..', import.meta.url).pathname
     const configPath = `${projectRoot}/tsconfig.json`
     const config = ts.readConfigFile(configPath, (path) =>
@@ -48,41 +73,45 @@ describe('React copyable snippet', () => {
     const virtualPath = `${projectRoot}/src/snippet/__test__/generated-calendar.tsx`
     const isVirtualFile = (fileName: string): boolean =>
       fileName.replaceAll('\\', '/').endsWith('/generated-calendar.tsx')
-    const host = ts.createCompilerHost(parsed.options)
-    const originalFileExists = host.fileExists.bind(host)
-    const originalReadFile = host.readFile.bind(host)
-    const originalGetSourceFile = host.getSourceFile.bind(host)
-    host.fileExists = (fileName) =>
-      isVirtualFile(fileName) || originalFileExists(fileName)
-    host.readFile = (fileName) =>
-      isVirtualFile(fileName) ? generated : originalReadFile(fileName)
-    host.getSourceFile = (
-      fileName,
-      languageVersion,
-      onError,
-      shouldCreateNewSourceFile
-    ) =>
-      isVirtualFile(fileName)
-        ? ts.createSourceFile(
-            fileName,
-            generated,
-            languageVersion,
-            true,
-            ts.ScriptKind.TSX
-          )
-        : originalGetSourceFile(
-            fileName,
-            languageVersion,
-            onError,
-            shouldCreateNewSourceFile
-          )
+    for (const view of ['day', 'week', 'days', 'month', 'agenda'] as const) {
+      const generated = generatedOf(view)
+      const host = ts.createCompilerHost(parsed.options)
+      const originalFileExists = host.fileExists.bind(host)
+      const originalReadFile = host.readFile.bind(host)
+      const originalGetSourceFile = host.getSourceFile.bind(host)
+      host.fileExists = (fileName) =>
+        isVirtualFile(fileName) || originalFileExists(fileName)
+      host.readFile = (fileName) =>
+        isVirtualFile(fileName) ? generated : originalReadFile(fileName)
+      host.getSourceFile = (
+        fileName,
+        languageVersion,
+        onError,
+        shouldCreateNewSourceFile
+      ) =>
+        isVirtualFile(fileName)
+          ? ts.createSourceFile(
+              fileName,
+              generated,
+              languageVersion,
+              true,
+              ts.ScriptKind.TSX
+            )
+          : originalGetSourceFile(
+              fileName,
+              languageVersion,
+              onError,
+              shouldCreateNewSourceFile
+            )
 
-    const program = ts.createProgram([virtualPath], parsed.options, host)
-    const diagnostics = ts.getPreEmitDiagnostics(program)
-    expect(
-      diagnostics.map((item) =>
-        ts.flattenDiagnosticMessageText(item.messageText, '\n')
-      )
-    ).toEqual([])
+      const program = ts.createProgram([virtualPath], parsed.options, host)
+      const diagnostics = ts.getPreEmitDiagnostics(program)
+      expect(
+        diagnostics.map((item) =>
+          ts.flattenDiagnosticMessageText(item.messageText, '\n')
+        ),
+        view
+      ).toEqual([])
+    }
   })
 })

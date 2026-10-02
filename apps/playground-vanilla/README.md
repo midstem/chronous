@@ -11,9 +11,10 @@ summary of the `CalendarLayout`, and opens onto its raw JSON.
 
 **Code** is that same board as one file. It carries the range, the events and
 the row height on screen, and the same Tailwind classes, the same geometry and the
-same standard DOM rendering the board runs — including the scroll to 07:00 and the current-time
-line. The full example includes all five views, so its navigation keeps working
-after you copy it. The generated file is plain JavaScript.
+same standard DOM rendering the board runs. Slotted views include the scroll to
+07:00 and the current-time line. The generated file is plain JavaScript and
+contains only the selected view’s renderer. Its navigation moves through dates
+while keeping that view.
 
 **Simple** starts with the range, the events, and small rendering functions
 that walk the `CalendarLayout` and lay it out in the DOM. It uses a compact,

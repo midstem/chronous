@@ -3,6 +3,7 @@ import type {
   EventInput,
   LocaleId
 } from '@midstem/chronous-angular'
+import { SLOTTED_VIEWS } from '@midstem/playground-core'
 import type { EventData } from '@midstem/playground-core'
 
 import { AGENDA_BODY } from './agenda'
@@ -11,20 +12,39 @@ import { preambleOf } from './preamble'
 import { FULL_CLOSING, OPENING } from './shell'
 import { SLOTTED_BODY, slottedHelpers } from './slotted'
 
-const helpers = (hourHeight: number): readonly string[] => [
-  ...slottedHelpers(hourHeight),
-  ...MONTH_HELPERS
-]
-
-const body: readonly string[] = [
-  '        @if (range().view === "month") {',
-  ...MONTH_BODY,
-  '        } @else if (range().view === "agenda") {',
-  ...AGENDA_BODY,
-  '        } @else {',
-  ...SLOTTED_BODY,
-  '        }'
-]
+const rendererOf = (
+  view: CalendarRange['view'],
+  hourHeight: number
+): {
+  body: readonly string[]
+  helpers: readonly string[]
+  clock: boolean
+  today: boolean
+  month: boolean
+} =>
+  SLOTTED_VIEWS.includes(view)
+    ? {
+        body: SLOTTED_BODY,
+        helpers: slottedHelpers(hourHeight),
+        clock: true,
+        today: false,
+        month: false
+      }
+    : view === 'month'
+      ? {
+          body: MONTH_BODY,
+          helpers: MONTH_HELPERS,
+          clock: false,
+          today: true,
+          month: true
+        }
+      : {
+          body: AGENDA_BODY,
+          helpers: [],
+          clock: false,
+          today: true,
+          month: false
+        }
 
 export const snippetOf = (
   range: CalendarRange,
@@ -32,11 +52,12 @@ export const snippetOf = (
   locale: LocaleId,
   hourHeight: number
 ): string => {
+  const renderer = rendererOf(range.view, hourHeight)
   return [
-    ...preambleOf(range, events, locale),
-    ...helpers(hourHeight),
+    ...preambleOf(range, events, locale, renderer.clock, renderer.today),
+    ...renderer.helpers,
     ...OPENING,
-    ...body,
-    ...FULL_CLOSING
+    ...renderer.body,
+    ...FULL_CLOSING(renderer)
   ].join('\n')
 }

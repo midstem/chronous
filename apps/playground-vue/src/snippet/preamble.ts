@@ -6,6 +6,7 @@ import { RANGE_INDENT } from './constants'
 
 export type Needs = {
   clock: boolean
+  today: boolean
 }
 
 const literal = (value: unknown): string =>
@@ -23,10 +24,10 @@ const importsOf = (needs: Needs): readonly string[] => [
   '<script setup lang="ts">',
   "import 'temporal-polyfill/global'",
   "import { ref } from 'vue'",
-  "import { Calendar, formatIso, useNow } from '@midstem/chronous-vue'",
+  `import { Calendar${needs.clock ? ', formatIso' : ''}${needs.today ? ', useNow' : ''} } from '@midstem/chronous-vue'`,
   needs.clock
-    ? "import type { CalendarRange, EventInput, IsoDateTime, ViewKind } from '@midstem/chronous-vue'"
-    : "import type { CalendarRange, EventInput, ViewKind } from '@midstem/chronous-vue'"
+    ? "import type { CalendarRange, EventInput, IsoDateTime } from '@midstem/chronous-vue'"
+    : "import type { CalendarRange, EventInput } from '@midstem/chronous-vue'"
 ]
 
 const CLOCK: readonly string[] = [
@@ -55,8 +56,6 @@ export const preambleOf = (
   '',
   `const LOCALE = ${literal(locale)}`,
   '',
-  "const VIEWS: ViewKind[] = ['day', 'week', 'days', 'month', 'agenda']",
-  '',
   ...(needs.clock ? CLOCK : []),
   'const INITIAL_RANGE: CalendarRange = {',
   rangeLines(range),
@@ -65,6 +64,6 @@ export const preambleOf = (
   `const EVENTS: EventInput<EventData>[] = ${eventLines(events)}`,
   '',
   'const range = ref<CalendarRange>(INITIAL_RANGE)',
-  'const today = useNow(() => range.value.timeZone)',
+  ...(needs.today ? ['const today = useNow(() => range.value.timeZone)'] : []),
   ''
 ]

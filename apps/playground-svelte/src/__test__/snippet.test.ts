@@ -24,9 +24,13 @@ const locale = "en-GB' ; throw new Error('bad')"
 const generated = snippetOf(range, events, locale, 60)
 
 describe('Svelte copyable snippet', () => {
-  it('keeps all view renderers reactive and serializes user strings safely', () => {
-    expect(generated).toContain("{:else if range.view === 'month'}")
-    expect(generated).toContain('<C.AgendaList')
+  it('generates only the selected renderer and serializes user strings safely', () => {
+    expect(generated).toContain('<C.TimeGrid')
+    expect(generated).not.toContain('<C.MonthGrid')
+    expect(generated).not.toContain('<C.AgendaList')
+    expect(generated).not.toContain('range.view')
+    expect(generated).not.toContain('ViewKind')
+    expect(generated).not.toContain('const views')
     expect(generated).toContain('event.data?.title ?? event.id')
     expect(generated).toContain(`const locale = ${JSON.stringify(locale)}`)
     expect(generated).toContain(
@@ -44,7 +48,7 @@ describe('Svelte copyable snippet', () => {
     ).toEqual([])
   })
 
-  it('compiles every view in both full and simple styles', () => {
+  it('compiles only the selected renderer for every view and style', () => {
     for (const view of ['day', 'week', 'days', 'month', 'agenda'] as const) {
       for (const style of [
         'default',
@@ -56,6 +60,35 @@ describe('Svelte copyable snippet', () => {
           generate: 'client'
         })
         expect(result.warnings).toEqual([])
+        expect(source).not.toContain('range.view')
+        expect(source).not.toContain('ViewKind')
+        expect(source).not.toContain('const views')
+        expect(source).not.toContain('@midstem/playground-core')
+        if (view === 'month') {
+          expect(source).toContain('<C.MonthGrid')
+          expect(source).not.toContain('<C.TimeGrid')
+          expect(source).not.toContain('<C.AgendaList')
+          expect(source).not.toContain('formatIso')
+        } else if (view === 'agenda') {
+          expect(source).toContain('<C.AgendaList')
+          expect(source).not.toContain('<C.TimeGrid')
+          expect(source).not.toContain('<C.MonthGrid')
+          expect(source).not.toContain('formatIso')
+        } else {
+          expect(source).toContain('<C.TimeGrid')
+          expect(source).not.toContain('<C.MonthGrid')
+          expect(source).not.toContain('<C.AgendaList')
+          expect(source).toContain('formatIso')
+        }
+        if (style === 'default') {
+          expect(source).toContain('<C.Toolbar')
+          expect(source).toContain('navigation.prev')
+          expect(source).toContain('navigation.today')
+          expect(source).toContain('navigation.next')
+        } else {
+          expect(source).not.toContain('<C.Toolbar')
+        }
+        expect(source).not.toContain('navigation.withView')
       }
     }
   })
