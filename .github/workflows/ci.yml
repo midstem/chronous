@@ -40,3 +40,29 @@ jobs:
 
       - name: Build the playgrounds
         run: npm run build --workspace @midstem/chronous-playground-react && npm run build --workspace @midstem/chronous-playground-angular && npm run build --workspace @midstem/chronous-playground-vue && npm run build --workspace @midstem/chronous-playground-svelte && npm run build --workspace @midstem/chronous-playground-vanilla
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.x
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build the packages
+        run: npm run build
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+

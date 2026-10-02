@@ -19,7 +19,9 @@ export const DayColumnProvider = defineComponent({
     }
   },
   setup(props, { slots }) {
-    provideDayColumnContext(props.value)
+    provideDayColumnContext({
+      day: computed(() => props.value.day.value)
+    })
     return () => slots.default?.()
   }
 })
