@@ -34,6 +34,7 @@ runs, how the benchmarks are read and how a release is cut.
 | `packages/vue`             | `@midstem/chronous-vue` — composables and components         |
 | `packages/svelte`          | `@midstem/chronous-svelte` — reactive helpers and components |
 | `packages/playground-core` | `@midstem/playground-core` — shared playground logic         |
+| `apps/playground-vanilla`  | Vanilla JS playground                                        |
 | `apps/playground-react`    | React playground                                             |
 | `apps/playground-angular`  | Angular playground                                           |
 | `apps/playground-vue`      | Vue playground                                               |
@@ -44,10 +45,11 @@ runs, how the benchmarks are read and how a release is cut.
 ```bash
 npm install
 npm run build
+npm run start:vanilla
 npm run start
 ```
 
-`apps/playground-react`, `apps/playground-angular`, `apps/playground-vue`, and `apps/playground-svelte` consume the packages by name,
+`apps/playground-vanilla`, `apps/playground-react`, `apps/playground-angular`, `apps/playground-vue`, and `apps/playground-svelte` consume the packages by name,
 so they resolve the built output the way an outside consumer would — which is why
 `npm run build` comes first, and why CI builds before it lints or typechecks.
 
@@ -91,6 +93,7 @@ transform would silently leave every input unbound.
 
 ## Playground
 
+[`apps/playground-vanilla`](apps/playground-vanilla) (Vanilla JS),
 [`apps/playground-react`](apps/playground-react) (React),
 [`apps/playground-angular`](apps/playground-angular) (Angular),
 [`apps/playground-vue`](apps/playground-vue) (Vue), and
@@ -103,6 +106,7 @@ in full, or stripped down to the shortest thing that still draws a calendar. It
 carries a light and a dark theme.
 
 ```bash
+npm run start:vanilla # starts Vanilla JS playground
 npm run start         # starts React playground
 npm run start:angular # starts Angular playground
 npm run start:vue     # starts Vue playground

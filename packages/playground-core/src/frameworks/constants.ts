@@ -10,7 +10,8 @@ export const PLAYGROUND_FRAMEWORKS: readonly FrameworkOption[] = [
   { id: 'react', title: 'React', packageName: '@midstem/chronous-react' },
   { id: 'angular', title: 'Angular', packageName: '@midstem/chronous-angular' },
   { id: 'vue', title: 'Vue', packageName: '@midstem/chronous-vue' },
-  { id: 'svelte', title: 'Svelte', packageName: '@midstem/chronous-svelte' }
+  { id: 'svelte', title: 'Svelte', packageName: '@midstem/chronous-svelte' },
+  { id: 'vanilla', title: 'Vanilla JS', packageName: '@midstem/chronous' }
 ]
 
 export const FRAMEWORK_LOGOS: Record<PlaygroundFramework, FrameworkLogoData> = {
@@ -20,7 +21,7 @@ export const FRAMEWORK_LOGOS: Record<PlaygroundFramework, FrameworkLogoData> = {
   },
   react: {
     viewBox: '0 0 118 103',
-    svg: '<g fill="none" fill-rule="evenodd"><circle cx="59" cy="51.5" r="10.8" fill="#61DAFB"/><ellipse cx="59" cy="51.5" rx="59" ry="22.9" stroke="#61DAFB" stroke-width="4.5"/><ellipse cx="59" cy="51.5" rx="59" ry="22.9" stroke="#61DAFB" stroke-width="4.5" transform="rotate(60 59 51.5)"/><ellipse cx="59" cy="51.5" rx="59" ry="22.9" stroke="#61DAFB" stroke-width="4.5" transform="rotate(120 59 51.5)"/></g>'
+    svg: '<g fill="none" fillRule="evenodd"><circle cx="59" cy="51.5" r="10.8" fill="#61DAFB"/><ellipse cx="59" cy="51.5" rx="59" ry="22.9" stroke="#61DAFB" strokeWidth="4.5"/><ellipse cx="59" cy="51.5" rx="59" ry="22.9" stroke="#61DAFB" strokeWidth="4.5" transform="rotate(60 59 51.5)"/><ellipse cx="59" cy="51.5" rx="59" ry="22.9" stroke="#61DAFB" strokeWidth="4.5" transform="rotate(120 59 51.5)"/></g>'
   },
   vue: {
     viewBox: '0 0 128 128',
@@ -29,5 +30,9 @@ export const FRAMEWORK_LOGOS: Record<PlaygroundFramework, FrameworkLogoData> = {
   angular: {
     viewBox: '0 0 250 250',
     svg: '<path fill="#dd0031" d="M125 30L31.9 63.2l14.2 123.1L125 230l78.9-43.7 14.2-123.1z"/><path fill="#c3002f" d="M125 30v22.2-.1V230l78.9-43.7 14.2-123.1z"/><path fill="#fff" d="M125 52.1L66.8 182.6h21.7l11.7-29.2h49.4l11.7 29.2H183zm17 83.3h-34l17-40.9z"/>'
+  },
+  vanilla: {
+    viewBox: '0 0 128 128',
+    svg: '<rect width="128" height="128" fill="#f7df1e"/><path fill="#000000" d="m85.98 99.99c2.58 4.21 5.93 7.31 11.87 7.31 4.99 0 8.17-2.49 8.17-5.93 0-4.13-3.27-5.59-8.76-7.99l-3.01-1.29c-8.68-3.7-14.45-8.34-14.45-18.13 0-9.03 6.88-15.89 17.62-15.89 7.65 0 13.15 2.66 17.11 9.63l-9.37 6.02c-2.06-3.7-4.29-5.16-7.74-5.16-3.52 0-5.76 2.24-5.76 5.16 0 3.61 2.24 5.07 7.4 7.31l3.01 1.29c10.22 4.38 15.99 8.85 15.99 18.9 0 10.83-8.51 16.77-19.93 16.77-11.17 0-18.39-5.32-21.66-12.37zm-42.67 1.12c-2.41 1.29-5.5 2.06-8.85 2.06-8.77 0-14.44-4.38-14.44-13.75v-38.45h12.03v37.5c0 4.9 1.89 7.22 5.84 7.22 3.18 0 5.42-.86 7.22-1.89v9.34z"/>'
   }
 }
