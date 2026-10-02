@@ -4,6 +4,7 @@ const BUTTON =
 export const OPENING: readonly string[] = [
   'export const Board = () => {',
   '  const [range, setRange] = useState<CalendarRange>(INITIAL_RANGE)',
+  '  const today = useNow(range.timeZone)?.date ?? null',
   '',
   '  return (',
   '    <Calendar.Root',

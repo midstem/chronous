@@ -12,13 +12,12 @@ summary of the `CalendarLayout`, and opens onto its raw JSON.
 **Code** is that same board as one file. It carries the range, the events and
 the row height on screen, and the same Tailwind classes, the same geometry and the
 same standard DOM rendering the board runs — including the scroll to 07:00 and the current-time
-line. The three shapes the engine draws each get their own version, so the file
-follows the view you were looking at.
+line. The full example includes all five views, so its navigation keeps working
+after you copy it. The generated file is plain JavaScript.
 
-**Simple** is the short way to the same picture: no toolbar, no navigation, no
-colour palette, no helper functions — the range, the events, and a clean function
-that walks the `CalendarLayout` and lays it out in the DOM. Under half the lines of the full
-version, and the place to start reading.
+**Simple** starts with the range, the events, and small rendering functions
+that walk the `CalendarLayout` and lay it out in the DOM. It uses a compact,
+neutral style without a toolbar or navigation, and is the place to start reading.
 
 The board is styled with Tailwind CSS v4. Colours are design tokens resolved
 with `light-dark()`, so the page follows the operating system and the toggle in
@@ -39,5 +38,12 @@ npm run dev --workspace @midstem/chronous-playground-vanilla
 
 The app imports `temporal-polyfill/global` from its entry module before the first
 render, showing how a consumer supplies Temporal on browsers without native support.
+
+To use the copied example, install `@midstem/chronous` and `temporal-polyfill` in
+an app that supports ES module imports. Include Tailwind CSS v4 and let it scan
+the copied file. Provide a `#root` element with a height (for example,
+`height: 100dvh`), then import `calendar.js` from your entry module. The snippet
+includes its current range, event data and row height; it does not depend on
+the playground's internal modules or design tokens.
 
 The app is private and is never published to npm.

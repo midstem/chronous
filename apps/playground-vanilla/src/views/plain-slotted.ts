@@ -11,9 +11,9 @@ import {
 } from '@midstem/playground-core'
 import type { EventData } from '@midstem/playground-core'
 
-import { minutePercentOf, percentOf } from './helpers'
+import { escapeHtml, minutePercentOf, percentOf } from './helpers'
 
-const LANE_HEIGHT = 20
+const LANE_HEIGHT = 24
 
 export const renderPlainSlotted = (
   calendar: CalendarLayout<EventData>,
@@ -55,10 +55,12 @@ export const renderPlainSlotted = (
         <div style="grid-column: 2 / -1; position: relative; height: ${lanes * LANE_HEIGHT}px;">
           ${row.bars
             .map((bar) => {
-              const title = bar.event.data?.title ?? bar.event.id
+              const title = escapeHtml(
+                String(bar.event.data?.title ?? bar.event.id)
+              )
               return `
             <div
-              data-event-id="${bar.event.id}"
+              data-event-id="${escapeHtml(bar.event.id)}"
               data-continues-before="${bar.continuesBefore}"
               data-continues-after="${bar.continuesAfter}"
               class="truncate rounded bg-event-all-day px-2 text-[11px] leading-6 text-event-all-day-ink"
@@ -102,11 +104,13 @@ export const renderPlainSlotted = (
 
       const boxesHtml = day.boxes
         .map((box) => {
-          const title = box.event.data?.title ?? box.event.id
+          const title = escapeHtml(
+            String(box.event.data?.title ?? box.event.id)
+          )
 
           return `
           <div
-            data-event-id="${box.event.id}"
+            data-event-id="${escapeHtml(box.event.id)}"
             data-continues-before="${box.continuesBefore}"
             data-continues-after="${box.continuesAfter}"
             class="truncate rounded-md bg-event-timed px-1.5 text-[11px] leading-[1.35] font-medium text-event-timed-ink"

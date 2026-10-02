@@ -5,10 +5,6 @@ export const SNIPPET_HINT =
 
 export const RANGE_INDENT = '  '
 
-export const KEY_PATTERN = /"([A-Za-z][\w]*)":/g
-
-export const KEY_REPLACEMENT = '$1:'
-
 export const badgeOf = (
   view: string,
   hourHeight: number,

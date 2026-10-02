@@ -1,16 +1,12 @@
-export const FILE_NAME = 'calendar.ts'
+export const FILE_NAME = 'calendar.js'
 
 export const SNIPPET_HINT =
-  'The board on the Calendar tab, as one file: the same range, the same events and the same row height, built with buildCalendar and rendered with standard DOM. Install @midstem/chronous, paste, run.'
+  'Runnable JavaScript module: install @midstem/chronous and temporal-polyfill, load Tailwind CSS v4, add #root, then paste and run. The module sizes #root to the viewport.'
 
 export const SIMPLE_HINT =
-  'The same calendar, built with buildCalendar and plain DOM: no palette, no helper functions, no toolbar. The place to start reading.'
+  'A short JavaScript example that builds the same view and shows timed and all-day events with plain DOM. It sizes #root to the viewport.'
 
 export const RANGE_INDENT = '  '
-
-export const KEY_PATTERN = /"([A-Za-z][\w]*)":/g
-
-export const KEY_REPLACEMENT = '$1:'
 
 export const badgeOf = (
   view: string,

@@ -13,6 +13,22 @@ export type CalendarNow = {
   minuteOfDay: number
 }
 
+export const escapeHtml = (value: string): string =>
+  value.replace(/[&<>"']/g, (character) => {
+    switch (character) {
+      case '&':
+        return '&amp;'
+      case '<':
+        return '&lt;'
+      case '>':
+        return '&gt;'
+      case '"':
+        return '&quot;'
+      default:
+        return '&#39;'
+    }
+  })
+
 const PARTS_LOCALE = 'en-US'
 const MINUTES_IN_DAY = 1440
 const PERCENT = 100

@@ -10,7 +10,7 @@ import {
 } from '@midstem/playground-core'
 import type { EventData } from '@midstem/playground-core'
 
-import { barsByDay } from './helpers'
+import { barsByDay, escapeHtml } from './helpers'
 
 const numberClass = (isToday: boolean): string =>
   isToday
@@ -36,7 +36,9 @@ export const renderAgenda = (
 
       const allDayEventsHtml = bars
         .map((bar) => {
-          const title = bar.event.data?.title ?? bar.event.id
+          const title = escapeHtml(
+            String(bar.event.data?.title ?? bar.event.id)
+          )
           return `
           <span class="flex items-center gap-2 text-[13px]">
             <span class="size-2 shrink-0 rounded-full ${dotOf(bar.event.id)}"></span>
@@ -48,7 +50,9 @@ export const renderAgenda = (
 
       const timedEventsHtml = boxes
         .map((box) => {
-          const title = box.event.data?.title ?? box.event.id
+          const title = escapeHtml(
+            String(box.event.data?.title ?? box.event.id)
+          )
           const timeRangeLabel = `${formatTime(box.start, locale)} – ${formatTime(box.end, locale)}`
           return `
           <span class="flex items-center gap-2 text-[13px]">

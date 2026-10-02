@@ -5,6 +5,7 @@ import {
   TOKEN_STYLES,
   highlight
 } from '@midstem/playground-core'
+import { escapeHtml } from '../views/helpers'
 
 export type CodeProps = {
   fileName: string
@@ -33,8 +34,8 @@ export const createCodeView = (props: CodeProps): HTMLElement => {
   const render = (): void => {
     container.innerHTML = `
       <header class="flex flex-wrap items-center gap-3 pb-3">
-        <h2 class="font-mono text-lg font-semibold">${props.fileName}</h2>
-        <span class="font-mono text-[11px] text-faint">${props.badge}</span>
+        <h2 class="font-mono text-lg font-semibold">${escapeHtml(props.fileName)}</h2>
+        <span class="font-mono text-[11px] text-faint">${escapeHtml(props.badge)}</span>
         <button type="button" class="ghost-button ml-auto" data-copy>
           ${copied ? COPIED_LABEL : COPY_LABEL}
         </button>
@@ -44,7 +45,7 @@ export const createCodeView = (props: CodeProps): HTMLElement => {
         <pre class="min-h-0 flex-1 overflow-auto p-4 font-mono text-xs leading-5 text-code-plain">${tokensHtml}</pre>
       </section>
 
-      <p class="pt-2 text-[11px] leading-4 text-muted">${props.hint}</p>
+      <p class="pt-2 text-[11px] leading-4 text-muted">${escapeHtml(props.hint)}</p>
     `
 
     const copyBtn = container.querySelector<HTMLButtonElement>('[data-copy]')

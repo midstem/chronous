@@ -7,6 +7,7 @@ import {
   DISAMBIGUATION_OPTIONS,
   EVENTS_HINT,
   LOCALE_HINT,
+  LOCALES,
   LOCALE_OPTIONS,
   PRESET_HINT,
   PRESET_OPTIONS,
@@ -27,6 +28,7 @@ import {
 import type { PresetId, Style, TabId } from '@midstem/playground-core'
 
 import type { PlaygroundStore } from '../playground'
+import { escapeHtml } from '../views/helpers'
 
 const renderPanel = (title: string, badge: string, content: string): string => `
   <section class="panel">
@@ -45,8 +47,33 @@ export const createSidebar = (store: PlaygroundStore): HTMLElement => {
   aside.className = 'flex min-h-0 flex-col border-r border-line bg-raised'
 
   let activeTab: TabId = DEFAULT_TAB
+  let customTimeZone = !ZONES.includes(store.getState().timeZone)
+  let customLocale = !LOCALES.includes(store.getState().locale)
 
   const render = (): void => {
+    const focused = aside.contains(document.activeElement)
+      ? (document.activeElement as HTMLElement)
+      : null
+    const focusTarget = focused?.hasAttribute('data-events-textarea')
+      ? { type: 'events' as const }
+      : focused?.dataset.field
+        ? { type: 'field' as const, key: focused.dataset.field }
+        : focused?.dataset.choice
+          ? { type: 'choice' as const, key: focused.dataset.choice }
+          : focused?.dataset.customField
+            ? { type: 'custom' as const, key: focused.dataset.customField }
+            : null
+    const selection =
+      focused instanceof HTMLTextAreaElement ||
+      (focused instanceof HTMLInputElement && focused.type === 'text')
+        ? {
+            start: focused.selectionStart,
+            end: focused.selectionEnd,
+            direction: focused.selectionDirection
+          }
+        : null
+    const previousScrollTop =
+      aside.querySelector<HTMLElement>('[data-controls]')?.scrollTop ?? 0
     const state = store.getState()
     const events = store.getEvents()
     const source = store.getSource()
@@ -142,17 +169,11 @@ export const createSidebar = (store: PlaygroundStore): HTMLElement => {
 
               <div class="field-frame">
                 <label class="field-label" for="field-timezone">timeZone</label>
-                <input
-                  id="field-timezone"
-                  list="zones-list"
-                  type="text"
-                  class="field-control"
-                  data-field="timeZone"
-                  value="${state.timeZone}"
-                />
-                <datalist id="zones-list">
-                  ${ZONES.map((z) => `<option value="${z}"></option>`).join('')}
-                </datalist>
+                <select id="field-timezone" class="field-control" data-choice="timeZone" aria-label="timeZone common values">
+                  ${ZONES.map((zone) => `<option value="${zone}" ${!customTimeZone && zone === state.timeZone ? 'selected' : ''}>${zone}</option>`).join('')}
+                  <option value="__custom__" ${customTimeZone ? 'selected' : ''}>Custom value…</option>
+                </select>
+                ${customTimeZone ? `<input class="field-control" type="text" data-custom-field="timeZone" aria-label="timeZone custom value" placeholder="Enter timeZone" value="${escapeHtml(state.timeZone)}" />` : ''}
                 <span class="field-hint">${TIME_ZONE_HINT}</span>
               </div>
 
@@ -175,7 +196,7 @@ export const createSidebar = (store: PlaygroundStore): HTMLElement => {
                   class="field-control"
                   data-field="dayCount"
                   placeholder="unset"
-                  value="${state.dayCount === UNSET ? '' : state.dayCount}"
+                  value="${escapeHtml(state.dayCount === UNSET ? '' : state.dayCount)}"
                 />
                 <span class="field-hint">${DAY_COUNT_HINT}</span>
               </div>
@@ -188,7 +209,7 @@ export const createSidebar = (store: PlaygroundStore): HTMLElement => {
                   class="field-control"
                   data-field="slotMinutes"
                   placeholder="unset"
-                  value="${state.slotMinutes === UNSET ? '' : state.slotMinutes}"
+                  value="${escapeHtml(state.slotMinutes === UNSET ? '' : state.slotMinutes)}"
                 />
                 <span class="field-hint">${SLOT_MINUTES_HINT}</span>
               </div>
@@ -212,20 +233,11 @@ export const createSidebar = (store: PlaygroundStore): HTMLElement => {
               `
               <div class="field-frame">
                 <label class="field-label" for="field-locale">locale</label>
-                <input
-                  id="field-locale"
-                  list="locales-list"
-                  type="text"
-                  class="field-control"
-                  data-field="locale"
-                  value="${state.locale}"
-                />
-                <datalist id="locales-list">
-                  ${LOCALE_OPTIONS.map(
-                    (opt) =>
-                      `<option value="${opt.value}">${opt.label}</option>`
-                  ).join('')}
-                </datalist>
+                <select id="field-locale" class="field-control" data-choice="locale" aria-label="locale common values">
+                  ${LOCALES.map((locale) => `<option value="${locale}" ${!customLocale && locale === state.locale ? 'selected' : ''}>${LOCALE_OPTIONS.find((option) => option.value === locale)?.label ?? locale}</option>`).join('')}
+                  <option value="__custom__" ${customLocale ? 'selected' : ''}>Custom value…</option>
+                </select>
+                ${customLocale ? `<input class="field-control" type="text" data-custom-field="locale" aria-label="locale custom value" placeholder="Enter locale" value="${escapeHtml(state.locale)}" />` : ''}
                 <span class="field-hint">${LOCALE_HINT}</span>
               </div>
             `
@@ -243,10 +255,10 @@ export const createSidebar = (store: PlaygroundStore): HTMLElement => {
               spellcheck="false"
               rows="${ROWS}"
               data-events-textarea
-            >${source}</textarea>
+            >${escapeHtml(source)}</textarea>
             ${
               problem
-                ? `<p role="alert" class="text-[11px] leading-4 text-danger">${problem}</p>`
+                ? `<p role="alert" class="text-[11px] leading-4 text-danger">${escapeHtml(problem)}</p>`
                 : `<p class="text-[11px] leading-4 text-muted">${EVENTS_HINT}</p>`
             }
           </div>`
@@ -295,12 +307,20 @@ export const createSidebar = (store: PlaygroundStore): HTMLElement => {
         }
       })
 
-      const timeZoneInput = aside.querySelector<HTMLInputElement>(
-        '[data-field="timeZone"]'
+      const timeZoneSelect = aside.querySelector<HTMLSelectElement>(
+        '[data-choice="timeZone"]'
       )
-      timeZoneInput?.addEventListener('change', () => {
-        store.update({ timeZone: timeZoneInput.value })
+      timeZoneSelect?.addEventListener('change', () => {
+        customTimeZone = timeZoneSelect.value === '__custom__'
+        if (!customTimeZone) store.update({ timeZone: timeZoneSelect.value })
+        else render()
       })
+      aside
+        .querySelector<HTMLInputElement>('[data-custom-field="timeZone"]')
+        ?.addEventListener('input', (event) => {
+          const input = event.currentTarget as HTMLInputElement
+          store.update({ timeZone: input.value })
+        })
 
       const weekStartsOnSelect = aside.querySelector<HTMLSelectElement>(
         '[data-field="weekStartsOn"]'
@@ -330,12 +350,20 @@ export const createSidebar = (store: PlaygroundStore): HTMLElement => {
         store.update({ disambiguation: disambiguationSelect.value })
       })
 
-      const localeInput = aside.querySelector<HTMLInputElement>(
-        '[data-field="locale"]'
+      const localeSelect = aside.querySelector<HTMLSelectElement>(
+        '[data-choice="locale"]'
       )
-      localeInput?.addEventListener('change', () => {
-        store.update({ locale: localeInput.value })
+      localeSelect?.addEventListener('change', () => {
+        customLocale = localeSelect.value === '__custom__'
+        if (!customLocale) store.update({ locale: localeSelect.value })
+        else render()
       })
+      aside
+        .querySelector<HTMLInputElement>('[data-custom-field="locale"]')
+        ?.addEventListener('input', (event) => {
+          const input = event.currentTarget as HTMLInputElement
+          store.update({ locale: input.value })
+        })
     } else {
       const textarea = aside.querySelector<HTMLTextAreaElement>(
         '[data-events-textarea]'
@@ -344,10 +372,40 @@ export const createSidebar = (store: PlaygroundStore): HTMLElement => {
         store.changeSource(textarea.value)
       })
     }
+    if (focusTarget) {
+      const selector =
+        focusTarget.type === 'events'
+          ? '[data-events-textarea]'
+          : `[data-${focusTarget.type === 'custom' ? 'custom-field' : focusTarget.type}="${focusTarget.key}"]`
+      const next = aside.querySelector<HTMLElement>(selector)
+      next?.focus()
+      if (
+        selection &&
+        selection.start !== null &&
+        selection.end !== null &&
+        (next instanceof HTMLTextAreaElement ||
+          (next instanceof HTMLInputElement && next.type === 'text'))
+      ) {
+        next.setSelectionRange(
+          selection.start,
+          selection.end,
+          selection.direction ?? undefined
+        )
+      }
+    }
+    const controls = aside.querySelector<HTMLElement>('[data-controls]')
+    if (controls) controls.scrollTop = previousScrollTop
   }
 
   render()
-  store.subscribe(render)
+  store.subscribe((reason) => {
+    if (reason === 'preset' || reason === 'reset') {
+      const state = store.getState()
+      customTimeZone = !ZONES.includes(state.timeZone)
+      customLocale = !LOCALES.includes(state.locale)
+    }
+    render()
+  })
 
   return aside
 }

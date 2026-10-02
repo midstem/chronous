@@ -14,7 +14,7 @@ export const SLOTTED_BODY: readonly string[] = [
   '        gutterCell={<span className="pl-2 text-[10px] text-slate-400">all-day</span>}',
   '      >',
   '        <Calendar.AllDayEvents className="truncate rounded bg-blue-700 px-2 text-[11px] leading-6 text-white dark:bg-blue-300 dark:text-slate-950">',
-  '          {({ event }) => event.data?.title}',
+  '          {({ event }) => event.data?.title ?? event.id}',
   '        </Calendar.AllDayEvents>',
   '      </Calendar.AllDayRow>',
   '    </div>',
@@ -28,7 +28,7 @@ export const SLOTTED_BODY: readonly string[] = [
   '        <Calendar.TimeSlots className="border-t border-slate-100 dark:border-white/5" />',
   '',
   '        <Calendar.TimedEvents className="truncate rounded-md bg-violet-700 px-1.5 text-[11px] leading-[1.35] font-medium text-white dark:bg-violet-400 dark:text-slate-950">',
-  '          {({ event }) => event.data?.title}',
+  '          {({ event }) => event.data?.title ?? event.id}',
   '        </Calendar.TimedEvents>',
   '      </Calendar.DayColumns>',
   '    </Calendar.TimeGrid>'

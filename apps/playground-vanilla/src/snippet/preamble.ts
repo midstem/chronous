@@ -2,14 +2,23 @@ import type { CalendarRange, EventInput, LocaleId } from '@midstem/chronous'
 import { JSON_INDENT } from '@midstem/playground-core'
 import type { EventData } from '@midstem/playground-core'
 
-import { KEY_PATTERN, KEY_REPLACEMENT, RANGE_INDENT } from './constants'
+import { RANGE_INDENT } from './constants'
+
+export const ESCAPE_HTML_SOURCE = [
+  `const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => {`,
+  `  const entities = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }`,
+  '  return entities[char]',
+  '})'
+].join('\n')
+
+export const CONTINUATION_SOURCE =
+  'const edge = (continues) => continues ? "…" : ""'
 
 export type Needs = {
   clock: boolean
 }
 
-const literal = (value: unknown): string =>
-  typeof value === 'number' ? String(value) : `'${String(value)}'`
+const literal = (value: unknown): string => JSON.stringify(value)
 
 export const rangeLines = (range: CalendarRange): string =>
   Object.entries(range)
@@ -17,10 +26,7 @@ export const rangeLines = (range: CalendarRange): string =>
     .join(',\n')
 
 export const eventLines = (events: readonly EventInput<EventData>[]): string =>
-  JSON.stringify(events, null, JSON_INDENT).replace(
-    KEY_PATTERN,
-    KEY_REPLACEMENT
-  )
+  JSON.stringify(events, null, JSON_INDENT).replace(/</g, '\\u003c')
 
 export const preambleOf = (
   range: CalendarRange,
@@ -30,17 +36,14 @@ export const preambleOf = (
 ): readonly string[] => [
   "import 'temporal-polyfill/global'",
   "import { buildCalendar, formatIso, calendarReducer, initialCalendarState } from '@midstem/chronous'",
-  "import type { CalendarRange, EventInput, CalendarLayout, ViewKind, IsoDateTime } from '@midstem/chronous'",
   '',
-  'type EventData = { title: string }',
+  `const LOCALE = ${JSON.stringify(locale)}`,
   '',
-  `const LOCALE = '${locale}'`,
-  '',
-  "const VIEWS: ViewKind[] = ['day', 'week', 'days', 'month', 'agenda']",
+  "const VIEWS = ['day', 'week', 'days', 'month', 'agenda']",
   '',
   ...(needs.clock
     ? [
-        'const clock = (at: IsoDateTime): string => {',
+        'const clock = (at) => {',
         '  try {',
         '    return formatIso(at, {',
         '      locale: LOCALE,',
@@ -50,13 +53,32 @@ export const preambleOf = (
         '    return at',
         '  }',
         '}',
+        '',
+        'const getNow = (timeZone) => {',
+        '  try {',
+        '    const options = { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false, timeZone }',
+        '    const parts = Object.fromEntries(',
+        '      new Intl.DateTimeFormat("en-US", options)',
+        '        .formatToParts(new Date())',
+        '        .map(({ type, value }) => [type, value])',
+        '    )',
+        '    const hour = Number(parts.hour) % 24',
+        '    return {',
+        '      date: `${parts.year}-${parts.month}-${parts.day}`,',
+        '      minuteOfDay: hour * 60 + Number(parts.minute)',
+        '    }',
+        '  } catch { return null }',
+        '}',
         ''
       ]
     : []),
-  'const INITIAL_RANGE: CalendarRange = {',
+  ESCAPE_HTML_SOURCE,
+  CONTINUATION_SOURCE,
+  '',
+  'const INITIAL_RANGE = {',
   rangeLines(range),
   '}',
   '',
-  `const EVENTS: EventInput<EventData>[] = ${eventLines(events)}`,
+  `const EVENTS = ${eventLines(events)}`,
   ''
 ]

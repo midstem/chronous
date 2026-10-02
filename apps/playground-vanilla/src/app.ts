@@ -31,8 +31,10 @@ export const createApp = (
   const updateMainView = (): void => {
     main.innerHTML = ''
     if (store.getMode() === 'calendar') {
-      main.appendChild(board)
+      board.setActive(true)
+      main.appendChild(board.element)
     } else {
+      board.setActive(false)
       main.appendChild(snippet)
     }
   }

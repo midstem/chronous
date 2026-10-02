@@ -6,7 +6,7 @@ import {
 } from '@midstem/playground-core'
 import type { EventData } from '@midstem/playground-core'
 
-import { barsByDay } from './helpers'
+import { barsByDay, escapeHtml } from './helpers'
 
 export const renderPlainAgenda = (
   calendar: CalendarLayout<EventData>,
@@ -24,14 +24,18 @@ export const renderPlainAgenda = (
 
       const allDayEventsHtml = bars
         .map((bar) => {
-          const title = bar.event.data?.title ?? bar.event.id
+          const title = escapeHtml(
+            String(bar.event.data?.title ?? bar.event.id)
+          )
           return `<span class="text-[13px]">${title} · all-day</span>`
         })
         .join('')
 
       const timedEventsHtml = boxes
         .map((box) => {
-          const title = box.event.data?.title ?? box.event.id
+          const title = escapeHtml(
+            String(box.event.data?.title ?? box.event.id)
+          )
           const timeRangeLabel = `${formatTime(box.start, locale)} – ${formatTime(box.end, locale)}`
           return `<span class="text-[13px]">${title} · ${timeRangeLabel}</span>`
         })

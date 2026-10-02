@@ -1,10 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type {
-  CalendarRange,
-  EventInput,
-  LocaleId
-} from '@midstem/chronous-vue'
+import type { CalendarRange, EventInput, LocaleId } from '@midstem/chronous-vue'
 import { isSimple } from '@midstem/playground-core'
 import type { EventData, Style } from '@midstem/playground-core'
 
@@ -51,10 +47,5 @@ const source = computed(() =>
 </script>
 
 <template>
-  <Code
-    :file-name="FILE_NAME"
-    :badge="badge"
-    :hint="hint"
-    :source="source"
-  />
+  <Code :file-name="FILE_NAME" :badge="badge" :hint="hint" :source="source" />
 </template>

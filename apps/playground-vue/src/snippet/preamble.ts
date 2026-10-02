@@ -2,14 +2,14 @@ import type { CalendarRange, EventInput, LocaleId } from '@midstem/chronous-vue'
 import { JSON_INDENT } from '@midstem/playground-core'
 import type { EventData } from '@midstem/playground-core'
 
-import { KEY_PATTERN, KEY_REPLACEMENT, RANGE_INDENT } from './constants'
+import { RANGE_INDENT } from './constants'
 
 export type Needs = {
   clock: boolean
 }
 
 const literal = (value: unknown): string =>
-  typeof value === 'number' ? String(value) : `'${String(value)}'`
+  JSON.stringify(value).replace(/</g, '\\u003c')
 
 export const rangeLines = (range: CalendarRange): string =>
   Object.entries(range)
@@ -17,17 +17,13 @@ export const rangeLines = (range: CalendarRange): string =>
     .join(',\n')
 
 export const eventLines = (events: readonly EventInput<EventData>[]): string =>
-  JSON.stringify(events, null, JSON_INDENT).replace(
-    KEY_PATTERN,
-    KEY_REPLACEMENT
-  )
+  JSON.stringify(events, null, JSON_INDENT).replace(/</g, '\\u003c')
 
 const importsOf = (needs: Needs): readonly string[] => [
   '<script setup lang="ts">',
+  "import 'temporal-polyfill/global'",
   "import { ref } from 'vue'",
-  needs.clock
-    ? "import { Calendar, createCalendarComponents, formatIso } from '@midstem/chronous-vue'"
-    : "import { Calendar, createCalendarComponents } from '@midstem/chronous-vue'",
+  "import { Calendar, formatIso, useNow } from '@midstem/chronous-vue'",
   needs.clock
     ? "import type { CalendarRange, EventInput, IsoDateTime, ViewKind } from '@midstem/chronous-vue'"
     : "import type { CalendarRange, EventInput, ViewKind } from '@midstem/chronous-vue'"
@@ -55,11 +51,9 @@ export const preambleOf = (
 ): readonly string[] => [
   ...importsOf(needs),
   '',
-  'type EventData = { title: string }',
+  'type EventData = { title?: string }',
   '',
-  'const Calendar = createCalendarComponents<EventData>()',
-  '',
-  `const LOCALE = '${locale}'`,
+  `const LOCALE = ${literal(locale)}`,
   '',
   "const VIEWS: ViewKind[] = ['day', 'week', 'days', 'month', 'agenda']",
   '',
@@ -71,6 +65,6 @@ export const preambleOf = (
   `const EVENTS: EventInput<EventData>[] = ${eventLines(events)}`,
   '',
   'const range = ref<CalendarRange>(INITIAL_RANGE)',
-  '</script>',
+  'const today = useNow(() => range.value.timeZone)',
   ''
 ]
