@@ -24,18 +24,18 @@ Load the polyfill once from the application entry point before rendering:
 import 'temporal-polyfill/global'
 ```
 
-Import `CALENDAR_DIRECTIVES` into a standalone component, or import individual exported directives/components. Engine values and types are re-exported from the same package entry point.
-
-The build embeds core into the FESM2022 module and emits Angular 18 partial
-declarations for the consumer's linker. No separate core dependency is resolved
-at runtime. Use this package's error classes when catching its errors: a
-separate `@midstem/chronous` import has different class identities.
+Angular template dependencies need both a TypeScript import and registration in
+`@Component.imports`. Choose either the full `CALENDAR_DIRECTIVES` array or
+individual exported components/directives used by the template.
+`CALENDAR_DIRECTIVES` contains only components/directives; it does not include
+`formatIso`, `injectCalendar` or `injectCalendarNavigation`. Import those functions
+normally in TypeScript when calling them; do not put them in `@Component.imports`.
+Engine values and types are re-exported from the same package entry point.
 
 ```ts
 import { Component, signal } from '@angular/core'
 import {
   CALENDAR_DIRECTIVES,
-  formatIso,
   injectCalendar,
   injectCalendarNavigation
 } from '@midstem/chronous-angular'
@@ -55,6 +55,34 @@ export class ScheduleComponent {
   readonly events = signal<readonly EventInput<{ title: string }>[]>([])
   readonly calendar = injectCalendar(this.range, this.events)
   readonly navigation = injectCalendarNavigation(this.range)
+}
+```
+
+For a smaller template, import only its dependencies instead of the full array:
+
+```ts
+import { Component } from '@angular/core'
+import {
+  CalendarDirective,
+  DayHeadingsDirective
+} from '@midstem/chronous-angular'
+import type { CalendarRange } from '@midstem/chronous-angular'
+
+@Component({
+  standalone: true,
+  imports: [CalendarDirective, DayHeadingsDirective],
+  template: `
+    <div *chronousCalendar="range; events: []">
+      <div *chronousDayHeadings="let day">{{ day.date }}</div>
+    </div>
+  `
+})
+export class DayHeadingsComponent {
+  readonly range: CalendarRange = {
+    view: 'week',
+    currentDate: '2026-03-18',
+    timeZone: 'Europe/Kyiv'
+  }
 }
 ```
 
@@ -185,6 +213,11 @@ Without Temporal, core selects its Date fallback and warns. Ordinary calendar co
 `injectNow` must run in an Angular injection context. It is initially `null`, starts its 30-second timer after the first browser render, and clears it at destroy. An unreadable time zone also produces `null`. `today` is unavailable (`null`) when the range time zone cannot be read; `prev` and `next` are null when the range cannot be stepped. Context readers require an injection context and their matching provider, and throw a descriptive error otherwise.
 
 ## Source map and validation
+
+The build embeds core into the FESM2022 module and emits Angular 18 partial
+declarations for the consumer's linker. No separate core dependency is resolved
+at runtime. Use this package's error classes when catching its errors: a
+separate `@midstem/chronous` import has different class identities.
 
 - Public exports and directive set: [`src/index.ts`](src/index.ts), [`src/directives/index.ts`](src/directives/index.ts)
 - Signal helpers and their caught errors: [`src/calendar`](src/calendar), [`src/navigation`](src/navigation), [`src/now`](src/now)
