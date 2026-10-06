@@ -66,7 +66,7 @@ const events = [{ id: 'standup', start: '2026-03-18T09:00', duration: 'PT30M' }]
 
 ## Documentation
 
-See the [documentation](https://chronous.midstem.net/docs/) for more examples, components, typed event data, navigation and how to load Temporal correctly. It also explains browser support and the behavior when Temporal is unavailable.
+See the [Vue documentation](https://chronous.midstem.net/docs/?framework=vue) for more examples, components, typed event data, navigation and how to load Temporal correctly. It also explains browser support and the behavior when Temporal is unavailable.
 
 ## License
 
