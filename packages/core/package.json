@@ -1,6 +1,6 @@
 {
   "name": "@midstem/chronous",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "license": "MIT",
   "description": "Headless scheduling engine: time model, layout and recurrence. No React, no DOM",

@@ -112,7 +112,7 @@ Give each day a grid for the positioned events:
 }
 ```
 
-The engine returns event positions as fractions; the example converts them to CSS percentages. Core also exports the types, formatting, navigation and layout APIs needed to build an adapter for a framework without a dedicated Chronous package. For ready-made integrations, use [React](https://www.npmjs.com/package/@midstem/chronous-react), [Vue](https://www.npmjs.com/package/@midstem/chronous-vue) or [Angular](https://www.npmjs.com/package/@midstem/chronous-angular).
+The engine returns event positions as fractions; the example converts them to CSS percentages. Core also exports the types, formatting, navigation and layout APIs needed to build an adapter for a framework without a dedicated Chronous package. For ready-made integrations, use [React](https://www.npmjs.com/package/@midstem/chronous-react), [Vue](https://www.npmjs.com/package/@midstem/chronous-vue), [Svelte](https://www.npmjs.com/package/@midstem/chronous-svelte) or [Angular](https://www.npmjs.com/package/@midstem/chronous-angular).
 
 ## Documentation
 
