@@ -24,8 +24,7 @@ Each adapter includes the engine. Follow a package link for installation and exa
 | [`@midstem/chronous-svelte`](packages/svelte)   | [![npm][v-svelte]][npm-svelte]   | [![bundle size][s-svelte]][b-svelte]   | [![FullCalendar size][sf-svelte]][bf-svelte] · ~2.7× smaller   |
 | [`@midstem/chronous-angular`](packages/angular) | [![npm][v-angular]][npm-angular] | [![bundle size][s-angular]][b-angular] | [![FullCalendar size][sf-angular]][bf-angular] · ~2.8× smaller |
 
-Gzipped bundlejs estimates with frameworks external; ratios checked October 6, 2026. Svelte is compared with vanilla FullCalendar. FullCalendar includes its
-Temporal polyfill; Chronous loads one separately when native Temporal is unavailable.
+Gzipped bundlejs estimates with frameworks external; ratios checked October 6, 2026. Svelte is compared with vanilla FullCalendar.
 
 ## Playgrounds
 
