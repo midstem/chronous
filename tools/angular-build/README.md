@@ -6,18 +6,22 @@ source unit tests keep using the repository's current Angular version.
 
 `packages/angular` delegates its build to `scripts/build.mjs`. It compiles
 against the pinned Angular types and emits Angular Package Format output with
-partial declarations in `dist/fesm2022`. The engine stays a runtime dependency.
-A temporary manifest lets ng-packagr generate output-relative paths without
-changing the publishable workspace's own `dist` exports.
+partial declarations in `dist/fesm2022`. The build then embeds the core engine
+in the flattened module and ships its declarations beside the Angular package's
+own declarations. A temporary manifest lets ng-packagr generate output-relative
+paths without changing the publishable workspace's own `dist` exports.
 
 ## Scripts
 
 - `scripts/build.mjs` runs ng-packagr with Angular 18 types and temporary build
-  configuration. It produces the publishable FESM2022 module and declarations.
+  configuration, then calls `scripts/embed-core.mjs` to embed core runtime code
+  and declarations into the Angular package.
+- `scripts/embed-core.mjs` bundles the core engine into FESM2022, and rewrites
+  the package's ESM modules and declarations to use its local engine files.
 - `scripts/minimum-consumer.mjs` compiles the actual README example with Angular
   18.0.0, applies the Angular linker, and creates a browser bundle without JIT.
-- `scripts/verify-package.mjs` installs the packed Angular and core libraries in a
-  temporary application, checks the minimum-version example in Chromium, then
+- `scripts/verify-package.mjs` installs the packed Angular library by itself in
+  a temporary application, checks the minimum-version example in Chromium, then
   runs the 28 production playground scenarios against that installed package.
 
 ## Running the checks
@@ -29,8 +33,8 @@ npm run build
 npm run test:package:angular
 ```
 
-The package check builds the libraries, packs and installs both Chronous npm
-archives locally without registry access, then:
+The package check builds the libraries, packs and installs the Angular npm
+archive locally without registry access, then:
 
 - compiles the Angular README example with Angular 18.0.0 and links it for a
   production browser build;

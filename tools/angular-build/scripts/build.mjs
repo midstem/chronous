@@ -4,6 +4,7 @@ import { createRequire } from 'node:module'
 import { dirname, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { ngPackagr } from 'ng-packagr'
+import { embedCore } from './embed-core.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const PACKAGE = resolve(ROOT, 'packages/angular')
@@ -28,8 +29,7 @@ writeFileSync(
   resolve(temporary, 'ng-package.json'),
   JSON.stringify({
     dest: relative(temporary, resolve(PACKAGE, 'dist')),
-    lib: { entryFile: resolve(PACKAGE, 'src/index.ts') },
-    allowedNonPeerDependencies: ['^@midstem/chronous$']
+    lib: { entryFile: resolve(PACKAGE, 'src/index.ts') }
   })
 )
 writeFileSync(
@@ -50,6 +50,7 @@ try {
     .forProject(resolve(temporary, 'ng-package.json'))
     .withTsConfig(resolve(temporary, 'tsconfig.json'))
     .build({ cacheEnabled: false })
+  await embedCore(resolve(PACKAGE, 'dist'), resolve(ROOT, 'packages/core/dist'))
 } finally {
   rmSync(temporary, { recursive: true, force: true })
 }

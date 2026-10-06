@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process'
 import {
   copyFileSync,
+  existsSync,
   mkdtempSync,
   readFileSync,
   rmSync,
@@ -21,24 +22,20 @@ function runNpm(args, options = {}) {
   execFileSync(npm, args, { cwd: ROOT, stdio: 'inherit', ...options })
 }
 
-function copyPackageLicenses() {
-  for (const name of ['angular', 'core']) {
-    copyFileSync(
-      resolve(ROOT, 'LICENSE'),
-      resolve(ROOT, 'packages', name, 'LICENSE')
-    )
-  }
+function copyAngularLicense() {
+  copyFileSync(
+    resolve(ROOT, 'LICENSE'),
+    resolve(ROOT, 'packages/angular/LICENSE')
+  )
 }
 
-function packChronousPackages(directory) {
+function packAngularPackage(directory) {
   const result = execFileSync(
     npm,
     [
       'pack',
       '--workspace',
       '@midstem/chronous-angular',
-      '--workspace',
-      '@midstem/chronous',
       '--ignore-scripts',
       '--pack-destination',
       directory,
@@ -51,13 +48,32 @@ function packChronousPackages(directory) {
   return JSON.parse(result)
 }
 
-function packageArchive(directory, packages, packageName) {
-  const entry = packages.find((item) => item.name === packageName)
-  if (!entry) throw new Error(`npm pack did not produce ${packageName}`)
+function angularArchive(directory, packages) {
+  const entry = packages.find(
+    (item) => item.name === '@midstem/chronous-angular'
+  )
+  if (!entry)
+    throw new Error('npm pack did not produce @midstem/chronous-angular')
   return resolve(directory, entry.filename)
 }
 
-function installPackageArchives(directory, packages) {
+function assertArchiveHasNoCoreDependency(archive) {
+  const manifest = JSON.parse(
+    execFileSync('tar', ['-xOf', archive, 'package/package.json'], {
+      encoding: 'utf8'
+    })
+  )
+  const dependencySections = [
+    manifest.dependencies,
+    manifest.optionalDependencies,
+    manifest.peerDependencies
+  ]
+  if (dependencySections.some((section) => section?.['@midstem/chronous'])) {
+    throw new Error('Angular npm archive still declares @midstem/chronous')
+  }
+}
+
+function installAngularArchive(directory, archive) {
   writeFileSync(
     resolve(directory, 'package.json'),
     '{"private":true,"type":"module"}'
@@ -72,11 +88,17 @@ function installPackageArchives(directory, packages) {
       '--no-fund',
       '--cache',
       resolve(directory, 'cache'),
-      packageArchive(directory, packages, '@midstem/chronous-angular'),
-      packageArchive(directory, packages, '@midstem/chronous')
+      archive
     ],
     { cwd: directory }
   )
+
+  const installedCore = resolve(directory, 'node_modules/@midstem/chronous')
+  if (existsSync(installedCore)) {
+    throw new Error(
+      'Angular archive install unexpectedly installed @midstem/chronous'
+    )
+  }
 
   // Reuse the host's Angular peer framework while keeping Chronous on tarballs.
   symlinkSync(
@@ -86,9 +108,9 @@ function installPackageArchives(directory, packages) {
   )
 }
 
-async function verifyMinimumConsumer(directory, angularPackage, corePackage) {
+async function verifyMinimumConsumer(directory, angularPackage) {
   const consumer = resolve(directory, 'minimum')
-  await buildMinimumConsumer(consumer, angularPackage, corePackage)
+  await buildMinimumConsumer(consumer, angularPackage)
 
   const server = createServer((request, response) => {
     const file = request.url === '/main.js' ? 'main.js' : 'index.html'
@@ -216,16 +238,17 @@ function runPlaywright(directory, production) {
 async function verifyPackage() {
   const temporary = mkdtempSync(resolve(tmpdir(), 'chronous-angular-consumer-'))
   try {
-    copyPackageLicenses()
-    const packages = packChronousPackages(temporary)
-    installPackageArchives(temporary, packages)
+    copyAngularLicense()
+    const packages = packAngularPackage(temporary)
+    const archive = angularArchive(temporary, packages)
+    assertArchiveHasNoCoreDependency(archive)
+    installAngularArchive(temporary, archive)
 
     const angularPackage = resolve(
       temporary,
       'node_modules/@midstem/chronous-angular'
     )
-    const corePackage = resolve(temporary, 'node_modules/@midstem/chronous')
-    await verifyMinimumConsumer(temporary, angularPackage, corePackage)
+    await verifyMinimumConsumer(temporary, angularPackage)
 
     const production = buildProductionPlayground(temporary, angularPackage)
     runPlaywright(temporary, production)

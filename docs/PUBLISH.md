@@ -22,16 +22,15 @@ so both browser and SSR consumers compile the components for their target.
 `verify:dist` inspects every Svelte output module and declaration for unresolved
 core imports, internal aliases and leaked Temporal types.
 
-`@midstem/chronous-angular` ships a flattened FESM2022 module with linkable
-partial declarations, built with the isolated Angular 18.0.0 toolchain in
-`tools/angular-build`. It keeps the engine external and depends on `^1.0.0`
-of the engine the ordinary way, so npm installs it
-transitively and an engine patch reaches Angular users without an Angular
-release. `verify:dist` checks instead that its output carries the
-`ɵɵngDeclare*` declarations the consumer's linker needs.
+`@midstem/chronous-angular` embeds the engine and ships a flattened FESM2022
+module with linkable partial declarations, built with the isolated Angular
+18.0.0 toolchain in `tools/angular-build`. The adapter has no runtime dependency
+on `@midstem/chronous`; `verify:dist` checks that no emitted module or declaration
+resolves the engine externally and that its output carries the `ɵɵngDeclare*`
+declarations the consumer's linker needs.
 
-An engine change reaches React, Vue and Svelte users through a release of their
-adapter, and reaches the engine's own users through an engine release.
+An engine change reaches React, Angular, Vue and Svelte users through a release
+of their adapter, and reaches the engine's own users through an engine release.
 
 **Versions are independent.** A bug in an adapter is that adapter's patch and
 leaves the engine alone. The numbers are free to drift, and they will.

@@ -64,7 +64,7 @@ function angularTypeEntry(packageName) {
     .replace('package.json', 'index.d.ts')
 }
 
-function writeConsumerTsconfig(directory, angularPackage, corePackage) {
+function writeConsumerTsconfig(directory, angularPackage) {
   writeFileSync(
     resolve(directory, 'tsconfig.json'),
     JSON.stringify({
@@ -73,7 +73,8 @@ function writeConsumerTsconfig(directory, angularPackage, corePackage) {
         module: 'ESNext',
         moduleResolution: 'bundler',
         strict: true,
-        skipLibCheck: true,
+        types: [],
+        skipLibCheck: false,
         experimentalDecorators: true,
         outDir: './compiled',
         paths: {
@@ -83,8 +84,7 @@ function writeConsumerTsconfig(directory, angularPackage, corePackage) {
           ],
           '@midstem/chronous-angular': [
             resolve(angularPackage, 'dist/index.d.ts')
-          ],
-          '@midstem/chronous': [resolve(corePackage, 'dist/index.d.ts')]
+          ]
         }
       },
       angularCompilerOptions: {
@@ -108,7 +108,7 @@ function compileConsumer(directory) {
   }
 }
 
-function packageConsumerPlugin(angularPackage, corePackage) {
+function packageConsumerPlugin(angularPackage) {
   const angularModule = JSON.parse(
     readFileSync(resolve(angularPackage, 'package.json'), 'utf8')
   ).module
@@ -118,9 +118,6 @@ function packageConsumerPlugin(angularPackage, corePackage) {
     setup(builder) {
       builder.onResolve({ filter: /^@midstem\/chronous-angular$/ }, () => ({
         path: resolve(angularPackage, angularModule)
-      }))
-      builder.onResolve({ filter: /^@midstem\/chronous$/ }, () => ({
-        path: resolve(corePackage, 'dist/index.js')
       }))
       builder.onResolve({ filter: /^@angular\// }, (args) => ({
         path: toolRequire.resolve(args.path)
@@ -148,27 +145,23 @@ function packageConsumerPlugin(angularPackage, corePackage) {
   }
 }
 
-async function bundleConsumer(directory, angularPackage, corePackage) {
+async function bundleConsumer(directory, angularPackage) {
   await build({
     entryPoints: [resolve(directory, 'compiled/main.js')],
     bundle: true,
     format: 'esm',
     outfile: resolve(directory, 'main.js'),
     define: { ngDevMode: 'false', ngJitMode: 'false' },
-    plugins: [packageConsumerPlugin(angularPackage, corePackage)]
+    plugins: [packageConsumerPlugin(angularPackage)]
   })
 }
 
-export async function buildMinimumConsumer(
-  directory,
-  angularPackage,
-  corePackage
-) {
+export async function buildMinimumConsumer(directory, angularPackage) {
   mkdirSync(directory, { recursive: true })
   writeConsumerSources(directory, readReadmeExample())
-  writeConsumerTsconfig(directory, angularPackage, corePackage)
+  writeConsumerTsconfig(directory, angularPackage)
   compileConsumer(directory)
-  await bundleConsumer(directory, angularPackage, corePackage)
+  await bundleConsumer(directory, angularPackage)
   writeFileSync(
     resolve(directory, 'index.html'),
     '<app-board></app-board><script type="module" src="/main.js"></script>'

@@ -24,8 +24,8 @@ and stays in the repository — it is not part of the published package.
 
 ## One install
 
-One package is enough. The engine comes along as a dependency of this one and
-everything it exports is re-exported from here — `buildCalendar`, `formatIso`,
+One package is enough. The engine is embedded in this package and everything it
+exports is re-exported from here — `buildCalendar`, `formatIso`,
 `calendarReducer`, the error classes and every type — so an
 Angular app never installs or imports `@midstem/chronous` by name:
 
@@ -38,12 +38,12 @@ The package is published in Angular's partial compilation format, standalone
 and signal-based throughout. `@angular/core` is its only peer dependency, from
 18 up; it uses no zone.js API, so a zoneless application needs nothing extra.
 
-Unlike the React package, which bundles the engine, this package keeps
-`@midstem/chronous` as a runtime dependency. It ships a flattened FESM2022 module
-with linkable partial declarations, compiled using Angular 18.0.0. This preserves
-Angular 18+ compatibility while the playground can use a newer Angular version.
-An application that also imports the engine directly shares one engine instance,
-so `instanceof` checks on error classes work across both imports.
+The Angular package embeds the engine, like the React package. It ships a
+flattened FESM2022 module with linkable partial declarations, compiled using
+Angular 18.0.0. This preserves Angular 18+ compatibility while the playground
+can use a newer Angular version. If an application also imports
+`@midstem/chronous` directly, it has a separate copy of the engine, so error
+class identity does not cross between those imports.
 
 ## Temporal, and Safari
 
