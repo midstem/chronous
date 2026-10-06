@@ -1,6 +1,7 @@
 import { Directive } from '@angular/core'
 
 @Directive({
+  standalone: true,
   selector: '[chronousMonthGrid]',
   exportAs: 'chronousMonthGrid',
   host: {

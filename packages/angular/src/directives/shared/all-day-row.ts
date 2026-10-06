@@ -19,6 +19,7 @@ const MIN_LANES = 0
 const LANES_COLUMN = '2 / -1'
 
 @Component({
+  standalone: true,
   selector: 'chronous-all-day-row',
   exportAs: 'chronousAllDayRow',
   changeDetection: ChangeDetectionStrategy.OnPush,

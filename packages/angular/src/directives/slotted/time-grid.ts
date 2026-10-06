@@ -22,6 +22,7 @@ const HOUR_HEIGHT = 60
 const SCROLL_TO_HOUR = 7
 
 @Component({
+  standalone: true,
   selector: 'chronous-time-grid',
   exportAs: 'chronousTimeGrid',
   changeDetection: ChangeDetectionStrategy.OnPush,

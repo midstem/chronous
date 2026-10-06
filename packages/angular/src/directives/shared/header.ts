@@ -4,6 +4,7 @@ import { injectCalendarContext } from '../context'
 import { templateOf } from '../helpers'
 
 @Directive({
+  standalone: true,
   selector: '[chronousHeader]',
   exportAs: 'chronousHeader',
   host: {

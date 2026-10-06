@@ -38,13 +38,12 @@ The package is published in Angular's partial compilation format, standalone
 and signal-based throughout. `@angular/core` is its only peer dependency, from
 18 up; it uses no zone.js API, so a zoneless application needs nothing extra.
 
-Unlike the React package, which builds the engine into its own bundle, this one
-resolves `@midstem/chronous` at runtime — Angular libraries ship linkable
-partial declarations rather than a rolled-up bundle, and inlining a dependency
-into that format is not something the toolchain does. The consequence is a
-single engine instance for an app that also imports the engine directly, which
-is the better half of the trade: `instanceof` on the error classes holds across
-both imports.
+Unlike the React package, which bundles the engine, this package keeps
+`@midstem/chronous` as a runtime dependency. It ships a flattened FESM2022 module
+with linkable partial declarations, compiled using Angular 18.0.0. This preserves
+Angular 18+ compatibility while the playground can use a newer Angular version.
+An application that also imports the engine directly shares one engine instance,
+so `instanceof` checks on error classes work across both imports.
 
 ## Temporal, and Safari
 

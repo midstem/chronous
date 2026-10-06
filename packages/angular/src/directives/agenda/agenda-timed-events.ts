@@ -25,6 +25,7 @@ export type AgendaTimedEventContext<TData> = ScopedContext<
 >
 
 @Directive({
+  standalone: true,
   selector: '[chronousAgendaTimedEvents]',
   exportAs: 'chronousAgendaTimedEvents'
 })

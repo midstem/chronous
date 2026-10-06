@@ -35,4 +35,12 @@ npm run dev --workspace @midstem/chronous-playground-angular
 The app imports `temporal-polyfill/global` from its entry module before bootstrap,
 showing how a consumer supplies Temporal on browsers without native support.
 
+To build the playground against an extracted npm package directory, set
+`CHRONOUS_ANGULAR_PACKAGE` to that directory. The build reads the package's `module`
+entry instead of the workspace source:
+
+```bash
+CHRONOUS_ANGULAR_PACKAGE=/abs/package npm run build --workspace @midstem/chronous-playground-angular
+```
+
 The app is private and is never published to npm.

@@ -41,6 +41,7 @@ export type CalendarErrorContext = ScopedContext<
 >
 
 @Directive({
+  standalone: true,
   selector: '[chronousCalendar]',
   exportAs: 'chronousCalendar',
   providers: [

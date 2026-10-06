@@ -13,7 +13,10 @@ const MODULE_FILE_NAMES = ['index.js', 'index.d.ts']
 const PACKAGES = [
   { name: 'core', fileNames: [...MODULE_FILE_NAMES, 'index.cjs'] },
   { name: 'react', fileNames: [...MODULE_FILE_NAMES, 'index.cjs'] },
-  { name: 'angular', fileNames: MODULE_FILE_NAMES },
+  {
+    name: 'angular',
+    fileNames: ['fesm2022/midstem-chronous-angular.mjs', 'index.d.ts']
+  },
   { name: 'vue', fileNames: [...MODULE_FILE_NAMES, 'index.cjs'] },
   {
     name: 'svelte',
@@ -22,9 +25,11 @@ const PACKAGES = [
 ]
 
 const PARTIAL_IVY_FILE_NAME =
-  'packages/angular/dist/directives/shared/header.js'
+  'packages/angular/dist/fesm2022/midstem-chronous-angular.mjs'
 
 const PARTIAL_IVY_DECLARATION = 'ngDeclareDirective'
+
+const ANGULAR_BUILD_VERSION = '18.0.0'
 
 const SUBPATH_IMPORT_PREFIX = '#src'
 
@@ -142,6 +147,14 @@ if (existsSync(partialIvy)) {
   check(
     `${PARTIAL_IVY_FILE_NAME} carries no ${PARTIAL_IVY_DECLARATION}, so the Angular package was not compiled for publishing`,
     readFileSync(partialIvy, 'utf8').includes(PARTIAL_IVY_DECLARATION)
+  )
+  const compilerVersions = [
+    ...readFileSync(partialIvy, 'utf8').matchAll(/version: ["']([^"']+)["']/g)
+  ]
+  check(
+    `${PARTIAL_IVY_FILE_NAME} must be compiled with Angular ${ANGULAR_BUILD_VERSION}`,
+    compilerVersions.length > 0 &&
+      compilerVersions.every((match) => match[1] === ANGULAR_BUILD_VERSION)
   )
 }
 

@@ -32,6 +32,7 @@ export type DayHeadingContext<TData> = ScopedContext<
 >
 
 @Directive({
+  standalone: true,
   selector: '[chronousDayHeadings]',
   exportAs: 'chronousDayHeadings'
 })

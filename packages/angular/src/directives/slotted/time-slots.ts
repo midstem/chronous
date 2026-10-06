@@ -19,7 +19,11 @@ export type TimeSlotScope = {
 
 export type TimeSlotContext = ScopedContext<CalendarSlot, TimeSlotScope>
 
-@Directive({ selector: '[chronousTimeSlots]', exportAs: 'chronousTimeSlots' })
+@Directive({
+  standalone: true,
+  selector: '[chronousTimeSlots]',
+  exportAs: 'chronousTimeSlots'
+})
 export class TimeSlotsDirective<TData> {
   static ngTemplateContextGuard<TData>(
     _directive: TimeSlotsDirective<TData>,

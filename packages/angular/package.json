@@ -6,12 +6,12 @@
   "description": "Headless Angular directives for @midstem/chronous",
   "author": "Midstem",
   "sideEffects": false,
-  "module": "./dist/index.js",
+  "module": "./dist/fesm2022/midstem-chronous-angular.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "default": "./dist/fesm2022/midstem-chronous-angular.mjs"
     },
     "./package.json": "./package.json"
   },
@@ -42,7 +42,7 @@
     "typescript"
   ],
   "scripts": {
-    "build": "node ../../tools/scripts/clean-dist.mjs && ngc -p tsconfig.build.json",
+    "build": "node ../../tools/angular-build/scripts/build.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:run": "vitest run",

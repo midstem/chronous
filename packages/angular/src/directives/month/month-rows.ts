@@ -29,7 +29,11 @@ export type MonthRowContext<TData> = ScopedContext<
   MonthRowScope<TData>
 >
 
-@Directive({ selector: '[chronousMonthRows]', exportAs: 'chronousMonthRows' })
+@Directive({
+  standalone: true,
+  selector: '[chronousMonthRows]',
+  exportAs: 'chronousMonthRows'
+})
 export class MonthRowsDirective<TData> {
   static ngTemplateContextGuard<TData>(
     _directive: MonthRowsDirective<TData>,

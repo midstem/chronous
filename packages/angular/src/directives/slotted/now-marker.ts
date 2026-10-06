@@ -24,7 +24,11 @@ export type NowMarkerScope = {
 
 export type NowMarkerContext = ScopedContext<number, NowMarkerScope>
 
-@Directive({ selector: '[chronousNowMarker]', exportAs: 'chronousNowMarker' })
+@Directive({
+  standalone: true,
+  selector: '[chronousNowMarker]',
+  exportAs: 'chronousNowMarker'
+})
 export class NowMarkerDirective<TData> {
   static ngTemplateContextGuard<TData>(
     _directive: NowMarkerDirective<TData>,

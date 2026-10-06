@@ -80,7 +80,7 @@ export class BoardComponent {
 
 ## Documentation
 
-See the [documentation](https://chronous.midstem.net/docs/) for more examples, directives, typed event data, navigation and how to load Temporal correctly. It also explains browser support and the behavior when Temporal is unavailable.
+See the [Angular documentation](https://chronous.midstem.net/docs/?framework=angular) for more examples, directives, typed event data, navigation and how to load Temporal correctly. It also explains browser support and the behavior when Temporal is unavailable.
 
 ## License
 

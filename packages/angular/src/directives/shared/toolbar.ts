@@ -25,7 +25,11 @@ export type ToolbarScope = {
 
 export type ToolbarContext = ScopedContext<CalendarNavigation, ToolbarScope>
 
-@Directive({ selector: '[chronousToolbar]', exportAs: 'chronousToolbar' })
+@Directive({
+  standalone: true,
+  selector: '[chronousToolbar]',
+  exportAs: 'chronousToolbar'
+})
 export class ToolbarDirective {
   static ngTemplateContextGuard(
     _directive: ToolbarDirective,

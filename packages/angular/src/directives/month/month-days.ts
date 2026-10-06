@@ -38,7 +38,11 @@ export type MonthDayContext<TData> = ScopedContext<
   MonthDayScope<TData>
 >
 
-@Directive({ selector: '[chronousMonthDays]', exportAs: 'chronousMonthDays' })
+@Directive({
+  standalone: true,
+  selector: '[chronousMonthDays]',
+  exportAs: 'chronousMonthDays'
+})
 export class MonthDaysDirective<TData> {
   static ngTemplateContextGuard<TData>(
     _directive: MonthDaysDirective<TData>,

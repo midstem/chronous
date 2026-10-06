@@ -22,9 +22,10 @@ so both browser and SSR consumers compile the components for their target.
 `verify:dist` inspects every Svelte output module and declaration for unresolved
 core imports, internal aliases and leaked Temporal types.
 
-`@midstem/chronous-angular` cannot do the same, because a published Angular
-library ships linkable partial declarations rather than a rolled-up bundle. It
-depends on `^1.0.0` of the engine the ordinary way, so npm installs it
+`@midstem/chronous-angular` ships a flattened FESM2022 module with linkable
+partial declarations, built with the isolated Angular 18.0.0 toolchain in
+`tools/angular-build`. It keeps the engine external and depends on `^1.0.0`
+of the engine the ordinary way, so npm installs it
 transitively and an engine patch reaches Angular users without an Angular
 release. `verify:dist` checks instead that its output carries the
 `ɵɵngDeclare*` declarations the consumer's linker needs.
@@ -107,6 +108,19 @@ npm run build && npm run verify:dist && npm run lint && npm run typecheck && npm
 ```
 
 `npm run test` runs the engine's suite on both the polyfill and native Temporal.
+
+For an Angular release, also run:
+
+```bash
+npm run test:package:angular
+```
+
+This builds and installs the npm archives locally, compiles and renders the
+README example with Angular 18.0.0, checks reactive input updates, and runs all
+28 E2E scenarios on a production playground consuming the package with the
+current Angular runtime. The normal playground continues to import adapter
+source for local feature development. CI and the Angular release workflow run
+this package validation too.
 
 ## 3. Merge into `main`
 
