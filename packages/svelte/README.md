@@ -1,9 +1,11 @@
 # Chronous Svelte
 
-[![NPM version][npm-image]][npm-url]
+[![NPM version][npm-image]][npm-url] [![bundle size][size-image]][size-url]
 
 [npm-image]: https://img.shields.io/npm/v/%40midstem%2Fchronous-svelte.svg
 [npm-url]: https://npmjs.org/package/@midstem/chronous-svelte
+[size-image]: https://deno.bundlejs.com/badge?q=@midstem/chronous-svelte&config=%7B%22esbuild%22%3A%7B%22external%22%3A%5B%22svelte%22%2C%22svelte%2F%2A%22%5D%7D%7D
+[size-url]: https://bundlejs.com/?q=%40midstem%2Fchronous-svelte&config=%7B%22esbuild%22%3A%7B%22external%22%3A%5B%22svelte%22%2C%22svelte%2F%2A%22%5D%7D%7D
 
 <a href='https://midstem.net'>
   <img src='https://raw.githubusercontent.com/midstem/chronous/main/images/midstem.png' height='60'>
