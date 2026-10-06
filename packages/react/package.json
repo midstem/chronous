@@ -1,6 +1,6 @@
 {
   "name": "@midstem/chronous-react",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "license": "MIT",
   "description": "Headless React primitives for @midstem/chronous",
