@@ -20,6 +20,14 @@ The engine and the adapters document themselves:
 
 - [`packages/svelte/DOCUMENTATIONS.md`](packages/svelte/DOCUMENTATIONS.md) —
   the Svelte 5 surface: reactive helpers, snippets, contexts and every component
+- [`packages/playground-core/DOCUMENTATIONS.md`](packages/playground-core/DOCUMENTATIONS.md) —
+  private playground utilities, fixtures, state conversion and browser lifecycle
+
+Package references use a shared agent-oriented structure: scope, setup, public
+API, behavior contracts, examples, errors and source maps. Read the selected
+adapter reference together with the core reference. Verify changes against
+`src/index.ts`, the relevant implementation and `package.json`; examples from
+another adapter do not define this adapter's reactive or rendering contract.
 
 What follows is the repository itself — how it is laid out, how the playground
 runs, how the benchmarks are read and how a release is cut.
@@ -70,10 +78,11 @@ and its public declarations. The consumer's Svelte compiler handles client and
 SSR builds; the adapter never resolves a separate core package at runtime.
 `verify-dist.mjs` checks every Svelte output module and declaration.
 
-`@midstem/chronous-angular` ships Angular's partial declarations, which are
-linked rather than bundled, so it depends on the engine the ordinary way and
-resolves it at runtime — the same one install for a consumer, and `instanceof`
-on the error classes holds across a direct engine import.
+`@midstem/chronous-angular` ships a flattened FESM2022 module with Angular's
+linkable partial declarations and embeds the core engine during its build.
+It resolves no separate core package at runtime. All adapters therefore have
+their own engine error classes: a direct `@midstem/chronous` import has different
+class identities. Use error classes from the package that built the calendar.
 
 For exact calendar behavior, the application should install `temporal-polyfill`
 and import `temporal-polyfill/global` from its entry module in browsers without
@@ -83,8 +92,9 @@ calendar behavior; no `CalendarRange` flag is required. See the
 [core browser behavior](packages/core/DOCUMENTATIONS.md#browser-behavior) for
 its limitations.
 
-`packages/angular` builds with `ngc` in `compilationMode: 'partial'` rather than
-with vite, because a published Angular library has to carry `ɵɵngDeclare*`
+`packages/angular` builds with `ng-packagr` and `compilationMode: 'partial'`,
+using the isolated Angular 18 toolchain in `tools/angular-build`, because a
+published Angular library has to carry `ɵɵngDeclare*`
 declarations for the consumer's linker; `verify-dist.mjs` checks one emitted
 file for them. Its tests run under vitest with
 `@analogjs/vite-plugin-angular`, which compiles the templates ahead of time —

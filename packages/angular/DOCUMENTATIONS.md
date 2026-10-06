@@ -1,397 +1,194 @@
-# `@midstem/chronous-angular` documentation
+# `@midstem/chronous-angular` agent reference
 
-The whole Angular surface: the one install, Temporal on Safari, the signal
-functions, every directive and the rules they follow. The [README](README.md) is
-the short way in, and [`@midstem/chronous`](../core/DOCUMENTATIONS.md)
-documents the engine underneath.
+## Scope and source of truth
 
-This file is the source for [https://chronous.midstem.net/](https://chronous.midstem.net/)
-and stays in the repository — it is not part of the published package.
+`@midstem/chronous-angular` provides Angular 18+ standalone directives and components over the Chronous calendar engine. It re-exports the engine API from its package entry point; applications normally install only this adapter and `@angular/core`. Its sole peer dependency is `@angular/core` (`>=18`). The package uses Angular signals and does not require Zone.js.
 
-## Contents
+This reference describes the public exports in `src/index.ts`, directive inputs and scopes, implementations, tests, and `package.json`. Calendar data, range validation, layout geometry, recurrence, and formatting semantics are defined by the [core API reference](../core/DOCUMENTATIONS.md).
 
-- [One install](#one-install)
-- [Temporal, and Safari](#temporal-and-safari)
-- [`injectCalendar`](#injectcalendar)
-- [`injectCalendarNavigation`](#injectcalendarnavigation)
-- [`injectNow`](#injectnow)
-- [Directives](#directives)
-- [The microsyntax](#the-microsyntax)
-- [Overflow, and the empty all-day row](#overflow-and-the-empty-all-day-row)
-- [Typed event data](#typed-event-data)
-- [Labels](#labels)
-- [What differs from the React package](#what-differs-from-the-react-package)
+When changing a public contract, verify the implementation and exported types
+and update this reference in the same change. Source code takes precedence over
+examples or descriptions that disagree with it.
 
-## One install
+## Setup and imports
 
-One package is enough. The engine is embedded in this package and everything it
-exports is re-exported from here — `buildCalendar`, `formatIso`,
-`calendarReducer`, the error classes and every type — so an
-Angular app never installs or imports `@midstem/chronous` by name:
+Install the adapter and, when exact Temporal behavior is needed in runtimes without native Temporal, the polyfill:
 
-```ts
-import { CALENDAR_DIRECTIVES, formatIso } from '@midstem/chronous-angular'
-import type { CalendarRange, EventInput } from '@midstem/chronous-angular'
+```sh
+npm install @midstem/chronous-angular temporal-polyfill
 ```
 
-The package is published in Angular's partial compilation format, standalone
-and signal-based throughout. `@angular/core` is its only peer dependency, from
-18 up; it uses no zone.js API, so a zoneless application needs nothing extra.
-
-The Angular package embeds the engine, like the React package. It ships a
-flattened FESM2022 module with linkable partial declarations, compiled using
-Angular 18.0.0. This preserves Angular 18+ compatibility while the playground
-can use a newer Angular version. If an application also imports
-`@midstem/chronous` directly, it has a separate copy of the engine, so error
-class identity does not cross between those imports.
-
-## Temporal, and Safari
-
-For exact calendar behavior, install `temporal-polyfill` in the application
-and import its global entry before rendering on browsers without native
-Temporal:
+Load the polyfill once from the application entry point before rendering:
 
 ```ts
 import 'temporal-polyfill/global'
 ```
 
-Chronous does not bundle the polyfill. If `globalThis.Temporal` is absent, it
-automatically uses a `Date` fallback and warns in the console. The range API
-does not change. Ordinary events and approximate recurring instances keep rendering. An
-unreadable event may be omitted with a warning, and DST layout may be approximate. See the
-[core browser behavior](../core/DOCUMENTATIONS.md#browser-behavior).
+Import `CALENDAR_DIRECTIVES` into a standalone component, or import individual exported directives/components. Engine values and types are re-exported from the same package entry point.
 
-## `injectCalendar`
-
-`injectCalendar(range, events)` is a computed projection of `buildCalendar`. It
-holds no state and runs no effects: the range is yours, so it can live in a
-router, a query string or a signal of your own. Both arguments are read as
-functions, so a signal, a computed or a plain getter all work.
+The build embeds core into the FESM2022 module and emits Angular 18 partial
+declarations for the consumer's linker. No separate core dependency is resolved
+at runtime. Use this package's error classes when catching its errors: a
+separate `@midstem/chronous` import has different class identities.
 
 ```ts
-readonly calendar = injectCalendar(this.range, this.events)
+import { Component, signal } from '@angular/core'
+import {
+  CALENDAR_DIRECTIVES,
+  formatIso,
+  injectCalendar,
+  injectCalendarNavigation
+} from '@midstem/chronous-angular'
+import type { CalendarRange, EventInput } from '@midstem/chronous-angular'
+
+@Component({
+  standalone: true,
+  imports: [...CALENDAR_DIRECTIVES],
+  template: `...`
+})
+export class ScheduleComponent {
+  readonly range = signal<CalendarRange>({
+    view: 'week',
+    currentDate: '2026-03-18',
+    timeZone: 'Europe/Kyiv'
+  })
+  readonly events = signal<readonly EventInput<{ title: string }>[]>([])
+  readonly calendar = injectCalendar(this.range, this.events)
+  readonly navigation = injectCalendarNavigation(this.range)
+}
 ```
 
-```ts
-const { calendar, error } = this.calendar()
-```
+## Public API
 
-The computed is keyed on the fields of the range rather than on its identity, so
-rebuilding the range object with the same values does not rebuild the calendar.
-Events are compared by reference — keep them in a signal you set deliberately.
+The entry point re-exports `buildCalendar`, `calendarReducer`, `formatIso`, `initialCalendarState`, `isTemporalAvailable`; errors `InvalidEventError`, `InvalidRangeError`, `InvalidRecurrenceError`, `MissingTemporalError`; and the core calendar, event, recurrence, date, locale, time-zone, view, and formatting types.
 
-`buildCalendar` throws on the first unusable event, on an unreadable range and
-on a recurrence rule it cannot read. The signal catches `InvalidEventError`,
-`InvalidRangeError` and `InvalidRecurrenceError` and hands them back instead:
-`calendar` is null exactly when `error` is set. Anything else is a bug and is
-left to propagate.
+| Export                            | Contract                                                                                                                                                           |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `injectCalendar(range, events)`   | Returns `Signal<CalendarResult<TData>>`; both arguments are zero-argument readers. It does not inject dependencies.                                                |
+| `injectCalendarNavigation(range)` | Returns `Signal<CalendarNavigation>` derived from a range reader. It does not inject dependencies.                                                                 |
+| `injectNow(timeZone)`             | Called in an injection context. Returns `Signal<CalendarNow \| null>` for a time-zone reader; ticks every 30 seconds after render and clears its timer on destroy. |
+| `injectCalendarContext()`         | Reads the nearest `chronousCalendar` provider. Fields `calendar`, `range`, `locale`, and `gutterWidth` are Angular signals and must be invoked to read values.     |
+| `injectTimeGridContext()`         | Reads the enclosing `<chronous-time-grid>` provider; `hourHeight` and `dayHeight` are signals.                                                                     |
+| `injectAllDayContext()`           | Reads the enclosing `<chronous-all-day-row>` provider; `row`, `laneHeight`, and `lanes` are signals.                                                               |
 
-## `injectCalendarNavigation`
+`CalendarNavigation` has `next: CalendarRange | null`, `prev: CalendarRange | null`, `today: (() => CalendarRange) | null`, and `withView(view): CalendarRange`. The `today` field is a nullable function because it reads the clock when called. Navigation computes ranges; the application owns and updates its range signal.
 
-`injectCalendarNavigation(range)` returns the ranges to move to, and never sets
-state itself. It is a thin wrapper over `calendarReducer` — the same steps are
-available without Angular, and without a rendered calendar.
+## Data and behavior contracts
 
-```ts
-readonly navigation = injectCalendarNavigation(this.range)
-```
+`injectCalendar` recomputes when the range fields or the events reference change. Replacing a range object with equal fields does not invalidate its stable range reader. Keep event arrays in a signal and replace the array when event inputs change. The result is a discriminated union: `{ calendar, error: null }` or `{ calendar: null, error }`.
+
+The result catches `InvalidRangeError`, `InvalidEventError`, `InvalidRecurrenceError`, and `MissingTemporalError`. Other exceptions propagate. `*chronousCalendar` uses the same result; it renders the supplied error template when present and otherwise throws the known error.
+
+All-day bars, timed boxes, ranges, recurrence expansion, and localized labels follow the [core data and layout contracts](../core/DOCUMENTATIONS.md). The adapter carries `EventInput<TData>` through layout and template contexts without interpreting `data`. Generated geometry and data attributes are applied to the consumer's repeated element. Labels ending in `Label` are formatted strings; values such as `day`, `bar`, and `box` are typed data objects.
+
+The application supplies colors, typography, borders and interaction handlers.
+Avoid overriding generated position/size styles unless replacing the layout.
+Day elements expose `data-date` and `data-in-current-period`; event elements
+expose `data-event-id`, `data-continues-before` and `data-continues-after`.
+Labels use the calendar locale and fall back to their ISO value when formatting
+fails. `formatIso` itself can throw; the adapter label helper catches those errors.
+Project gutter content with an element carrying `chronousGutterCell` into the
+header or `<chronous-all-day-row>`.
+
+### Directive and component reference
+
+`CALENDAR_DIRECTIVES` contains every entry below. For structural directives, use the selector with `*`; the listed aliases are their microsyntax inputs. Each repeated template context also exposes `$implicit` as its primary item. “Provider” names the scope available to the corresponding context reader; repeated item values are template variables and are not DI providers.
+
+| Selector                             | Inputs and defaults                                                                                                | Template scope / provider                                                                                                    |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| `*chronousCalendar`                  | required range expression; required `events`; `locale='en-US'`; `gutterWidth='3.25rem'`; optional `error` template | `$implicit` calendar plus `calendar`, `range`, `locale`, `gutterWidth`; provides calendar context                            |
+| `*chronousToolbar`                   | none                                                                                                               | `$implicit` navigation plus `navigation`, `range`, `title`; requires calendar context                                        |
+| `[chronousHeader]`                   | none                                                                                                               | styles the host; requires calendar context                                                                                   |
+| `*chronousDayHeadings`               | none                                                                                                               | `$implicit` day plus `day`, `date`, `weekdayLabel`, `dayLabel`, `inCurrentPeriod`; requires calendar context                 |
+| `<chronous-all-day-row>`             | `laneHeight=24`, `minLanes=0`                                                                                      | provides all-day `row`, `laneHeight`, `lanes` signals; requires calendar context                                             |
+| `*chronousAllDayEvents`              | `gap=4`                                                                                                            | `$implicit` event plus `event`, `bar`; requires all-day row context                                                          |
+| `<chronous-time-grid>`               | `hourHeight=60`, `scrollToHour=7` (`null` disables scrolling)                                                      | provides `hourHeight`, computed `dayHeight`; requires calendar context                                                       |
+| `[chronousTimeAxis]`                 | none                                                                                                               | styles the host; requires time-grid context                                                                                  |
+| `*chronousTimeLabels`                | none                                                                                                               | `$implicit` slot plus `slot`, `minuteOfDay`, `timeLabel`; requires calendar context                                          |
+| `*chronousDayColumns`                | none                                                                                                               | `$implicit` day plus `day`; requires calendar and time-grid contexts                                                         |
+| `*chronousTimeSlots="day"`           | required day                                                                                                       | `$implicit` slot plus `slot`, `minuteOfDay`                                                                                  |
+| `*chronousTimedEvents="day"`         | required day; `minHeight=22`; `gap=3`                                                                              | `$implicit` event plus `event`, `box`; requires day expression                                                               |
+| `*chronousNowMarker="day"`           | required day                                                                                                       | `$implicit` minute number plus `minuteOfDay`; requires calendar context                                                      |
+| `[chronousMonthGrid]`                | none                                                                                                               | styles the host; no context read                                                                                             |
+| `*chronousMonthWeekdays`             | none                                                                                                               | `$implicit` day plus `day`, `weekdayLabel`; requires calendar context                                                        |
+| `*chronousMonthRows`                 | `maxLanes=null`; `laneHeight=20`                                                                                   | `$implicit` row scope plus `row`, `days`, `maxLanes`, `laneHeight`; requires calendar context                                |
+| `*chronousMonthDays="row"`           | required month row scope                                                                                           | `$implicit` day plus `day`, `boxes`, `bars`, `hiddenBars`, `dayLabel`, `inCurrentPeriod`, `lanes`; requires calendar context |
+| `*chronousMonthAllDayEvents="row"`   | required month row scope; `gap=4`; `lanesTopOffset=28`                                                             | `$implicit` event plus `event`, `bar`                                                                                        |
+| `*chronousMonthTimedEvents="day"`    | required day                                                                                                       | `$implicit` event plus `event`, `box`                                                                                        |
+| `[chronousAgendaList]`               | none                                                                                                               | styles the host; requires calendar context                                                                                   |
+| `*chronousAgendaDays`                | `showEmptyDays=false`                                                                                              | `$implicit` day plus `day`, `bars`, `boxes`, `weekdayLabel`, `dayLabel`, `monthLabel`; requires calendar context             |
+| `*chronousAgendaAllDayEvents="bars"` | required bars                                                                                                      | `$implicit` event plus `event`, `bar`                                                                                        |
+| `*chronousAgendaTimedEvents="day"`   | required day                                                                                                       | `$implicit` event plus `event`, `box`, `timeRangeLabel`; needs calendar context                                              |
+
+For example, microsyntax `let event` reads `$implicit`, `let box = box` reads a named scope field, and `maxLanes: 3` binds an input alias. Structural context guards preserve `TData` under Angular `strictTemplates`. Repeated values such as a particular day or row are passed into child directives explicitly (`*chronousTimeSlots="day"`, `*chronousMonthDays="row"`).
+
+The all-day row hides when it has no all-day bars and reserves `minLanes` only when requested. Month rows default to unlimited visible lanes; setting `maxLanes` filters rendered bars and supplies per-day `hiddenBars` for an overflow affordance. Agenda days omit empty days unless `showEmptyDays` is true. The calendar gutter is shared by the header, all-day row, and time grid.
+
+## Minimal example
+
+This view composition shows the required root inputs, shared grid, and the day value passed to each slotted directive:
 
 ```html
-<button [disabled]="!navigation().prev" (click)="range.set(navigation().prev!)">
-  Back
-</button>
-<button
-  [disabled]="!navigation().today"
-  (click)="range.set(navigation().today()!)"
->
-  Today
-</button>
-<button [disabled]="!navigation().next" (click)="range.set(navigation().next!)">
-  Forward
-</button>
-```
-
-A step moves by the period the range asks for: a day by one day, a week by
-seven, a span by its own length, and a month by one month anchored on the
-first — so a long month never drags the anchor backwards. The weekday of the
-anchor survives a week step, which is what makes switching to `day` afterwards
-land where the reader was looking.
-
-`next` and `prev` remain usable when Temporal is absent because core uses its
-automatic Date fallback. They are null when the range cannot be stepped, such
-as an unreadable anchor date or invalid `dayCount`. DST transitions can make
-the resulting calendar layout approximate and produce a console warning.
-
-`today` is a function rather than a value because it depends on the wall clock
-and not on the inputs: it is read at the click, in the calendar's own zone. It
-is null only when that zone itself cannot be read.
-
-## `injectNow`
-
-`injectNow(timeZone)` reads the wall clock in the calendar's own zone and ticks
-every thirty seconds. It reports `null` until the first render and whenever the
-zone cannot be read, so a marker of your own can gate on it directly.
-
-```ts
-readonly now = injectNow(() => this.range().timeZone)
-```
-
-`CalendarNow` carries the `date` the clock is on and its `minuteOfDay`, which is
-all `*chronousNowMarker` needs to place itself. The timer is started after the
-first render and cleared on destroy, so it costs nothing on the server.
-
-## Directives
-
-`CALENDAR_DIRECTIVES` is the whole set, ready for a standalone component's
-`imports`. The tedious half comes already wired — geometry, scoping, the
-loops — and everything you can see is yours to write: every part sits on _your_
-element, keeps your classes, your bindings and your markup, and hands you the
-event behind it.
-
-```html
-<div *chronousCalendar="range(); events: events(); locale: 'en-GB'">
-  <div chronousHeader class="grid-header">
-    <div
-      *chronousDayHeadings="
-        let day;
-        let weekdayLabel = weekdayLabel;
-        let dayLabel = dayLabel
-      "
-      class="heading"
-    >
-      <span>{{ weekdayLabel }}</span> <strong>{{ dayLabel }}</strong>
-    </div>
+<div *chronousCalendar="range(); events: events()">
+  <div chronousHeader>
+    <div *chronousDayHeadings="let day">{{ day.date }}</div>
   </div>
-
-  <chronous-all-day-row>
-    <span chronousGutterCell>all-day</span>
-
-    <div *chronousAllDayEvents="let event" class="bar">
-      {{ event.data.title }}
-    </div>
-  </chronous-all-day-row>
-
-  <chronous-time-grid [hourHeight]="60">
-    <div chronousTimeAxis class="gutter">
-      <div
-        *chronousTimeLabels="let slot; let timeLabel = timeLabel"
-        class="tick"
-      >
-        {{ timeLabel }}
-      </div>
-    </div>
-
-    <div *chronousDayColumns="let day" class="column">
-      <span *chronousTimeSlots="day" class="line"></span>
-
-      <div *chronousNowMarker="day" class="now"></div>
-
-      <button
-        *chronousTimedEvents="day; let event"
-        type="button"
-        class="event"
-        (click)="open(event)"
-      >
-        {{ event.data.title }}
+  <chronous-time-grid>
+    <div *chronousDayColumns="let day">
+      <span *chronousTimeSlots="day"></span>
+      <button *chronousTimedEvents="day; let event">
+        {{ event.data?.title }}
       </button>
+      <span *chronousNowMarker="day"></span>
     </div>
   </chronous-time-grid>
 </div>
 ```
 
-`chronousMonthGrid` / `chronousMonthWeekdays` / `chronousMonthRows` /
-`chronousMonthDays` / `chronousMonthAllDayEvents` / `chronousMonthTimedEvents`
-cover the month view, and `chronousAgendaList` / `chronousAgendaDays` /
-`chronousAgendaAllDayEvents` / `chronousAgendaTimedEvents` the agenda. The pair
-repeats in every view: the all-day part draws what the engine laid out as bars,
-the timed part what it laid out inside a day. `*chronousToolbar` wraps
-`injectCalendarNavigation` and hands you `navigation`, `range` and a formatted
-`title`; where you move to is your own signal to set.
+For month views, the implicit value from `chronousMonthRows` is a `MonthRowScope<TData>`. Pass that same row to both day cells and spanning all-day bars; the agenda all-day directive instead takes the current day's `bars` array:
 
-Six rules cover the whole surface.
-
-**A plural name is a structural directive that iterates.** `chronousDayColumns`
-renders your element once per day, `chronousTimedEvents` once per box,
-`chronousTimeSlots` once per slot. Singular names — `chronousHeader`,
-`chronousTimeAxis`, `chronousMonthGrid` — are attribute directives that style
-the element they sit on. `<chronous-all-day-row>` and `<chronous-time-grid>` are
-the two components in the set, because both wrap their content in a leading
-gutter cell and a grid you would otherwise have to write yourself.
-
-**Geometry is written onto your element as inline styles.** Position, size,
-lane offsets and the grid templates land on the element you wrote, so a class is
-always free to add to them. A `[style.top]` binding of your own on the same
-property is the one thing that fights: reach for a class there, or take the
-numbers off the scope and place the element yourself.
-
-**Three scopes travel through DI; the rest travel through the template.**
-`injectCalendarContext()`, `injectTimeGridContext()` and `injectAllDayContext()`
-give a component of your own the calendar, the grid geometry or the all-day row
-it sits inside, and each throws by name when it is used outside its parent.
-Anything that repeats — a day, a row — cannot travel that way, because one
-directive instance renders every iteration, so it travels as a template
-variable you hand to the next part: `*chronousTimeSlots="day"`,
-`*chronousMonthDays="row"`.
-
-**A formatted string ends in `Label`.** `weekdayLabel`, `dayLabel`,
-`monthLabel`, `timeLabel` and `timeRangeLabel` have already been through
-`formatIso` in the calendar's locale and are ready to render. Everything without
-the suffix is data: `day` is a `CalendarDay`, `box` a `CalendarBox`, `bar` a
-`CalendarBar`, and `minuteOfDay` a number.
-
-**Per-item state arrives as data attributes**, because a class is shared by
-every element a directive renders. `data-date` and `data-in-current-period` land
-on `chronousDayHeadings`, `chronousDayColumns`, `chronousMonthDays` and
-`chronousAgendaDays`; `data-event-id` and `data-continues-before` /
-`data-continues-after` land on the event directives:
+Render the appropriate recipe inside `*chronousCalendar`, with the matching
+`range().view` (`'month'` or `'agenda'`).
 
 ```html
-<div
-  *chronousMonthDays="row; let day"
-  class="data-[in-current-period=false]:bg-zinc-50"
-></div>
-```
-
-**The gutter lives on the calendar.** `chronousHeader`,
-`<chronous-all-day-row>` and `<chronous-time-grid>` lay out the same CSS grid,
-so `gutterWidth` is one input on the root rather than three that can drift
-apart. Month and agenda ignore it.
-
-## The microsyntax
-
-Every repeating part is a structural directive, so it is written with `*` and
-reads its options out of Angular's microsyntax. Three shapes cover all of it:
-
-```html
-<div *chronousDayColumns="let day"></div>
-
-<span *chronousTimeSlots="day; let slot; let minuteOfDay = minuteOfDay"></span>
-
-<div *chronousMonthRows="let row; maxLanes: 3; laneHeight: 18"></div>
-```
-
-The leading expression, where a part takes one, is the parent value it works
-from — the day whose boxes to draw, the row whose bars to lay out. `let x` binds
-the item being repeated; `let x = key` binds anything else on the scope. Options
-are `key: value` pairs and may sit anywhere after the first part, which is what
-lets an option-only directive be written `*chronousAgendaDays="let day;
-showEmptyDays: true"`.
-
-The parts and what they take:
-
-| Part                          | Takes                        | Repeats over                  |
-| ----------------------------- | ---------------------------- | ----------------------------- |
-| `*chronousCalendar`           | the range, then `events`     | once                          |
-| `*chronousToolbar`            | —                            | once                          |
-| `chronousHeader`              | —                            | the element it is on          |
-| `*chronousDayHeadings`        | —                            | every day                     |
-| `<chronous-all-day-row>`      | `laneHeight`, `minLanes`     | once                          |
-| `*chronousAllDayEvents`       | —                            | the row's bars                |
-| `<chronous-time-grid>`        | `hourHeight`, `scrollToHour` | once                          |
-| `chronousTimeAxis`            | —                            | the element it is on          |
-| `*chronousTimeLabels`         | —                            | the slots of a day            |
-| `*chronousDayColumns`         | —                            | every day                     |
-| `*chronousTimeSlots`          | a day                        | its slots                     |
-| `*chronousTimedEvents`        | a day                        | its boxes                     |
-| `*chronousNowMarker`          | a day                        | once, if today                |
-| `chronousMonthGrid`           | —                            | the element it is on          |
-| `*chronousMonthWeekdays`      | —                            | the first row's days          |
-| `*chronousMonthRows`          | —                            | every row                     |
-| `*chronousMonthDays`          | a row                        | its days                      |
-| `*chronousMonthAllDayEvents`  | a row                        | its bars                      |
-| `*chronousMonthTimedEvents`   | a day                        | its boxes                     |
-| `chronousAgendaList`          | —                            | the element it is on          |
-| `*chronousAgendaDays`         | —                            | the days that carry something |
-| `*chronousAgendaAllDayEvents` | the day's bars               | those bars                    |
-| `*chronousAgendaTimedEvents`  | a day                        | its boxes                     |
-
-Every structural directive carries an `ngTemplateContextGuard`, so `let`
-variables are typed under `strictTemplates` and `TData` flows from the events
-you passed all the way to `event.data`.
-
-## Overflow, and the empty all-day row
-
-Two cut-offs are shared between siblings, so they cannot drift apart.
-
-`*chronousMonthRows` takes `maxLanes`, and the `laneHeight` its bars are drawn
-at, for the same reason the gutter lives on the calendar: both are shared with
-siblings, so they sit on the parent rather than on one child that could drift
-from another. `*chronousMonthAllDayEvents` then stops drawing bars past that
-lane, and every `*chronousMonthDays` cell is handed the bars that cover _it_ —
-`bars` for all of them, `hiddenBars` for the ones the cut-off dropped, and
-`lanes` counting only what is drawn. That is the whole "+2 more" affordance:
-
-```html
-<div *chronousMonthRows="let row; maxLanes: 3">
-  <div *chronousMonthDays="row; let day; let hiddenBars = hiddenBars">
-    @if (hiddenBars.length) {
-    <button type="button">+{{ hiddenBars.length }} more</button>
-    }
+<div chronousMonthGrid>
+  <div *chronousMonthWeekdays="let day; let weekdayLabel = weekdayLabel">
+    {{ weekdayLabel }}
   </div>
-
-  <div *chronousMonthAllDayEvents="row; let event" class="bar">
-    {{ event.data.title }}
+  <div *chronousMonthRows="let row; maxLanes: 3">
+    <div *chronousMonthDays="row; let day; let hiddenBars = hiddenBars">
+      {{ day.date }} <span>{{ hiddenBars.length }}</span>
+    </div>
+    <div *chronousMonthAllDayEvents="row; let event">
+      {{ event.data?.title }}
+    </div>
   </div>
+</div>
+
+<div chronousAgendaList>
+  <section *chronousAgendaDays="let day; let bars = bars">
+    <h2>{{ day.date }}</h2>
+    <div *chronousAgendaAllDayEvents="bars; let event">
+      {{ event.data?.title }}
+    </div>
+    <div *chronousAgendaTimedEvents="day; let event">
+      {{ event.data?.title }}
+    </div>
+  </section>
 </div>
 ```
 
-`<chronous-all-day-row>` hides itself when the range has no all-day event at
-all, which keeps a week view from carrying an empty strip. `minLanes` holds a
-height anyway — one lane is usually what a stable header wants — and never
-shrinks a row that already needs more.
+## Errors and limitations
 
-## Typed event data
+Without Temporal, core selects its Date fallback and warns. Ordinary calendar construction and navigation remain available, while recurrence expansion and cross-zone/DST calculations can be approximate; malformed event input can still be rejected. See [core browser behavior](../core/DOCUMENTATIONS.md#browser-behavior). Load `temporal-polyfill/global` before rendering when exact behavior is required.
 
-`EventInput<TData>` carries whatever you put on `data`, and that type survives
-the whole way through the layout: `CalendarBox<TData>`, `CalendarBar<TData>` and
-the template contexts are all generic in it. Nothing in the engine reads `data`;
-it is carried, not interpreted.
+`injectNow` must run in an Angular injection context. It is initially `null`, starts its 30-second timer after the first browser render, and clears it at destroy. An unreadable time zone also produces `null`. `today` is unavailable (`null`) when the range time zone cannot be read; `prev` and `next` are null when the range cannot be stepped. Context readers require an injection context and their matching provider, and throw a descriptive error otherwise.
 
-```ts
-type EventData = { title: string; owner: string }
+## Source map and validation
 
-readonly events = signal<EventInput<EventData>[]>([...])
-```
-
-```html
-<div *chronousTimedEvents="day; let event">{{ event.data.title }}</div>
-```
-
-The generic is inferred from the events you hand `*chronousCalendar`, so there
-is nothing to annotate at the point of use.
-
-## Labels
-
-Every label is `formatIso` in the calendar's `locale`, with the options the part
-needs — `weekday: 'short'` for a weekday, `day: 'numeric'` for a day number,
-`hour`/`minute` for a clock. A locale the runtime cannot read falls back to the
-ISO value rather than throwing, so a typo shows up as `2026-03-18` on the screen
-instead of taking the view down.
-
-Where a label is not the one you want, the data behind it is on the same scope:
-take `day.date` or `box.start` and call `formatIso` — or `Intl` — yourself.
-
-```ts
-readonly weekdayOf = (day: CalendarDay<EventData>): string =>
-  formatIso(day.date, { locale: 'uk-UA', options: { weekday: 'long' } })
-```
-
-```html
-<div *chronousDayHeadings="let day">{{ weekdayOf(day) }}</div>
-```
-
-## What differs from the React package
-
-The two adapters draw the same calendar and share the engine, the vocabulary and
-the geometry. Where they differ, Angular's idioms won:
-
-- **`use*` hooks are `inject*` functions** returning signals, called from an
-  injection context.
-- **Components with an `as` prop are directives on your element.** There is no
-  tag to name, because you already wrote it.
-- **Render props are template contexts.** `let event` is what
-  `{({ event }) => …}` was.
-- **The toolbar has no `onNavigate`.** The range is a signal you own, so
-  `*chronousToolbar` hands you `navigation` and you set it.
-- **Per-item scopes are passed, not injected**, for the reason under the third
-  rule above.
+- Public exports and directive set: [`src/index.ts`](src/index.ts), [`src/directives/index.ts`](src/directives/index.ts)
+- Signal helpers and their caught errors: [`src/calendar`](src/calendar), [`src/navigation`](src/navigation), [`src/now`](src/now)
+- Providers and template context guards: [`src/directives/context`](src/directives/context), [`src/directives`](src/directives)
+- Package entry and peer dependency: [`package.json`](package.json)
+- Embedded core and partial declarations: [`build.mjs`](../../tools/angular-build/scripts/build.mjs), [`embed-core.mjs`](../../tools/angular-build/scripts/embed-core.mjs)
+- Validate with `npm run typecheck --workspace @midstem/chronous-angular` and `npm run test:run --workspace @midstem/chronous-angular` from the repository root.

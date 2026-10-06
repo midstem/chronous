@@ -1,119 +1,153 @@
-# Svelte adapter guide
+# `@midstem/chronous-svelte` agent reference
 
-`@midstem/chronous-svelte` wraps the shared `@midstem/chronous` engine with Svelte 5 components, context helpers, and Svelte stores. It publishes its `.svelte` files with the Svelte export condition so the consumer's Svelte compiler can produce both client and server output.
+## Scope and source of truth
 
-## Install
+`@midstem/chronous-svelte` provides Svelte 5 components, context readers, and Svelte readable stores over the Chronous calendar engine. It publishes its `.svelte` source through the `svelte` package export condition so Svelte-aware tools can compile it for client rendering and SSR. Its peer dependency is Svelte `>=5.0.0`.
+
+This reference follows the public exports, component props and implementations, tests, and package metadata. Calendar input validation, layout, recurrence, and formatting semantics are defined by the [core API reference](../core/DOCUMENTATIONS.md).
+
+When changing a public contract, verify the implementation and exported types
+and update this reference in the same change. Source code takes precedence over
+examples or descriptions that disagree with it.
+
+## Setup and imports
+
+Install the adapter and, when exact Temporal behavior is needed in runtimes without native Temporal, the polyfill:
 
 ```sh
-npm install @midstem/chronous-svelte svelte temporal-polyfill
+npm install @midstem/chronous-svelte temporal-polyfill
 ```
 
-Svelte 5 is required. Configure the Svelte plugin in Vite as usual. Import the Temporal polyfill from the application entry when exact recurrence and time-zone calculations are required:
+Use the Svelte Vite plugin or another Svelte-aware compiler. Load the polyfill once from the application entry point before rendering:
 
 ```ts
 import 'temporal-polyfill/global'
 ```
 
-The engine also works without Temporal and reports whether it is available through `isTemporalAvailable()`. Its date fallback keeps ordinary calendars and navigation working; recurrence expansion and cross-zone calculations may be approximate.
+Import components and helpers from the package root. `Calendar` is the default component set; `createCalendarComponents<TData>()` returns component references with snippet payloads typed for your event data.
 
-## Weekly calendar
-
-`Calendar.Root` builds the calendar and provides its range, layout, locale, and gutter width to descendants. Svelte snippets receive scope objects as parameters. Their values remain typed through `createCalendarComponents<TData>()`.
+Core is embedded in the local engine bundle; consumers need no separate
+`@midstem/chronous` dependency. Use error classes from this package when catching
+its errors; separately imported core has different class identities. Import the
+package root rather than internal `dist` files.
 
 ```svelte
 <script lang="ts">
-  import type { CalendarRange, EventInput } from '@midstem/chronous-svelte'
   import { Calendar, createCalendarComponents } from '@midstem/chronous-svelte'
+  import type { CalendarRange, EventInput } from '@midstem/chronous-svelte'
 
-  type EventData = { title: string; color: string }
+  type EventData = { title: string }
   const C = createCalendarComponents<EventData>()
   let range = $state<CalendarRange>({
-    view: 'week',
-    currentDate: '2026-03-18',
-    timeZone: 'Europe/Kyiv'
+    view: 'week', currentDate: '2026-03-18', timeZone: 'Europe/Kyiv'
   })
-  let events = $state<EventInput<EventData>[]>([
-    {
-      id: 'planning',
-      start: '2026-03-18T09:00:00',
-      end: '2026-03-18T10:30:00',
-      data: { title: 'Planning', color: '#6b4eff' }
-    },
-    {
-      id: 'team-day',
-      allDay: true,
-      start: '2026-03-17',
-      end: '2026-03-20',
-      data: { title: 'Team day', color: '#008c74' }
-    }
-  ])
-
-  const navigate = (next: CalendarRange) => (range = next)
+  let events = $state<readonly EventInput<EventData>[]>([])
 </script>
 
-<C.Root {range} {events} locale="en-GB" gutterWidth="3.5rem">
+<C.Root {range} {events}>
   {#snippet children()}
-    <C.Toolbar onNavigate={navigate}>
-      {#snippet children({ navigation, range, title, goTo })}
-        <button
-          disabled={!navigation.prev}
-          onclick={() => navigation.prev && goTo(navigation.prev)}
-        >
-          Previous
-        </button>
-        <strong>{title}</strong>
-        <button
-          disabled={!navigation.next}
-          onclick={() => navigation.next && goTo(navigation.next)}
-        >
-          Next
-        </button>
-        <button onclick={() => goTo(navigation.withView('month'))}>Month</button
-        >
-      {/snippet}
-    </C.Toolbar>
-
     <C.DayHeadings>
-      {#snippet children({ weekdayLabel, dayLabel, inCurrentPeriod })}
-        <div class:outside={!inCurrentPeriod}>{weekdayLabel} {dayLabel}</div>
+      {#snippet children({ dayLabel, weekdayLabel })}
+        <div>{weekdayLabel} {dayLabel}</div>
       {/snippet}
     </C.DayHeadings>
+  {/snippet}
+</C.Root>
+```
 
-    <C.AllDayRow minLanes={1}>
-      {#snippet children()}
-        <C.AllDayEvents>
-          {#snippet children({ event, bar })}
-            <div
-              class="all-day"
-              data-lane={bar.lane}
-              style={`background:${event.data?.color}`}
-            >
-              {event.data?.title}
-            </div>
-          {/snippet}
-        </C.AllDayEvents>
-      {/snippet}
-    </C.AllDayRow>
+The entry point also re-exports core functions, error classes, and types, plus `useCalendar`, `calendarResult`, `useCalendarNavigation`, `calendarNavigation`, `useNow`, and seven context readers.
 
-    <C.TimeGrid hourHeight={64} scrollToHour={8}>
+## Public API
+
+| Export                              | Contract                                                                                                                   |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `useCalendar(range, events)`        | Takes readable stores and returns `Readable<CalendarResult<TData>>`, derived whenever either input store emits.            |
+| `calendarResult(range, events)`     | Synchronously returns the same result union for ordinary values.                                                           |
+| `useCalendarNavigation(range)`      | Takes a readable range store and returns `Readable<CalendarNavigation>`.                                                   |
+| `calendarNavigation(range)`         | Synchronously returns the navigation object for a range value.                                                             |
+| `useNow(timeZone)`                  | Returns `Readable<CalendarNow \| null>`; its first subscriber starts a 30-second clock and the last unsubscribe clears it. |
+| `Calendar`                          | The 23 public components listed below, with event data defaulting to `unknown`.                                            |
+| `createCalendarComponents<TData>()` | Returns the same component references typed for `TData`; it does not create separate runtime components.                   |
+
+`CalendarNavigation` contains `next` and `prev` as `CalendarRange | null`, `today` as `(() => CalendarRange) | null`, and `withView(view): CalendarRange`. The `today` function reads the clock when called. Navigation returns proposed ranges; the application updates the range passed to `Root`.
+
+`CalendarResult<TData>` is either `{ calendar, error: null }` or `{ calendar: null, error }`. The reactive and synchronous helpers catch `InvalidRangeError`, `InvalidEventError`, `InvalidRecurrenceError`, and `MissingTemporalError`; unrelated exceptions propagate.
+
+## Data and behavior contracts
+
+### Components, props, and snippet scopes
+
+Components accept `as` (default `div`, except `TimeSlots`, which defaults to `span`), `children` snippets where a scope is listed, `style` (CSS text or a style object), and standard attributes/handlers for the selected element. `children` replaces the component's default content; it does not remove geometry applied to the component's host element.
+
+| Component            | Specific props and defaults                                                                   | `children` snippet scope / provider                                                                      |
+| -------------------- | --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `Root`               | required `range`, `events`; `locale='en-US'`; `gutterWidth='3.25rem'`; optional `renderError` | calendar context (`calendar`, `range`, `locale`, `gutterWidth`); provides calendar context               |
+| `Toolbar`            | required `onNavigate`; `views=['day','week','month','agenda']`                                | `navigation`, `range`, `title`, `goTo`                                                                   |
+| `Header`             | optional `gutterCell` snippet                                                                 | calendar context                                                                                         |
+| `DayHeadings`        | —                                                                                             | `day`, `date`, `weekdayLabel`, `dayLabel`, `inCurrentPeriod`                                             |
+| `AllDayRow`          | `laneHeight=24`; `minLanes=0`; optional `gutterCell` snippet                                  | `row`, `laneHeight`, `lanes`; provides all-day context                                                   |
+| `AllDayEvents`       | `gap=4`                                                                                       | `event`, `bar`                                                                                           |
+| `TimeGrid`           | `hourHeight=60`; `scrollToHour=7` (`null` disables initial scroll)                            | `hourHeight`, `dayHeight`; provides time-grid context                                                    |
+| `TimeAxis`           | —                                                                                             | `hourHeight`, `dayHeight`                                                                                |
+| `TimeLabels`         | —                                                                                             | `slot`, `minuteOfDay`, `timeLabel`                                                                       |
+| `DayColumns`         | —                                                                                             | `day`; provides day-column context                                                                       |
+| `TimeSlots`          | —                                                                                             | `slot`, `minuteOfDay`                                                                                    |
+| `TimedEvents`        | `minHeight=22`; `gap=3`                                                                       | `event`, `box`                                                                                           |
+| `NowMarker`          | —                                                                                             | `minuteOfDay`                                                                                            |
+| `MonthGrid`          | —                                                                                             | calendar context                                                                                         |
+| `MonthWeekdays`      | —                                                                                             | `day`, `weekdayLabel`                                                                                    |
+| `MonthRows`          | `maxLanes=null`; `laneHeight=20`                                                              | `row`, `days`, `maxLanes`, `laneHeight`; provides month-row context                                      |
+| `MonthDays`          | —                                                                                             | `day`, `boxes`, `bars`, `hiddenBars`, `dayLabel`, `inCurrentPeriod`, `lanes`; provides month-day context |
+| `MonthAllDayEvents`  | `gap=4`; `lanesTopOffset=28`                                                                  | `event`, `bar`                                                                                           |
+| `MonthTimedEvents`   | —                                                                                             | `event`, `box`                                                                                           |
+| `AgendaList`         | —                                                                                             | calendar context                                                                                         |
+| `AgendaDays`         | `showEmptyDays=false`                                                                         | `day`, `bars`, `boxes`, `weekdayLabel`, `dayLabel`, `monthLabel`; provides agenda-day context            |
+| `AgendaAllDayEvents` | —                                                                                             | `event`, `bar`                                                                                           |
+| `AgendaTimedEvents`  | —                                                                                             | `event`, `box`, `timeRangeLabel`                                                                         |
+
+Context readers run during component initialization beneath their matching
+provider and throw a descriptive error outside it. They return getter-backed
+objects, not stores; retain the object to read updated values.
+
+| Reader                         | Provider     | Fields                                       |
+| ------------------------------ | ------------ | -------------------------------------------- |
+| `useCalendarContext<TData>()`  | `Root`       | `calendar`, `range`, `locale`, `gutterWidth` |
+| `useTimeGridContext()`         | `TimeGrid`   | `hourHeight`, `dayHeight`                    |
+| `useDayColumnContext<TData>()` | `DayColumns` | `day`                                        |
+| `useAllDayContext<TData>()`    | `AllDayRow`  | `row`, `laneHeight`, `lanes`                 |
+| `useMonthRowContext<TData>()`  | `MonthRows`  | `row`, `days`, `maxLanes`, `laneHeight`      |
+| `useMonthDayContext<TData>()`  | `MonthDays`  | `day`, `boxes`, `bars`, `hiddenBars`         |
+| `useAgendaDayContext<TData>()` | `AgendaDays` | `day`, `bars`, `boxes`                       |
+
+Compose slotted views as `Root > TimeGrid > DayColumns > TimeSlots/TimedEvents/NowMarker`;
+place `TimeLabels` inside `TimeAxis` in the same grid. Compose month rows under
+`Root`, with `MonthDays` and `MonthAllDayEvents` as siblings in each `MonthRows`
+snippet; place `MonthTimedEvents` inside `MonthDays`. For agenda, place the event
+components inside `AgendaDays` under `Root`. `MonthGrid` and `AgendaList` supply
+markup and geometry rather than additional context providers.
+
+### Rendering contracts
+
+`EventInput<TData>` flows through the computed calendar layout into day, row, bar, box, and snippet values. `createCalendarComponents<TData>()` supplies type information for those snippet values; it does not transform payloads. Core layout values `box.top`, `box.height`, `box.left`, and `box.width` are fractions. The timed-event components apply those fractions as percentages and apply event positioning to their own host element. When writing custom geometry on another element, convert a fraction to a CSS percentage by multiplying by 100; when using a component's positioned host, do not apply the same geometry again to its child. Month timed events render within a day cell and do not apply slotted time-grid geometry.
+
+The all-day row hides when it has no bars and reserves `minLanes` only when requested. Month rows show all lanes by default; `maxLanes` filters rendered bars and exposes per-day `hiddenBars`. Agenda days omit empty days unless `showEmptyDays` is true. The calendar gutter is shared across header, all-day row, and time grid. Labels use the root locale and fall back to the original ISO value if formatting fails. See [core data and layout contracts](../core/DOCUMENTATIONS.md).
+
+## Minimal example
+
+This composition shows the day-column context consumed by time slots, timed events, and the now marker. Geometry belongs to the `TimedEvents` host; the snippet only supplies content and styling:
+
+```svelte
+<C.Root {range} {events}>
+  {#snippet children()}
+    <C.TimeGrid>
       {#snippet children()}
-        <C.TimeAxis>
-          {#snippet children({ dayHeight })}
-            <div style={`height:${dayHeight}px`}><C.TimeLabels /></div>
-          {/snippet}
-        </C.TimeAxis>
         <C.DayColumns>
           {#snippet children({ day })}
-            <span class="date">{day.date}</span>
+            <span>{day.date}</span>
             <C.TimeSlots />
             <C.TimedEvents>
-              {#snippet children({ event, box })}
-                <article
-                  class="timed"
-                  style={`background:${event.data?.color};top:${box.top}%;height:${box.height}%`}
-                >
-                  {event.data?.title}
-                </article>
+              {#snippet children({ event })}
+                <span class="event-title">{event.data?.title}</span>
               {/snippet}
             </C.TimedEvents>
             <C.NowMarker />
@@ -125,63 +159,40 @@ The engine also works without Temporal and reports whether it is available throu
 </C.Root>
 ```
 
-The `children` snippet replaces a primitive's default rendering and receives its scope. Without a snippet, components use simple labels or event IDs where those make sense. `as` accepts an HTML tag name, and `style` accepts a CSS string or a style object. Standard HTML attributes and event handlers pass through to the generated element.
-
-## Month view
-
-`MonthRows` provides each row's lane configuration. Place `MonthAllDayEvents` beside `MonthDays` in the row snippet so each spanning bar is rendered once over its full row. `MonthDays` provides each day with its timed boxes, all-day bars, hidden overflow bars, visible lane count, and formatted day number.
+For a month view, the `MonthRows` snippet provides the row and its days; nest `MonthDays` and `MonthAllDayEvents` in that row, then put `MonthTimedEvents` in each day. The components read their row/day from context:
 
 ```svelte
-<C.MonthGrid>
-  {#snippet children()}
-    <C.MonthWeekdays>
-      {#snippet children({ day, weekdayLabel })}
-        <div data-date={day.date}>{weekdayLabel}</div>
+<C.MonthRows maxLanes={3}>
+  {#snippet children({ row, days })}
+    <C.MonthAllDayEvents>
+      {#snippet children({ event, bar })}
+        <div data-lane={bar.lane}>{event.data?.title}</div>
       {/snippet}
-    </C.MonthWeekdays>
-    <C.MonthRows maxLanes={2} laneHeight={20}>
-      {#snippet children({ row, days })}
-        <C.MonthAllDayEvents>
-          {#snippet children({ event, bar })}
-            <div class="bar" data-lane={bar.lane}>{event.data?.title}</div>
-          {/snippet}
-        </C.MonthAllDayEvents>
-        <C.MonthDays>
-          {#snippet children({ day, hiddenBars, lanes })}
-            <section data-date={day.date} data-visible-lanes={lanes}>
-              <span>{day.date}</span>
-              {#each hiddenBars as bar (`${bar.event.id}-${bar.startDay}`)}
-                <button class="more">More: {bar.event.data?.title}</button>
-              {/each}
-              <C.MonthTimedEvents>
-                {#snippet children({ event, box })}
-                  <div class="month-event" data-start-minute={box.startMinute}>
-                    {event.data?.title}
-                  </div>
-                {/snippet}
-              </C.MonthTimedEvents>
-            </section>
-          {/snippet}
-        </C.MonthDays>
+    </C.MonthAllDayEvents>
+    <C.MonthDays>
+      {#snippet children({ day, hiddenBars })}
+        <section>
+          <span>{day.date}</span>
+          {#if hiddenBars.length}<span>+{hiddenBars.length} more</span>{/if}
+          <C.MonthTimedEvents>
+            {#snippet children({ event })}<div>{event.data?.title}</div>{/snippet}
+          </C.MonthTimedEvents>
+        </section>
       {/snippet}
-    </C.MonthRows>
+    </C.MonthDays>
   {/snippet}
-</C.MonthGrid>
+</C.MonthRows>
 ```
 
-Set `maxLanes={null}` to show all all-day lanes. The default is `null`.
-
-## Agenda view
-
-`AgendaDays` hides empty days by default. Set `showEmptyDays` to render each day in the range. All-day and timed events are exposed as snippets, and timed events include a localized `timeRangeLabel`.
+For an agenda, nest `AgendaDays` in `AgendaList`; each day snippet can use its bars directly or delegate to the event components:
 
 ```svelte
 <C.AgendaList>
   {#snippet children()}
-    <C.AgendaDays showEmptyDays>
-      {#snippet children({ day, weekdayLabel, dayLabel, monthLabel })}
+    <C.AgendaDays>
+      {#snippet children({ day, weekdayLabel, dayLabel, bars })}
         <section>
-          <h2>{weekdayLabel}, {monthLabel} {dayLabel}</h2>
+          <h2>{weekdayLabel} {dayLabel}</h2>
           <C.AgendaAllDayEvents>
             {#snippet children({ event })}<p>{event.data?.title}</p>{/snippet}
           </C.AgendaAllDayEvents>
@@ -190,6 +201,7 @@ Set `maxLanes={null}` to show all all-day lanes. The default is `null`.
               <p>{timeRangeLabel}: {event.data?.title}</p>
             {/snippet}
           </C.AgendaTimedEvents>
+          <small>{bars.length} all-day bars</small>
         </section>
       {/snippet}
     </C.AgendaDays>
@@ -197,143 +209,20 @@ Set `maxLanes={null}` to show all all-day lanes. The default is `null`.
 </C.AgendaList>
 ```
 
-## Navigation
+## Errors and limitations
 
-`Calendar.Toolbar` generates previous, today, next, and view buttons unless you provide its `children` snippet. It requires `onNavigate`, which receives the next range; keep that range in `$state` so the root and all descendants update.
+`Root` renders a recognized calendar error through `renderError` when supplied; otherwise it throws that error. Errors outside the caught set propagate. The `calendar` getter on the calendar context throws the current calendar error if the root is in its error state.
 
-For a store-backed range outside the built-in toolbar, use `useCalendarNavigation(rangeStore)`. It returns a Svelte readable store. `calendarNavigation(range)` returns the same navigation object for a plain value. Invalid previous/next transitions return `null`; `today` is `null` when the range cannot be navigated.
+Without Temporal, core uses its Date fallback and warns. Ordinary calendar construction and navigation remain available, while recurrence expansion and cross-zone/DST calculations can be approximate; malformed event input can still be rejected. See [core browser behavior](../core/DOCUMENTATIONS.md#browser-behavior). Install and load `temporal-polyfill/global` when exact behavior is required.
 
-## Calendar result stores
+`useNow` starts a timer only while subscribed in a browser. Its initial value and its value for an unreadable time zone are `null`; server rendering does not start a timer. Invalid previous/next transitions return `null`, and `today` is null when it cannot read the range time zone. Context readers must run during component initialization under their matching provider. Retain the context object and read its fields in reactive expressions: its getter-backed values track current props, while destructuring a field once captures a snapshot.
 
-`useCalendar(rangeStore, eventsStore)` returns a readable store containing either `{ calendar, error: null }` or `{ calendar: null, error }`. It rebuilds when either store changes. `calendarResult(range, events)` computes the same union synchronously for ordinary values.
+## Source map and validation
 
-```ts
-import type { CalendarRange, EventInput } from '@midstem/chronous-svelte'
-import { get, writable } from 'svelte/store'
-import { useCalendar } from '@midstem/chronous-svelte'
-
-const range = writable<CalendarRange>({
-  view: 'week',
-  currentDate: '2026-03-18',
-  timeZone: 'Europe/Kyiv'
-})
-const events = writable<readonly EventInput[]>([])
-const result = useCalendar(range, events)
-console.log(get(result).error)
-```
-
-Within a Svelte component, auto-subscribe with `$result` or subscribe using the normal Svelte store API.
-
-## Typed payloads
-
-The base `Calendar` components accept any event data type. `createCalendarComponents<TData>()` returns the same component set with event and day snippets typed for `TData`:
-
-```svelte
-<script lang="ts">
-  import { createCalendarComponents } from '@midstem/chronous-svelte'
-  type Task = { title: string; owner: string }
-  const C = createCalendarComponents<Task>()
-</script>
-
-<C.TimedEvents>
-  {#snippet children({ event })}
-    <span>{event.data?.owner}: {event.data?.title}</span>
-  {/snippet}
-</C.TimedEvents>
-```
-
-## Errors and contexts
-
-`Calendar.Root` catches the engine's `InvalidRangeError`, `InvalidEventError`, `InvalidRecurrenceError`, and `MissingTemporalError`. Supply a `renderError` snippet to render those errors in place. Without it, the known error is thrown. Unexpected errors are never hidden.
-
-```svelte
-<C.Root {range} {events}>
-  {#snippet children()}<C.DayHeadings />{/snippet}
-  {#snippet renderError(error)}
-    <p role="alert">Calendar unavailable: {error.message}</p>
-  {/snippet}
-</C.Root>
-```
-
-Context readers are called during component initialization inside the matching provider. Keep the returned context object and read its fields in reactive expressions; destructuring a getter-backed field once would take a snapshot.
-
-```svelte
-<script lang="ts">
-  import { useCalendarContext } from '@midstem/chronous-svelte'
-
-  const context = useCalendarContext()
-</script>
-
-<p>{context.range.currentDate} ({context.calendar.days.length} days)</p>
-```
-
-The seven readers map to their providers as follows:
-
-| Reader                  | Provider        | Values                                                  |
-| ----------------------- | --------------- | ------------------------------------------------------- |
-| `useCalendarContext()`  | `Calendar.Root` | `calendar`, `range`, `locale`, `gutterWidth`            |
-| `useTimeGridContext()`  | `TimeGrid`      | `hourHeight`, `dayHeight`                               |
-| `useDayColumnContext()` | `DayColumns`    | `day`                                                   |
-| `useAllDayContext()`    | `AllDayRow`     | `row`, `laneHeight`, `lanes`                            |
-| `useMonthRowContext()`  | `MonthRows`     | `row`, `days`, `maxLanes`, `laneHeight`                 |
-| `useMonthDayContext()`  | `MonthDays`     | `day`, timed `boxes`, all covering `bars`, `hiddenBars` |
-| `useAgendaDayContext()` | `AgendaDays`    | `day`, `bars`, timed `boxes`                            |
-
-Calling a reader outside its matching provider throws a descriptive error.
-
-## Component reference
-
-All 23 primitives accept `as`, standard HTML attributes, `class`, and string or object `style`. A `children` snippet overrides the default markup and receives the scope shown below.
-
-| Component            | Main props                                                | `children` snippet scope                                                     |
-| -------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `Root`               | `range`, `events`, `locale`, `gutterWidth`, `renderError` | calendar context                                                             |
-| `Toolbar`            | `onNavigate`, `views`                                     | `navigation`, `range`, `title`, `goTo`                                       |
-| `Header`             | `gutterCell`                                              | calendar context                                                             |
-| `DayHeadings`        | —                                                         | `day`, `date`, `weekdayLabel`, `dayLabel`, `inCurrentPeriod`                 |
-| `AllDayRow`          | `laneHeight`, `minLanes`, `gutterCell`                    | `row`, `laneHeight`, `lanes`                                                 |
-| `AllDayEvents`       | `gap`                                                     | `event`, `bar`                                                               |
-| `TimeGrid`           | `hourHeight`, `scrollToHour`                              | `hourHeight`, `dayHeight`                                                    |
-| `TimeAxis`           | —                                                         | `hourHeight`, `dayHeight`                                                    |
-| `TimeLabels`         | —                                                         | `slot`, `minuteOfDay`, `timeLabel`                                           |
-| `DayColumns`         | —                                                         | `day`                                                                        |
-| `TimeSlots`          | —                                                         | `slot`, `minuteOfDay`                                                        |
-| `TimedEvents`        | `minHeight`, `gap`                                        | `event`, `box`                                                               |
-| `NowMarker`          | —                                                         | `minuteOfDay`                                                                |
-| `MonthGrid`          | —                                                         | calendar context                                                             |
-| `MonthWeekdays`      | —                                                         | `day`, `weekdayLabel`                                                        |
-| `MonthRows`          | `maxLanes`, `laneHeight`                                  | `row`, `days`, `maxLanes`, `laneHeight`                                      |
-| `MonthDays`          | —                                                         | `day`, `boxes`, `bars`, `hiddenBars`, `dayLabel`, `inCurrentPeriod`, `lanes` |
-| `MonthAllDayEvents`  | `gap`, `lanesTopOffset`                                   | `event`, `bar`                                                               |
-| `MonthTimedEvents`   | —                                                         | `event`, `box`                                                               |
-| `AgendaList`         | —                                                         | calendar context                                                             |
-| `AgendaDays`         | `showEmptyDays`                                           | `day`, `bars`, `boxes`, `weekdayLabel`, `dayLabel`, `monthLabel`             |
-| `AgendaAllDayEvents` | —                                                         | `event`, `bar`                                                               |
-| `AgendaTimedEvents`  | —                                                         | `event`, `box`, `timeRangeLabel`                                             |
-
-## Current-time marker and SSR
-
-`Calendar.NowMarker` renders only in the day column matching the current date in the calendar's time zone. It refreshes every 30 seconds. Its timer starts only for browser subscribers and stops when the last subscriber unmounts. The exported `useNow(timeZone)` returns a `Readable<CalendarNow | null>`; it is `null` before a browser subscription (including during SSR), emits the current zoned date and minute on subscribe, and clears its interval when the final subscriber unsubscribes. The server output omits the current-time marker until hydration, so rendering does not require `window` or start timers.
-
-The package publishes `.svelte` component sources through the Svelte export condition. Svelte-aware build tools compile those components for the target, including server rendering. Import the adapter from your application entry; do not import individual files from its `dist` folder.
-
-## Defaults
-
-The adapter follows the React layout defaults: locale `en-US`, gutter width `3.25rem`, 60 pixels per hour, initial scroll to hour 7, 24-pixel all-day lanes with no reserved lane unless requested, 4-pixel all-day event gaps, 22-pixel minimum timed-event height with a 3-pixel gap, 20-pixel month lanes, unlimited month lanes, a 28-pixel month all-day offset, and hidden empty agenda days.
-
-All components are headless. Their inline geometry keeps event positioning and slot alignment consistent; class names, colors, borders, and typography belong to the application.
-
-## Working on this package
-
-Run `npm run build` from the repository root to build core before the adapters.
-The Svelte build uses `svelte-package` for preprocessed components and their
-declarations, then Vite to bundle the local `src/engine.ts` entry. It uses the
-core build's self-contained public declaration as `dist/engine.d.ts`.
-`verify:dist` checks that the package resolves no separate core dependency and
-that no internal aliases or Temporal namespace types reach the published files.
-
-```bash
-npm run build
-npm run typecheck --workspace @midstem/chronous-svelte
-npm run test:run --workspace @midstem/chronous-svelte
-```
+- Public exports and component list: [`src/index.ts`](src/index.ts), [`src/components/index.ts`](src/components/index.ts)
+- Component prop and snippet types: [`src/components/types.ts`](src/components/types.ts)
+- Reactive results and navigation: [`src/calendar`](src/calendar), [`src/navigation`](src/navigation)
+- Context providers and getters: [`src/components/context`](src/components/context)
+- Clock and SSR behavior: [`src/components/slotted/use-now.ts`](src/components/slotted/use-now.ts), [`tests/ssr.test.ts`](tests/ssr.test.ts)
+- Package export condition and peer dependency: [`package.json`](package.json)
+- Validate with `npm run typecheck --workspace @midstem/chronous-svelte` and `npm run test:run --workspace @midstem/chronous-svelte` from the repository root.

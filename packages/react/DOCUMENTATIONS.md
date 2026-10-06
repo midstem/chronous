@@ -1,306 +1,200 @@
-# `@midstem/chronous-react` documentation
+# `@midstem/chronous-react` agent reference
 
-The whole React surface: the one install, Temporal on Safari, the two hooks,
-every component and the rules they follow. The [README](README.md) is the short
-way in, and [`@midstem/chronous`](../core/DOCUMENTATIONS.md) documents the
-engine underneath.
+## Scope and source of truth
 
-This file is the source for [https://chronous.midstem.net/](https://chronous.midstem.net/)
-and stays in the repository — it is not part of the published package.
+This page documents the public React adapter API. The adapter re-exports the core engine API; date, recurrence, range, navigation, and Temporal semantics are defined by the [core reference](../core/DOCUMENTATIONS.md). Component behavior and defaults below are verified against package exports, TypeScript declarations, implementations, and tests.
 
-## Contents
+When changing a public contract, verify the implementation and exported types
+and update this reference in the same change. Source code takes precedence over
+examples or descriptions that disagree with it.
 
-- [One install](#one-install)
-- [Temporal, and Safari](#temporal-and-safari)
-- [`useCalendar`](#usecalendar)
-- [`useCalendarNavigation`](#usecalendarnavigation)
-- [Components](#components)
-- [Typed event data](#typed-event-data)
-- [Labels](#labels)
+## Setup and imports
 
-## One install
+Install `@midstem/chronous-react` and React 18 or newer:
 
-One package is enough. The engine is built into this bundle rather than
-installed beside it, and everything it exports is re-exported from here —
-`buildCalendar`, `formatIso`, `calendarReducer`, the error
-classes and every type — so a React app never installs or imports
-`@midstem/chronous` by name:
-
-```tsx
-import { Calendar, formatIso } from '@midstem/chronous-react'
-import type { CalendarRange, EventInput } from '@midstem/chronous-react'
+```sh
+npm install @midstem/chronous-react react
 ```
 
-Install `@midstem/chronous` on its own only where React is not involved — a
-server, a worker, another framework. Its version never has to line up with this
-one, because nothing here resolves it at runtime. The one thing that does not
-survive that split is `instanceof`: an error thrown by a separately installed
-engine is not an instance of the error classes exported here, so catch it
-against the package that built the calendar.
-
-## Temporal, and Safari
-
-For exact calendar behavior, install `temporal-polyfill` in the application
-and import its global entry before rendering on browsers without native
-Temporal:
+The adapter bundles its `@midstem/chronous` dependency; import the engine and types from this package. For runtimes without native Temporal, load a compatible polyfill before rendering if exact Temporal behavior is required:
 
 ```ts
 import 'temporal-polyfill/global'
 ```
 
-Chronous does not bundle the polyfill. If `globalThis.Temporal` is absent, it
-automatically uses a `Date` fallback and warns in the console. The range API
-does not change. Ordinary events and approximate recurring instances keep rendering. An
-unreadable event may be omitted with a warning, and DST layout may be approximate. See the
-[core browser behavior](../core/DOCUMENTATIONS.md#browser-behavior).
-
-## `useCalendar`
-
-`useCalendar(range, events)` is a memoized projection of `buildCalendar`. It
-holds no state and runs no effects: the range is yours, so it can live in a
-router, a query string or `useState`. A `CalendarRange` names what to draw —
-the view, the date it is currently on and the time zone.
+See the core reference's browser behavior section for fallback details.
 
 ```tsx
-const { calendar, error } = useCalendar(range, events)
+import {
+  Calendar,
+  useCalendar,
+  useCalendarNavigation
+} from '@midstem/chronous-react'
+import type { CalendarRange, EventInput } from '@midstem/chronous-react'
+
+const range: CalendarRange = {
+  view: 'week',
+  currentDate: '2026-03-18',
+  timeZone: 'Europe/Kyiv'
+}
+const events: EventInput<{ title: string }>[] = [
+  {
+    id: 'standup',
+    start: '2026-03-18T09:00',
+    duration: 'PT30M',
+    data: { title: 'Standup' }
+  }
+]
 ```
 
-The memo is keyed on the fields of the range rather than on its identity, so an
-inline object literal does not rebuild the calendar on every render. Events are
-keyed by reference — memoize that array yourself if it is built inline.
+## Public API
 
-`buildCalendar` throws on the first unusable event, on an unreadable range and
-on a recurrence rule it cannot read, and a throw during render takes the whole
-tree down. The hook catches `InvalidEventError`, `InvalidRangeError` and
-`InvalidRecurrenceError` and hands them back instead: `calendar` is null exactly
-when `error` is set. Anything else is a bug and is left to propagate.
+The package root re-exports the core values `buildCalendar`, `calendarReducer`, `formatIso`, `initialCalendarState`, `isTemporalAvailable`, and the error classes `InvalidEventError`, `InvalidRangeError`, `InvalidRecurrenceError`, `MissingTemporalError`. It also re-exports core types including `CalendarRange`, `CalendarLayout`, `CalendarDay`, `CalendarRow`, `CalendarBar`, `CalendarBox`, `CalendarSlot`, `CalendarEntry`, `TimedEntry`, `EventInput`, `RecurrenceInput`, `RecurrenceOverride`, `CalendarAction`, `CalendarState`, `CalendarSelection`, `ViewKind`, `IsoDate`, `IsoDateTime`, `TimeZoneId`, `LocaleId`, `WeekStartsOn`, `Disambiguation`, and formatting types.
 
-## `useCalendarNavigation`
+Adapter exports are `Calendar`, `createCalendarComponents`, `useCalendar`, `useCalendarNavigation`, `useNow`, the context hooks below, and component/scope prop types. Components are accessed as `Calendar.Root`, `Calendar.Toolbar`, and so on; component and scope prop types are named exports.
 
-`useCalendarNavigation(range)` returns the ranges to move to, and never sets
-state itself. It is a thin wrapper over `calendarReducer` — the same steps are
-available without React, and without a rendered calendar.
+`useCalendar(range, events)` returns `{ calendar, error }`. `range` is a `CalendarRange`; `events` is a readonly event array. Its result is a discriminated union: a successful layout with `error: null`, or `calendar: null` with a `CalendarError` (`InvalidEventError | InvalidRangeError | InvalidRecurrenceError | MissingTemporalError`). The range is stabilized by its fields; calendar projection is memoized by that stable range and the `events` array identity. Keep an inline-created events array stable when avoiding recomputation matters.
+
+`useCalendarNavigation(range)` returns `{ next, prev, today, withView }`. `next` and `prev` are `CalendarRange | null`; `today` is `(() => CalendarRange) | null`; `withView(view)` returns the range with that view applied. The hook does not update application state. `today` reads the current wall clock when called.
+
+`useNow(timeZone)` returns `CalendarNow | null`, with `{ date: IsoDate, minuteOfDay: number }`. It samples every 30 seconds after mount and initially returns `null`; an unreadable time zone also returns `null`.
+
+`createCalendarComponents<TData>()` returns the same `Calendar` object with its render-prop scopes typed to `TData`; it performs no runtime work. Without it, event data in component scopes defaults to `unknown`.
+
+## Data and behavior contracts
+
+### Components, props, defaults, and provider hierarchy
+
+All components default to `as="div"`, except `TimeSlots` (`span`). Their props include `children` and standard props for the selected HTML element. `Root` provides calendar state to descendants. Nested providers are established by `TimeGrid`, `DayColumns`, `AllDayRow`, `MonthRows`, `MonthDays`, and `AgendaDays`; use those components inside the parent contexts shown in the last column.
+
+| Component            | Additional props (default)                                                            | Scope fields                                                                 | Required ancestor       |
+| -------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ----------------------- |
+| `Root`               | `range`, `events` required; `locale="en-US"`; `gutterWidth="3.25rem"`; `renderError?` | `calendar`, `range`, `locale`, `gutterWidth`                                 | —                       |
+| `Toolbar`            | `onNavigate` required; `views=['day','week','month','agenda']`                        | `navigation`, `range`, `title`, `goTo`                                       | `Root`                  |
+| `Header`             | `gutterCell=null`                                                                     | same as root context                                                         | `Root`                  |
+| `DayHeadings`        | —                                                                                     | `day`, `date`, `weekdayLabel`, `dayLabel`, `inCurrentPeriod`                 | `Root`                  |
+| `AllDayRow`          | `laneHeight=24`; `minLanes=0`; `gutterCell=null`                                      | `row`, `laneHeight`, `lanes`                                                 | `Root`                  |
+| `AllDayEvents`       | `gap=4`                                                                               | `event`, `bar`                                                               | `AllDayRow`             |
+| `TimeGrid`           | `hourHeight=60`; `scrollToHour=7` (`null` disables initial scroll)                    | `hourHeight`, `dayHeight`                                                    | `Root`                  |
+| `TimeAxis`           | —                                                                                     | `hourHeight`, `dayHeight`                                                    | `TimeGrid`              |
+| `TimeLabels`         | —                                                                                     | `slot`, `minuteOfDay`, `timeLabel`                                           | `Root`                  |
+| `DayColumns`         | —                                                                                     | `day`                                                                        | `Root` and `TimeGrid`   |
+| `TimeSlots`          | —                                                                                     | `slot`, `minuteOfDay`                                                        | `DayColumns`            |
+| `TimedEvents`        | `minHeight=22`; `gap=3`                                                               | `event`, `box`                                                               | `Root` and `DayColumns` |
+| `NowMarker`          | —                                                                                     | `minuteOfDay`                                                                | `Root` and `DayColumns` |
+| `MonthGrid`          | —                                                                                     | `calendar`, `range`, `locale`, `gutterWidth`                                 | `Root`                  |
+| `MonthWeekdays`      | —                                                                                     | `day`, `weekdayLabel`                                                        | `Root`                  |
+| `MonthRows`          | `maxLanes=null`; `laneHeight=20`                                                      | `row`, `days`, `maxLanes`, `laneHeight`                                      | `Root`                  |
+| `MonthDays`          | —                                                                                     | `day`, `boxes`, `bars`, `hiddenBars`, `dayLabel`, `inCurrentPeriod`, `lanes` | `MonthRows`             |
+| `MonthAllDayEvents`  | `gap=4`; `lanesTopOffset=28`                                                          | `event`, `bar`                                                               | `MonthRows`             |
+| `MonthTimedEvents`   | —                                                                                     | `event`, `box`                                                               | `MonthDays`             |
+| `AgendaList`         | —                                                                                     | `calendar`, `range`, `locale`, `gutterWidth`                                 | `Root`                  |
+| `AgendaDays`         | `showEmptyDays=false`                                                                 | `day`, `bars`, `boxes`, `weekdayLabel`, `dayLabel`, `monthLabel`             | `Root`                  |
+| `AgendaAllDayEvents` | —                                                                                     | `event`, `bar`                                                               | `AgendaDays`            |
+| `AgendaTimedEvents`  | —                                                                                     | `event`, `box`, `timeRangeLabel`                                             | `AgendaDays`            |
+
+Plural components iterate their data: for example, `DayColumns` renders one column per day and `TimedEvents` one element per positioned event. A scoped child may be a React node or a function receiving that component's scope; children render inside the provider boundary. Per-item scopes are available to custom descendants through the context hooks.
+
+`useCalendarContext<TData>()` reads `CalendarContextValue<TData>` (`calendar`, `range`, `locale`, `gutterWidth`) from `Root`. `useTimeGridContext()` reads `{ hourHeight, dayHeight }` from `TimeGrid`. `useDayColumnContext<TData>()` reads `{ day }` from `DayColumns`; `useAllDayContext<TData>()` reads `{ row, laneHeight, lanes }` from `AllDayRow`; `useMonthRowContext<TData>()` reads `{ row, days, maxLanes, laneHeight }` from `MonthRows`; `useMonthDayContext<TData>()` reads `{ day, boxes, bars, hiddenBars }` from `MonthDays`; `useAgendaDayContext<TData>()` reads `{ day, bars, boxes }` from `AgendaDays`. Calling a context hook without its provider throws an error naming the required parent component.
+
+### Rendering conventions
+
+`DayHeadings`, `DayColumns`, `MonthDays`, and `AgendaDays` set `data-date` and `data-in-current-period`; event renderers set `data-event-id`, `data-continues-before`, and `data-continues-after`. Caller attributes can override these defaults.
+
+`as` selects the rendered tag. React element props, handlers, `className`, and ARIA attributes are forwarded. Components that compute layout merge the computed style with the caller's style, with caller values taking precedence. Scopes distinguish formatted strings by `Label` suffix; the components expose `weekdayLabel`, `dayLabel`, `monthLabel`, `timeLabel`, and `timeRangeLabel` where listed in the table. Values such as `day`, `slot`, `box`, `bar`, and `minuteOfDay` remain structured engine data. Component label helpers fall back to the input string if `formatIso` rejects the locale or options. The `Toolbar`'s `onNavigate(range)` callback receives ranges; its custom child scope exposes the same callback as `goTo`.
+
+`Root` renders `renderError(error)` within its own element when calendar construction fails and a renderer is supplied. Without `renderError`, it rethrows during render. For direct error-state handling, use `useCalendar`.
+
+`AllDayRow` renders no row when the range has no all-day events unless `minLanes` reserves lanes. `MonthRows.maxLanes` limits displayed all-day bars; each month-day scope still exposes its `hiddenBars`, all `bars`, and `lanes`. `TimeGrid` initially scrolls to the nearest scrolling ancestor at `scrollToHour`; set it to `null` to skip this behavior. `useNow` is an independent clock hook.
+
+## Minimal example
 
 ```tsx
-const { next, prev, today, withView } = useCalendarNavigation(range)
+import { Calendar, createCalendarComponents } from '@midstem/chronous-react'
+import type { CalendarRange, EventInput } from '@midstem/chronous-react'
 
-<button disabled={!prev} onClick={() => prev && setRange(prev)}>Back</button>
-<button disabled={!today} onClick={() => today && setRange(today())}>Today</button>
-<button disabled={!next} onClick={() => next && setRange(next)}>Forward</button>
+const TypedCalendar = createCalendarComponents<{ title: string }>()
+const range: CalendarRange = {
+  view: 'week',
+  currentDate: '2026-03-18',
+  timeZone: 'Europe/Kyiv'
+}
+const events: EventInput<{ title: string }>[] = [
+  {
+    id: 'standup',
+    start: '2026-03-18T09:00',
+    duration: 'PT30M',
+    data: { title: 'Standup' }
+  }
+]
+
+export function WeekCalendar() {
+  return (
+    <TypedCalendar.Root range={range} events={events}>
+      <TypedCalendar.TimeGrid>
+        <TypedCalendar.TimeAxis>
+          <TypedCalendar.TimeLabels />
+        </TypedCalendar.TimeAxis>
+        <TypedCalendar.DayColumns>
+          <TypedCalendar.TimeSlots />
+          <TypedCalendar.TimedEvents>
+            {({ event }) => event.data?.title}
+          </TypedCalendar.TimedEvents>
+        </TypedCalendar.DayColumns>
+      </TypedCalendar.TimeGrid>
+    </TypedCalendar.Root>
+  )
+}
 ```
 
-A step moves by the period the range asks for: a day by one day, a week by
-seven, a span by its own length, and a month by one month anchored on the
-first — so a long month never drags the anchor backwards. The weekday of the
-anchor survives a week step, which is what makes switching to `day` afterwards
-land where the reader was looking.
+Month and agenda components replace the slotted view inside `Root`. Choose the composition that matches `range.view`.
 
-`next` and `prev` remain usable when Temporal is absent because core uses its
-automatic Date fallback. They are null when the range cannot be stepped, such
-as an unreadable anchor date or invalid `dayCount`. DST transitions can make
-the resulting calendar layout approximate and produce a console warning.
-
-`today` is a function rather than a value because it depends on the wall clock
-and not on the inputs: it is read at the click, in the calendar's own zone. It
-is null only when that zone itself cannot be read, because then there is no
-today to read and no move that would help — fix the zone instead.
-
-## Components
-
-`Calendar` is a compound component built on the same two hooks. The tedious half
-comes already wired — geometry, scoping, keys — and everything you can see is
-yours to write: every part renders the tag you name, takes your class names and
-your markup, and hands you the event behind it. Nothing here is closed off; the
-pieces arrive pre-wired, not locked down, so styling is the part left for you.
+Month composition:
 
 ```tsx
-import { Calendar } from '@midstem/chronous-react'
-
-;<Calendar.Root range={range} events={events} locale="en-GB">
-  <Calendar.Header className="grid-header">
-    <Calendar.DayHeadings className="heading">
-      {({ weekdayLabel, dayLabel }) => (
+<TypedCalendar.MonthGrid>
+  <TypedCalendar.MonthWeekdays>
+    {({ weekdayLabel }) => weekdayLabel}
+  </TypedCalendar.MonthWeekdays>
+  <TypedCalendar.MonthRows maxLanes={3}>
+    <TypedCalendar.MonthDays>
+      {({ dayLabel, hiddenBars }) => (
         <>
-          <span>{weekdayLabel}</span> <strong>{dayLabel}</strong>
+          {dayLabel}
+          {hiddenBars.length > 0 && <span>+{hiddenBars.length}</span>}
+          <TypedCalendar.MonthTimedEvents />
         </>
       )}
-    </Calendar.DayHeadings>
-  </Calendar.Header>
-
-  <Calendar.AllDayRow gutterCell="all-day">
-    <Calendar.AllDayEvents className="bar">
-      {({ event }) => event.data?.title}
-    </Calendar.AllDayEvents>
-  </Calendar.AllDayRow>
-
-  <Calendar.TimeGrid hourHeight={60}>
-    <Calendar.TimeAxis className="gutter">
-      <Calendar.TimeLabels className="tick" />
-    </Calendar.TimeAxis>
-
-    <Calendar.DayColumns className="column">
-      <Calendar.TimeSlots className="line" />
-      <Calendar.NowMarker className="now" />
-      <Calendar.TimedEvents as="button" className="event" onClick={open}>
-        {({ event }) => event.data?.title}
-      </Calendar.TimedEvents>
-    </Calendar.DayColumns>
-  </Calendar.TimeGrid>
-</Calendar.Root>
+    </TypedCalendar.MonthDays>
+    <TypedCalendar.MonthAllDayEvents />
+  </TypedCalendar.MonthRows>
+</TypedCalendar.MonthGrid>
 ```
 
-`MonthGrid` / `MonthWeekdays` / `MonthRows` / `MonthDays` /
-`MonthAllDayEvents` / `MonthTimedEvents` cover the month view, and
-`AgendaList` / `AgendaDays` / `AgendaAllDayEvents` / `AgendaTimedEvents` the
-agenda. The pair repeats in every view: `AllDayEvents` draws what the engine
-laid out as bars, `TimedEvents` what it laid out inside a day. `Toolbar` wraps
-`useCalendarNavigation` and reports where to move to through `onNavigate` — the
-same function reaches its render prop as `goTo`, so a toolbar of your own reads
-`goTo(navigation.next)`. `useNow` reads the wall clock in the calendar's own
-zone when you want to mark today yourself.
-
-Six rules cover the whole surface.
-
-**A plural name iterates.** `DayColumns` renders one element per day,
-`TimedEvents` one per box, `TimeSlots` one per slot. This is the one place the
-API departs from Radix, where a child is always one element: the calendar's
-repetition is the engine's, not the consumer's, so the component owns the loop
-and the keys. Singular names — `Root`, `Header`, `TimeGrid`, `NowMarker` — render
-once.
-
-**Children are a node or a function of the scope**, and either way they render
-inside that scope, so nested components resolve:
+Agenda composition:
 
 ```tsx
-<Calendar.MonthDays>
-  {({ dayLabel, inCurrentPeriod }) => (
-    <div data-outside={!inCurrentPeriod}>
-      {dayLabel}
-      <Calendar.MonthTimedEvents className="dot" />
-    </div>
-  )}
-</Calendar.MonthDays>
-```
-
-Every scope is also a hook — `useDayColumnContext`, `useMonthRowContext`,
-`useAgendaDayContext` and the rest — so a component of your own can sit inside
-`Calendar.DayColumns` and read the day without a render prop. Reading a scope
-outside its parent throws and names the parent it wants.
-
-**`as` picks the tag, and your `style` wins.** Every component forwards
-`className`, `ref`, handlers and `aria-*` to the element it renders, and merges
-the layout it computed underneath the `style` you pass — so an event can be a
-`<button>`, and a `top` of your own overrides the one the engine placed.
-
-**A formatted string ends in `Label`.** `weekdayLabel`, `dayLabel`,
-`monthLabel`, `timeLabel` and `timeRangeLabel` have already been through
-`formatIso` in the calendar's locale and are ready to render. Everything without
-the suffix is data: `day` is a `CalendarDay`, `box` a `CalendarBox`, `bar` a
-`CalendarBar`, and `minuteOfDay` a number.
-
-**Per-item state arrives as data attributes**, because `className` is shared by
-every element a component renders. `data-date` and `data-in-current-period`
-land on
-`DayHeadings`, `DayColumns`, `MonthDays` and `AgendaDays`; `data-event-id` and
-`data-continues-before` / `data-continues-after` land on the event components. A
-prop you pass wins over the attribute, so you can pin one when you need to:
-
-```tsx
-<Calendar.MonthDays className="data-[in-current-period=false]:bg-zinc-50" />
-```
-
-**The gutter lives on `Root`.** `Header`, `AllDayRow` and `TimeGrid` lay out
-the same CSS grid, so `gutterWidth` is one prop on the root rather than three
-that can drift apart. Month and agenda ignore it. What goes _in_ that leading
-column is `gutterCell`, on `Header` and on `AllDayRow`.
-
-### Overflow, and the empty all-day row
-
-Two cut-offs are shared between siblings, so they cannot drift apart.
-
-`MonthRows` takes `maxLanes`, and the `laneHeight` its bars are drawn at, for
-the same reason the gutter lives on `Root`: both are shared with siblings, so
-they sit on the parent rather than on one child that could drift from another.
-`MonthAllDayEvents` then stops drawing bars past that lane, and every
-`MonthDays` cell is handed the bars that cover _it_ —
-`bars` for all of them, `hiddenBars` for the ones the cut-off dropped, and
-`lanes` counting only what is drawn. That is the whole "+2 more" affordance:
-
-```tsx
-<Calendar.MonthRows maxLanes={3}>
-  <Calendar.MonthDays>
-    {({ dayLabel, hiddenBars }) => (
+<TypedCalendar.AgendaList>
+  <TypedCalendar.AgendaDays>
+    {({ dayLabel }) => (
       <>
-        {dayLabel}
-        {hiddenBars.length > 0 && <button>+{hiddenBars.length} more</button>}
+        <h2>{dayLabel}</h2>
+        <TypedCalendar.AgendaAllDayEvents />
+        <TypedCalendar.AgendaTimedEvents>
+          {({ event }) => event.data?.title}
+        </TypedCalendar.AgendaTimedEvents>
       </>
     )}
-  </Calendar.MonthDays>
-  <Calendar.MonthAllDayEvents className="bar" />
-</Calendar.MonthRows>
+  </TypedCalendar.AgendaDays>
+</TypedCalendar.AgendaList>
 ```
 
-Timed events in a month cell need nothing new: `boxes` is already in the same
-scope, so `boxes.slice(0, 3)` and `boxes.length - 3` are yours to write.
+## Errors and limitations
 
-`AllDayRow` renders nothing when the range holds no all-day event, which frees
-the space but moves the grid under it as you step between weeks. `minLanes`
-holds the row open instead — `minLanes={1}` keeps one lane's height and the
-`gutterCell` with it, and a row that needs more lanes still gets them:
+The adapter's calendar error union is `InvalidEventError`, `InvalidRangeError`, `InvalidRecurrenceError`, and `MissingTemporalError`. These cover invalid or unreadable event data, invalid range inputs such as dates/time zones/slot settings, unreadable recurrence rules, and operations that require Temporal when no fallback is available. `useCalendar` returns these errors; `Root` rethrows them unless `renderError` is supplied. Unexpected exceptions are not converted to `CalendarError` and propagate.
 
-```tsx
-<Calendar.AllDayRow minLanes={1} gutterCell="all-day">
-  <Calendar.AllDayEvents className="bar" />
-</Calendar.AllDayRow>
-```
+Navigation uses `null` for unavailable `next`, `prev`, or `today`. `today` is a nullable function, not a range value. The adapter embeds its core build, so error classes imported from this package do not share identity with classes from a separately imported `@midstem/chronous` copy. Core fallback and DST limitations are described in the [core reference](../core/DOCUMENTATIONS.md).
 
-`TimeGrid` scrolls to `scrollToHour` on mount by finding the nearest element
-that actually scrolls — itself when nothing else does, the ancestor when your
-layout puts a sticky header above it. Pass `null` to leave the scroll alone.
+## Source map and validation
 
-`Root` renders `renderError(error)` inside its own element when the range or
-the events cannot be read, so the layout does not collapse, and rethrows when
-no `renderError` is given: an invalid range is a bug in the input, and
-swallowing it into a blank grid hides it. Reach for `useCalendar` directly when
-you want to handle it as state instead.
-
-## Typed event data
-
-Context cannot infer a type argument, so `Calendar` on its own hands render
-props `data?: unknown`. `createCalendarComponents` binds the namespace once and
-the type flows to every render prop:
-
-```tsx
-const Calendar = createCalendarComponents<{ title: string; owner: string }>()
-
-<Calendar.TimedEvents>
-  {({ event }) => event.data?.title}
-</Calendar.TimedEvents>
-```
-
-It is the same object at runtime — a cast, not a factory — so it costs nothing
-and can be created at module scope. It is named for what it returns, and not
-`createCalendar`, because `buildCalendar` arrives from the same import and
-builds something else entirely.
-
-## Labels
-
-No formatting ships here, and the hooks take no `locale`. Labels are the
-consumer's, and `formatIso` reads either shape a calendar hands back:
-
-```tsx
-import { formatIso } from '@midstem/chronous-react'
-
-formatIso(day.date, { locale, options: { weekday: 'short', day: 'numeric' } })
-formatIso(slot.start, {
-  locale,
-  options: { hour: '2-digit', minute: '2-digit' }
-})
-```
-
-`day.date` is a bare `2026-03-18` with no time and no offset, meant for keys,
-comparisons and headings; `day.start`, `slot.start` and `box.start` are full
-date-times carrying their offset. `formatIso` keeps the first floating and reads
-the second in the offset it carries, so neither needs `range.timeZone` passed
-back in. Reach for raw `Intl` only to step outside that — `new Date(day.date)`
-is UTC midnight, which is the previous day west of Greenwich.
+Public exports: [`src/index.ts`](src/index.ts), [`src/components/index.ts`](src/components/index.ts). Hook signatures: [`src/calendar/`](src/calendar/), [`src/navigation/`](src/navigation/), and [`src/components/slotted/use-now.ts`](src/components/slotted/use-now.ts). Component declarations and implementations: [`src/components/`](src/components/); contexts: [`src/components/context/`](src/components/context/). Behavior checks: [`src/__test__/`](src/__test__/), [`src/calendar/__test__/`](src/calendar/__test__/), [`src/navigation/__test__/`](src/navigation/__test__/), and [`src/components/__test__/`](src/components/__test__/). Format with `npx prettier --write packages/react/DOCUMENTATIONS.md`; run package checks with `npm run typecheck` and `npm run test:run` from `packages/react`.

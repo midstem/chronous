@@ -1,277 +1,281 @@
-# `@midstem/chronous` documentation
+# `@midstem/chronous` agent reference
 
-The whole engine surface: Temporal, events, recurrence, views, navigation,
-calendars, layout, lanes and labels. The [README](README.md) is the short way
-in.
+## Scope and source of truth
 
-This file is the source for [https://chronous.midstem.net/](https://chronous.midstem.net/)
-and stays in the repository — it is not part of the published package.
+This file describes the public API of `@midstem/chronous` and the behavior
+agents should preserve when changing it. The package root exports are defined
+in [`src/index.ts`](src/index.ts); implementation details are in the linked
+source files below. Update this reference when a public contract changes.
 
-## Contents
+## Setup and imports
 
-- [`@midstem/chronous` documentation](#midstemchronous-documentation)
-  - [Contents](#contents)
-  - [Temporal](#temporal)
-    - [Browser behavior](#browser-behavior)
-  - [Events](#events)
-  - [Recurrence](#recurrence)
-  - [Views](#views)
-  - [Navigation](#navigation)
-  - [Calendars](#calendars)
-  - [Layout](#layout)
-  - [Lanes](#lanes)
-  - [Labels](#labels)
-
-## Temporal
-
-For a practical explanation with ten calendar examples, see
-[Why Chronous uses Temporal](../../docs/WHY_TEMPORAL.md).
-
-Chronous uses [Temporal](https://tc39.es/proposal-temporal/docs/) for its full
-calendar behavior. It distinguishes an instant, a date without a time, and a
-wall time in a named zone. A `Date` plus `Intl.DateTimeFormat` is sufficient to
-show a one-off UTC instant in a viewer's zone. It is not enough by itself to
-recover an organizer's intended recurring wall time or to treat an all-day date
-as a date rather than midnight UTC.
-
-For example, an event stored as `2026-03-18T07:00:00Z` can be displayed as
-09:00 in Kyiv with `Date` and `Intl`. A meeting that repeats at 09:00 in
-`Europe/Kyiv` needs that named zone and wall-clock rule: adding seven times
-24 hours to the UTC instant can move the meeting after a DST transition. Store
-all-day events as date-only values such as `2026-03-18`, so conversion to a
-viewer's zone does not move the holiday to a different day.
-
-### Browser behavior
-
-For full calendar behavior, the application should install `temporal-polyfill`
-and import its global entry in browsers without native Temporal:
+The package root is the supported import path. Chronous reads
+`globalThis.Temporal` when an operation runs and does not install a polyfill.
+For full calendar behavior in runtimes without native Temporal, install
+`temporal-polyfill` and import its global entry before calling Chronous:
 
 ```ts
 import 'temporal-polyfill/global'
 import { buildCalendar } from '@midstem/chronous'
 ```
 
-Chronous does not include or install that polyfill. It reads
-`globalThis.Temporal` when an operation runs. Native Temporal or the global
-polyfill uses the full engine. If neither is present, Chronous automatically
-uses an internal `Date` and `Intl` fallback. The caller does not set a flag,
-and the input and output types stay the same. When Temporal becomes available,
-the same application code uses the full engine on its next call.
+`buildCalendar`, the navigation reducer and `formatIso` use an internal `Date`
+fallback when Temporal is absent; see [Browser behavior](#browser-behavior).
+`MissingTemporalError` is exported for identifying missing-Temporal failures.
 
-The fallback logs one warning about the missing polyfill. It renders the five
-views and ordinary fixed events, floating local times, all-day dates, and
-simple ISO durations. Floating times are interpreted in the event's zone or
-the calendar zone. Durations with calendar units use approximate elapsed time;
-a transition day can have approximate slot boundaries. These cases log more
-specific warnings. Recurring series expand approximately in the visible range, including daily, weekly,
-monthly and yearly intervals, explicit dates, exceptions and overrides. Some rule
-filters and DST transitions may produce different instances from the full
-engine; each series logs a warning naming its id. Malformed input such as
-`start: 'not-a-date'` is omitted with a warning while other events remain
-visible. An invalid calendar range
-still produces `InvalidRangeError` from the core function; framework adapters
-catch it and expose it in their `error` result.
+## Public API
 
-If the server supplies only separate events with fixed UTC `start` and `end`
-values, the fallback can convert and place them in `range.timeZone` without a
-polyfill. It still logs the missing-Temporal warning, and time-grid slots around
-a clock transition can be approximate. See [the concrete example](../../docs/WHY_TEMPORAL.md).
+The root exports these runtime values and types:
 
-This is a safety net for an application that forgot the polyfill, not a second
-full scheduling engine. Install the polyfill for exact recurrence, DST,
-ambiguous wall-time handling and the complete Temporal semantics.
-`isTemporalAvailable()` reports whether `globalThis.Temporal` is present; it
-may return `false` while the Date fallback is rendering.
+| Kind                      | Exports                                                                                                                                    |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Functions                 | `buildCalendar`, `calendarReducer`, `initialCalendarState`, `formatIso`, `isTemporalAvailable`                                             |
+| Errors                    | `InvalidEventError`, `InvalidRangeError`, `InvalidRecurrenceError`, `MissingTemporalError`                                                 |
+| Calendar types            | `AllDayEntry`, `CalendarBar`, `CalendarBox`, `CalendarDay`, `CalendarEntry`, `CalendarLayout`, `CalendarRow`, `CalendarSlot`, `TimedEntry` |
+| Event types               | `EventId`, `EventInput`, `RecurrenceInput`, `RecurrenceOverride`                                                                           |
+| Navigation types          | `CalendarAction`, `CalendarSelection`, `CalendarState`                                                                                     |
+| Range types               | `CalendarRange`, `ViewKind`                                                                                                                |
+| Time and formatting types | `DateTimeFormatOptions`, `Disambiguation`, `FormatOptions`, `IsoDate`, `IsoDateTime`, `LocaleId`, `TimeZoneId`, `WeekStartsOn`             |
 
-[FullCalendar 7](https://fullcalendar.io/docs/temporal-polyfill) also requires
-`temporal-polyfill`, but uses it as an internal module rather than installing a
-global. Chronous instead leaves polyfill installation to the application.
+Callable signatures are `buildCalendar<TData>(range: CalendarRange, events:
+readonly EventInput<TData>[]): CalendarLayout<TData>`,
+`initialCalendarState(range: CalendarRange): CalendarState`,
+`calendarReducer(state: CalendarState, action: CalendarAction): CalendarState`,
+`formatIso(value: IsoDateTime, options: FormatOptions): string`, and
+`isTemporalAvailable(): boolean`. `initialCalendarState` sets selection to
+`null`; it accepts only the range argument.
 
-## Events
+`EventId`, `IsoDate`, `IsoDateTime`, `LocaleId` and `TimeZoneId` are string
+aliases. `ViewKind` is `'day' | 'week' | 'days' | 'month' | 'agenda'`;
+`WeekStartsOn` is `0 | 1 | 2 | 3 | 4 | 5 | 6`; `Disambiguation` is
+`'compatible' | 'earlier' | 'later' | 'reject'`.
 
-An event is described with ISO-8601 strings. Times are read in the calendar's
-time zone unless the event carries its own — that is how a Kyiv office schedule
-stays correct when it is opened from Berlin.
+## Data and behavior contracts
+
+### Browser behavior
+
+`isTemporalAvailable()` reports whether `globalThis.Temporal` exists at the
+time it is called. When absent, calendar construction, date navigation and
+`formatIso` use the `Date`/`Intl` fallback and log a missing-Temporal warning
+once per engine copy. The fallback is approximate: it supports ordinary events,
+the five views, and basic recurrence, but recurrence filters and daylight
+saving transitions can differ from the Temporal implementation. Unsupported
+or malformed fallback events are omitted with a warning; invalid ranges still
+throw `InvalidRangeError`. The public calendar entry points use this fallback
+when Temporal is absent; `MissingTemporalError` remains part of the exported
+error API for missing-Temporal failures.
+
+Source: [`src/runtime/index.ts`](src/runtime/index.ts),
+[`src/time/temporal.ts`](src/time/temporal.ts),
+[`src/calendar/date-fallback`](src/calendar/date-fallback),
+[`src/calendar/date-fallback/warn.ts`](src/calendar/date-fallback/warn.ts).
+
+### Events
+
+`EventInput<TData>` has required `id` and ISO-string `start`; optional fields
+are `end`, `duration`, `allDay`, `timeZone`, `recurrence`, and `data`. An
+explicit `allDay` controls classification. Otherwise an event is all-day only
+when `start` and any supplied `end` are date-only strings. The event's
+`timeZone` defaults to the range zone. Timed inputs are normalized to the range
+zone; all-day values remain calendar dates. If both `end` and `duration` are
+given, `end` is used. A timed event with neither has zero duration; an all-day
+event defaults to one day. Date-only all-day ends are exclusive, and equal
+start and end are normalized to one day.
+
+ISO durations use Temporal duration arithmetic: date units are wall-calendar
+units, while clock units represent elapsed time. Ambiguous or skipped wall
+times use `disambiguation`, which defaults to `compatible`. A timed end before
+its start or unreadable event input throws `InvalidEventError`; the error
+exposes `eventId` and `reason`.
 
 ```ts
 type EventInput<TData = unknown> = {
-  id: string
-  start: string
-  end?: string
+  id: EventId
+  start: IsoDateTime
+  end?: IsoDateTime
   duration?: string
   allDay?: boolean
-  timeZone?: string
+  timeZone?: TimeZoneId
   recurrence?: RecurrenceInput<TData>
   data?: TData
 }
-```
 
-- `end` wins over `duration`; with neither, a timed event has zero length.
-- `duration` is an ISO-8601 duration (`PT90M`, `P3D`). Date units are calendar
-  arithmetic — `P1D` keeps the wall clock across a DST transition — while clock
-  units are exact, so `PT4H` is always four real hours.
-- An event is all-day when `allDay` says so, or when its dates carry no time.
-  All-day events are plain dates with no zone attached, and their `end` is
-  **exclusive** — `2026-03-15` to `2026-03-18` covers three days. An `end`
-  equal to `start` means a single day.
-- A wall time that a DST transition skipped or repeated is resolved with the
-  calendar's `disambiguation` (`compatible` by default, or `earlier`, `later`,
-  `reject`).
-- Input that cannot be read, or an event that ends before it starts, throws
-  `InvalidEventError` carrying the offending `eventId`.
-
-## Recurrence
-
-An event that carries `recurrence` is a series. Building a calendar expands it
-into instances, and only for the range asked for — an unbounded rule is never
-walked past the last day on screen.
-
-```ts
 type RecurrenceInput<TData = unknown> = {
   rule?: string
-  dates?: string[]
-  exceptions?: string[]
+  dates?: IsoDateTime[]
+  exceptions?: IsoDateTime[]
   overrides?: RecurrenceOverride<TData>[]
 }
 
 type RecurrenceOverride<TData = unknown> = {
-  recurrenceId: string
+  recurrenceId: IsoDateTime
   cancelled?: boolean
-  start?: string
-  end?: string
+  start?: IsoDateTime
+  end?: IsoDateTime
   duration?: string
   data?: TData
 }
 ```
 
-- `rule` is an RFC 5545 `RRULE`, with or without the `RRULE:` prefix. Supported
-  parts are `FREQ` (`DAILY`, `WEEKLY`, `MONTHLY`, `YEARLY`), `INTERVAL`,
-  `COUNT`, `UNTIL`, `BYDAY` (with ordinals such as `-1FR` under `MONTHLY` and
-  `YEARLY`), `BYMONTHDAY`, `BYMONTH`, `BYSETPOS` and `WKST`. Anything else
-  throws `InvalidRecurrenceError` rather than being ignored.
-- The event's own `start` is the anchor. An anchor the rule does not match is
-  not an instance: `FREQ=WEEKLY;BYDAY=MO` on a Tuesday starts the following
-  Monday.
-- Every instance keeps the wall clock and the wall length of the series, so a
-  09:00 meeting stays at 09:00 through a DST change and an instance that lands
-  in a skipped hour follows the calendar's `disambiguation`.
-- `dates` adds starts the rule does not produce, each with its own time of day.
-- `exceptions` removes instances by their start. `COUNT` is counted before they
-  are removed, exactly as RFC 5545 asks.
-- `overrides` replaces one instance, or drops it with `cancelled`. An override
-  with no `end` or `duration` keeps the length of the series, and one that
-  moves an instance into the range brings it into view.
-- Instances are matched by the moment they name, so an exception or an override
-  may be written in any zone that resolves to it.
-- An instance is a full event: its `id` is the series id, `__` and its
-  `recurrenceId`, and it carries `seriesId` and `recurrenceId` of its own. A
-  plain event has neither.
+`compatible` chooses the earlier occurrence of a repeated wall time and moves
+a skipped wall time forward; `earlier`, `later` and `reject` are the other
+Temporal disambiguation choices. The same setting is used to read event wall
+times and recurrence instances.
 
-## Views
+Source: [`src/event/types.ts`](src/event/types.ts),
+[`src/event/index.ts`](src/event/index.ts),
+[`src/event/errors.ts`](src/event/errors.ts).
 
-A range turns an anchor date into the days a calendar draws, and the rows it
-draws them on.
+### Recurrence
+
+`RecurrenceInput<TData>` has optional `rule`, `dates`, `exceptions` and
+`overrides`. Rules accept `FREQ` (`DAILY`, `WEEKLY`, `MONTHLY`, `YEARLY`),
+`INTERVAL`, `COUNT`, `UNTIL`, `BYDAY`, `BYMONTHDAY`, `BYMONTH`, `BYSETPOS` and
+`WKST`, with or without the `RRULE:` prefix. `INTERVAL` defaults to 1 and
+`WKST` to Monday. `COUNT` and `UNTIL` cannot be combined. Ordinal `BYDAY` is
+allowed only for monthly and yearly rules; `BYMONTHDAY` is not supported with
+weekly frequency. Other unsupported or malformed rule parts throw
+`InvalidRecurrenceError` with `eventId` and `reason`.
+
+The event start anchors the rule and is an instance only if it matches the
+rule. Generated instances retain the series wall
+time and wall duration. `COUNT` counts rule-generated dates before exceptions
+are removed. `dates` adds explicit starts. For timed series, `exceptions` and
+override `recurrenceId` match the resolved start instant in the series zone;
+equivalent offsets can identify the same occurrence. For all-day series they
+match the calendar date (a supplied date-time is converted to the series zone's
+date). An override may supply `start`, `end`, `duration` and/or
+`data`; `cancelled: true` removes the matching occurrence. An omitted end and
+duration keep the series duration. A moved override
+is included when its replacement overlaps the requested range, even if its
+original recurrence start is outside it. Expansion is limited to the requested
+visible range, while including instances whose duration overlaps that range.
+An instance's `id` is `${seriesId}__${recurrenceId}`; `seriesId` stores the
+original event id and `recurrenceId` identifies the original occurrence.
+
+Source: [`src/event/types.ts`](src/event/types.ts),
+[`src/recurrence/index.ts`](src/recurrence/index.ts),
+[`src/recurrence/parse.ts`](src/recurrence/parse.ts),
+[`src/recurrence/helpers.ts`](src/recurrence/helpers.ts).
+
+### Views
+
+`CalendarRange` requires `view`, date-only `currentDate` and `timeZone`.
+`view` is `day`, `week`, `days`, `month` or `agenda`; optional fields are
+`weekStartsOn` (0 Sunday through 6 Saturday, default 1/Monday), `dayCount`,
+`slotMinutes` (default 60) and `disambiguation` (default `compatible`).
+`day` spans one date; `week` spans seven dates from `weekStartsOn`; `days` and
+`agenda` span `dayCount`, defaulting to 7 and 30 respectively. `month` spans
+whole weeks containing the month; padding dates have `inCurrentPeriod: false`.
+Time slots are present for `day`, `week` and `days`, and absent for `month` and
+`agenda`.
+
+`slotMinutes` must be an integer from 1 through 1440, and `dayCount` must be a
+positive integer when used. A day has `ceil(1440 / slotMinutes)` wall-clock
+slots. Slot boundaries resolve in the range time zone; around daylight saving
+transitions slot elapsed minutes can differ from the wall interval and can be
+zero. Slot placement is by wall-clock row; `disambiguation` applies to event
+times, not slot rows. `CalendarDay.minutes` reports the actual elapsed length
+of that date. `compatible` resolves ambiguous event times to the earlier
+occurrence and shifts nonexistent times forward; `earlier`, `later` and
+`reject` are also accepted. Invalid dates, zones or numeric range options
+throw `InvalidRangeError` when the range is built.
 
 ```ts
 type CalendarRange = {
-  view: 'day' | 'week' | 'days' | 'month' | 'agenda'
-  currentDate: string
-  timeZone: string
-  weekStartsOn?: 0 | 1 | 2 | 3 | 4 | 5 | 6
+  view: ViewKind
+  currentDate: IsoDate
+  timeZone: TimeZoneId
+  weekStartsOn?: WeekStartsOn
   dayCount?: number
   slotMinutes?: number
   disambiguation?: Disambiguation
 }
 ```
 
-- `currentDate` is the date the calendar is on: the period drawn is the one
-  that **contains** it. `view: 'week'` with `currentDate: '2026-03-18'` — a
-  Wednesday — draws Monday 16 to Sunday 22. It is not read as today and it is
-  not a selection; `next`, `prev` and `today` move it, and nothing else does.
-- `day` is one day and `week` is seven from `weekStartsOn` (Monday by
-  default). `days` and `agenda` span `dayCount`, which defaults to a week and
-  to thirty days. `month` covers the anchor's month padded out to whole weeks;
-  the padding days are marked `inCurrentPeriod: false`.
-- A time grid is built for `day`, `week` and `days`. `month` and `agenda`
-  carry no slots.
-- Slots are wall-clock rows. A day always has `1440 / slotMinutes` of them —
-  twenty-four by default — whatever the time zone does that day. Each slot
-  knows its `minuteOfDay`, its real `start` and `end`, and its length in
-  `minutes`: a row is placed by the wall clock and sized by elapsed time.
-- A DST transition is absorbed by the row it falls in. In `Europe/Kyiv` the
-  03:00 row runs two hours on 25 October 2026 and zero on 29 March 2026; in
-  `Australia/Lord_Howe` a row can be ninety or thirty minutes long. No row is
-  ever negative, and a day's rows always add up to its real length.
-- Rows are placed by the wall clock alone. `disambiguation` is what the events
-  are read with and is never applied to a row, so the hour a zone skips stays a
-  zero-length row instead of becoming an error.
-- `disambiguation` decides what a wall time means when a DST transition made it
-  ambiguous or impossible — 01:30 on the night an hour repeats happens twice,
-  and on the night an hour is skipped it never happens at all. It is Temporal's
-  own option, passed straight through: `compatible` (the default) takes the
-  earlier of a repeated pair and pushes a skipped time forward, `earlier` and
-  `later` pick a side of a repeated hour, and `reject` throws instead of
-  guessing. Leave it alone unless a schedule has to round one way by policy.
-- `currentDate` or a time zone that cannot be read, a `slotMinutes` outside 1
-  to 1440 or a `dayCount` below one throws `InvalidRangeError`. The zone is
-  checked once, where the range is resolved, so a mistyped one never reaches the
-  engine as a bare `RangeError`.
+Source: [`src/range/types.ts`](src/range/types.ts),
+[`src/range/index.ts`](src/range/index.ts),
+[`src/range/helpers.ts`](src/range/helpers.ts).
 
-## Navigation
+### Navigation
 
-Moving around a calendar is a reducer over the range, so next and previous can
-be tested without rendering anything.
+`CalendarState` is `{ range: CalendarRange, selection: CalendarSelection |
+null }`, initially with `selection: null`. A selection is `{ kind: 'event',
+id }`, `{ kind: 'slot', date, minuteOfDay }` or `{ kind: 'date', date }`.
+Actions are `{ type: 'next' }`, `{ type: 'prev' }`, `{ type: 'today', now }`,
+`{ type: 'goto', date }`, `{ type: 'view', view }`, `{ type: 'select',
+selection }` and `{ type: 'clear' }`. `today` reads the supplied moment in the
+range zone; the reducer does not read the system clock. `day` moves by one day,
+`week` by seven, `days` and `agenda` by their configured span, and `month` by
+one month from the first of the month. Navigation preserves selection except
+for `clear`; unchanged actions may return the original state object. The
+initializer only wraps the range and does not validate it. `goto` and `view`
+do not eagerly validate either. `next` and `prev` read the anchor (and the
+`days`/`agenda` span when needed); `today` reads the time zone and supplied
+moment. Those operations can throw `InvalidRangeError` for unreadable values.
 
 ```ts
-import { calendarReducer, initialCalendarState } from '@midstem/chronous'
+type CalendarSelection =
+  | { kind: 'event'; id: EventId }
+  | { kind: 'slot'; date: IsoDate; minuteOfDay: number }
+  | { kind: 'date'; date: IsoDate }
 
-const state = initialCalendarState({
-  view: 'week',
-  currentDate: '2026-08-25',
-  timeZone: 'Europe/Kyiv'
-})
-
-calendarReducer(state, { type: 'next' }).range.currentDate
-calendarReducer(state, { type: 'view', view: 'month' }).range.view
-calendarReducer(state, {
-  type: 'select',
-  selection: { kind: 'event', id: 'standup' }
-})
-```
-
-- The state is `{ range, selection }` and nothing else. Every action returns a
-  new state, or the state it was handed when the move changes nothing, so a
-  consumer can compare by identity.
-- `next` and `prev` move by the period the range asks for: `day` by one day,
-  `week` by seven, `days` and `agenda` by their own length, `month` by one
-  month anchored on the first. Anchoring the month is what keeps 31 January
-  from stepping to 28 February and staying there. Every other view keeps the
-  weekday of the anchor, so `prev` always undoes `next`.
-- The step is computed from the same resolved span the range is built from, so
-  one period ends exactly where the next begins — no repeated day, no gap.
-- `today` carries the moment: `{ type: 'today', now }`, where `now` is any ISO
-  string. The reducer reads it in `range.timeZone` and never looks at the clock
-  itself, which is what keeps it pure and testable. An absolute instant is read
-  as one; a bare wall-clock string is read as local to the range.
-- `goto` sets the anchor, `view` swaps the view, `select` and `clear` hold and
-  drop a selection — an event, a slot or a date. Moving does not clear the
-  selection; drop it yourself if that is what the interface wants.
-- Everything `buildCalendar` would refuse, the reducer refuses the same way,
-  with `InvalidRangeError`.
-
-## Calendars
-
-`buildCalendar` is the front door: a range and a list of events in, one
-plain object out.
-
-```ts
-const calendar = buildCalendar(
-  { view: 'week', currentDate: '2026-03-18', timeZone: 'Europe/Kyiv' },
-  [{ id: 'standup', start: '2026-03-18T09:00', duration: 'PT30M' }]
-)
+type CalendarAction =
+  | { type: 'next' }
+  | { type: 'prev' }
+  | { type: 'today'; now: IsoDateTime }
+  | { type: 'goto'; date: IsoDate }
+  | { type: 'view'; view: ViewKind }
+  | { type: 'select'; selection: CalendarSelection }
+  | { type: 'clear' }
 ```
 
 ```ts
+type CalendarState = {
+  range: CalendarRange
+  selection: CalendarSelection | null
+}
+```
+
+Source: [`src/navigation/types.ts`](src/navigation/types.ts),
+[`src/navigation/index.ts`](src/navigation/index.ts),
+[`src/navigation/helpers.ts`](src/navigation/helpers.ts).
+
+### Calendars
+
+`buildCalendar(range, events)` returns `CalendarLayout<TData>` with `view`,
+ISO-string `start` and `end`, `days` and lane `rows`. Calendar output is
+JSON-compatible except for arbitrary `data` payloads: their serializability
+is the caller's responsibility. Timed values are ISO date-times with offsets; all-day values
+are date-only strings. Entries include `id`, `allDay`, `start`, `end`, and
+optional `seriesId`, `recurrenceId` and `data`. Each day includes `date`,
+`start`, `end`, elapsed `minutes`, `inCurrentPeriod`, `slots` and timed `boxes`.
+Invalid input in the Temporal path fails the call with the corresponding
+`InvalidRangeError`, `InvalidEventError` or `InvalidRecurrenceError`.
+
+```ts
+type TimedEntry<TData = unknown> = {
+  id: EventId
+  allDay: false
+  start: IsoDateTime
+  end: IsoDateTime
+  seriesId?: EventId
+  recurrenceId?: IsoDateTime
+  data?: TData
+}
+
+type AllDayEntry<TData = unknown> = {
+  id: EventId
+  allDay: true
+  start: IsoDate
+  end: IsoDate
+  seriesId?: EventId
+  recurrenceId?: IsoDateTime
+  data?: TData
+}
+
+type CalendarEntry<TData = unknown> = TimedEntry<TData> | AllDayEntry<TData>
+
 type CalendarLayout<TData = unknown> = {
   view: ViewKind
   start: IsoDateTime
@@ -296,28 +300,7 @@ type CalendarSlot = {
   end: IsoDateTime
   minutes: number
 }
-```
 
-- Everything crossing the boundary is a string or a number. Temporal types stay
-  inside the engine, so a calendar is plain JSON: it survives `JSON.stringify`,
-  a server-to-client payload and a React state update unchanged.
-- A moment comes back as an ISO-8601 string carrying its offset —
-  `2026-10-25T03:00:00+03:00` — so `new Date(value)` is exact without knowing
-  the calendar's time zone. A date with no time comes back as `2026-03-18`.
-- `days` are the days the grid draws, `rows` the bands of bars above it.
-- Every box and bar carries the normalized event as `event`, discriminated by
-  `allDay`: a timed entry holds date-times, an all-day entry plain dates.
-- The range's `timeZone` and `disambiguation` are the ones the events are read
-  with, so a calendar is built from one consistent point of view.
-- Input that cannot be read throws `InvalidEventError`, `InvalidRangeError` or
-  `InvalidRecurrenceError`. One unusable event fails the whole call.
-
-## Layout
-
-Overlapping events are packed into columns the way a calendar draws them, one
-day at a time.
-
-```ts
 type CalendarBox<TData = unknown> = {
   event: TimedEntry<TData>
   start: IsoDateTime
@@ -335,31 +318,7 @@ type CalendarBox<TData = unknown> = {
   continuesBefore: boolean
   continuesAfter: boolean
 }
-```
 
-- Only events shorter than a day are placed here. All-day events, and timed
-  events long enough to cover a whole day, move up into the lanes below.
-- An event is clipped to every day it touches, so one event crossing midnight
-  is placed once per day with `continuesBefore` and `continuesAfter` saying
-  where it carries on.
-- Events that overlap form a cluster. The cluster is cut into as few columns as
-  it needs, and each event then widens to the right until it meets a
-  neighbour — an event with nothing beside it takes the full width.
-- `startMinute` and `endMinute` are wall-clock minutes from midnight, the same
-  coordinates the grid rows use, and `top` / `height` / `left` / `width` are
-  those coordinates as fractions of the day. `minutes` is the real elapsed
-  length of the clipped piece: on 29 March 2026 in `Europe/Kyiv` an event from
-  01:00 to 04:00 is drawn three hours tall and reports two hours.
-- A box never runs backwards. An event that starts and ends inside a repeated
-  hour collapses to zero height, exactly as its row does.
-- Days without a time grid are placed all the same, so `month` and `agenda`
-  cells can order their events by the same numbers.
-
-## Lanes
-
-Long events are drawn as bars above the grid instead of inside it.
-
-```ts
 type CalendarRow<TData = unknown> = {
   start: IsoDate
   end: IsoDate
@@ -384,65 +343,123 @@ type CalendarBar<TData = unknown> = {
 }
 ```
 
-- Every all-day event gets a bar. A timed event gets one when it covers
-  twenty-four hours or more **by the wall clock**, and it then leaves the grid
-  entirely. An event from 09:00 to 09:00 the next day is a bar on any date,
-  including the day a DST transition cuts to twenty-three real hours; an event
-  from 22:00 to 02:00 stays in the grid, split across the two days it touches.
-- A range is cut into lane rows: a month grid breaks at every week, so a bar
-  never crosses a grid row, and every other view is one row.
-- A bar is clipped to its row and placed once per row, with `continuesBefore`
-  and `continuesAfter` saying where it carries on.
-- `startDay` and `endDay` are day indices inside the row, `endDay` exclusive.
-  `dayCount` is the length in days, and `left` / `width` are the same span as
-  fractions of the row. A count is never called `days` — that name is an array
-  everywhere else.
-- `start` and `end` are the dates the bar covers, `end` exclusive as everywhere
-  else. For a promoted timed event the original moments stay on `event`.
-- Bars read across the row, longest first, and each takes the lowest free lane.
-  A bar never grows into a free lane beside it. Every bar in a row reports the
-  same `lanes` count, so a row can be sized before it is drawn, and a renderer
-  that shows only the first few lanes picks its own cut-off.
+Source: [`src/calendar/index.ts`](src/calendar/index.ts),
+[`src/calendar/helpers.ts`](src/calendar/helpers.ts),
+[`src/calendar/types.ts`](src/calendar/types.ts).
 
-## Labels
+### Layout
 
-`formatIso` turns a string a calendar hands back into a label, without asking
-the consumer which of the two shapes it is holding.
+`CalendarBox` has these fields: `event: TimedEntry<TData>`, clipped ISO
+`start`/`end`, wall-clock `startMinute`/`endMinute`, elapsed `minutes`,
+`top`/`height`, horizontal `left`/`width`, zero-based `column`, cluster
+`columns`, occupied-column `span`, and `continuesBefore`/`continuesAfter`.
+`top = startMinute / 1440` and `height = (endMinute - startMinute) / 1440`;
+`left = column / columns` and `width = span / columns`. Multiply fractions by
+100 for CSS percentages, or by the target pixel size. The minute fields are
+wall-clock coordinates; elapsed `minutes` can differ across DST. A segment
+ending earlier by the wall clock within a repeated hour clamps to zero height.
+Events that overlap are assigned columns and expand right through free columns.
+All-day
+events and timed events whose wall duration is at least 24 hours are placed in
+lanes, not boxes.
 
-```ts
-formatIso(day.date, {
-  locale: 'uk-UA',
-  options: { day: 'numeric', month: 'long' }
-})
-formatIso(slot.start, {
-  locale: 'en-GB',
-  options: { hour: '2-digit', minute: '2-digit' }
-})
-formatIso(box.start, {
-  locale: 'en-GB',
-  timeZone: 'America/New_York',
-  options: { timeStyle: 'short' }
-})
-```
+Source: [`src/layout/index.ts`](src/layout/index.ts),
+[`src/layout/helpers.ts`](src/layout/helpers.ts),
+[`src/calendar/types.ts`](src/calendar/types.ts).
+
+### Lanes
+
+`CalendarRow` has ISO-date `start`/`end` bounds, `dayCount`, row `lanes` count
+and `bars`. `CalendarBar` has `event: CalendarEntry<TData>`, clipped date
+`start`/exclusive `end`, zero-based `startDay`/exclusive `endDay`, `dayCount`,
+zero-based `lane`, row `lanes`, horizontal `left`/`width`, and
+`continuesBefore`/`continuesAfter`. The day indices are relative to the row;
+`left` and `width` are fractions of that row. Long timed events are selected
+by wall duration of at least 24 hours. Month views split lane rows by week;
+other views use one row. Events are ordered by start, then longer span, then
+id, and assigned the lowest available lane. Every bar in a row reports that
+row's total `lanes` count.
+
+Source: [`src/lanes/index.ts`](src/lanes/index.ts),
+[`src/lanes/helpers.ts`](src/lanes/helpers.ts),
+[`src/calendar/types.ts`](src/calendar/types.ts).
+
+### Labels
+
+`formatIso(value, options)` accepts an `IsoDateTime` string and required
+`locale`, with optional `timeZone` and `Intl.DateTimeFormatOptions`. Date-only
+strings are formatted as floating dates and are not shifted by a time zone.
+Date-times with offsets or zone annotations identify an instant; `timeZone`
+chooses its display zone and otherwise the input zone/offset is used. Floating
+date-times retain their written wall fields. Formatters are cached internally.
+Invalid input or unsupported `Intl` options can throw `RangeError`.
 
 ```ts
 type FormatOptions = {
   locale: LocaleId
   timeZone?: TimeZoneId
-  options?: DateTimeFormatOptions
+  options?: DateTimeFormatOptions // Intl.DateTimeFormatOptions alias
 }
 ```
 
-- The range is scalars only, so it crosses the boundary with everything else:
-  `locale`, an optional `timeZone` and `Intl.DateTimeFormatOptions`.
-- A date — `2026-03-18` — is formatted as the floating date it is and is never
-  moved into a zone, so a day heading cannot slip a day. `timeZone` is ignored
-  for it. This is what `new Date('2026-03-18')` gets wrong: that reads UTC
-  midnight, which is the previous day west of Greenwich.
-- A date-time carries its offset, which fixes the instant. `timeZone` decides
-  the zone it is shown in and defaults to the offset the string already has, so
-  `slot.start` reads back as the wall time the row stands for — both times an
-  hour repeats, and either side of an hour that is skipped.
-- A date-time with no offset is floating too, and reads as written.
-- Formatters are cached, so a month grid formatting forty-two cells on every
-  render builds one formatter, not forty-two.
+Use `formatIso(day.date, { locale: 'en-GB', options: { weekday: 'short' } })`
+for dates. Avoid `new Date(day.date)` for day headings: it reads midnight UTC
+and can shift the date in a viewer's zone.
+
+Source: [`src/time/index.ts`](src/time/index.ts),
+[`src/time/helpers.ts`](src/time/helpers.ts),
+[`src/time/types.ts`](src/time/types.ts).
+
+## Minimal example
+
+```ts
+import 'temporal-polyfill/global'
+import {
+  buildCalendar,
+  type CalendarRange,
+  type EventInput
+} from '@midstem/chronous'
+
+const range: CalendarRange = {
+  view: 'week',
+  currentDate: '2026-03-18',
+  timeZone: 'Europe/Kyiv'
+}
+const events: EventInput[] = [
+  { id: 'standup', start: '2026-03-18T09:00', duration: 'PT30M' }
+]
+
+const calendar = buildCalendar(range, events)
+```
+
+## Errors and limitations
+
+The public error classes are `InvalidEventError` (`eventId`, `reason`),
+`InvalidRecurrenceError` (`eventId`, `reason`), `InvalidRangeError`
+(`reason`) and `MissingTemporalError`. The first three describe invalid
+calendar inputs in the Temporal implementation. The Date fallback can omit
+individual invalid or unsupported events with warnings; range validation
+errors remain exceptions. Fallback recurrence and zone-transition results
+are approximate. The public calendar entry points use a fallback when Temporal
+is absent; `MissingTemporalError` is exported for missing-Temporal failures.
+
+## Source map and validation
+
+- Root exports: [`src/index.ts`](src/index.ts)
+- Runtime detection: [`src/runtime/index.ts`](src/runtime/index.ts)
+- Temporal requirement and error: [`src/time/temporal.ts`](src/time/temporal.ts), [`src/time/errors.ts`](src/time/errors.ts)
+- Public input/output contracts: [`src/event/types.ts`](src/event/types.ts), [`src/range/types.ts`](src/range/types.ts), [`src/navigation/types.ts`](src/navigation/types.ts), [`src/calendar/types.ts`](src/calendar/types.ts)
+- Calendar assembly: [`src/calendar/index.ts`](src/calendar/index.ts)
+- Recurrence parser and expansion: [`src/recurrence/parse.ts`](src/recurrence/parse.ts), [`src/recurrence/index.ts`](src/recurrence/index.ts)
+- Formatting: [`src/time/index.ts`](src/time/index.ts)
+
+Run from the repository root:
+
+```sh
+npm run typecheck --workspace @midstem/chronous
+npm run test:run --workspace @midstem/chronous
+npx prettier --check packages/core/DOCUMENTATIONS.md
+```
+
+When changing contracts, check the relevant tests in each source module's
+`__test__` directory and update this reference alongside the implementation.
