@@ -17,7 +17,7 @@ Chronous is a headless calendar for Svelte 5. It handles time zones, recurrence 
 npm install @midstem/chronous-svelte temporal-polyfill
 ```
 
-The package includes the core engine. Import `temporal-polyfill/global` once in your app entry when you need exact recurrence and time-zone behavior. Svelte-aware build tools compile the published components for client and server rendering.
+[Temporal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal#browser_compatibility) is available in current Chrome, Edge and Firefox, but not yet in Safari. Install the polyfill for Safari and other browsers without native Temporal, then import `temporal-polyfill/global` once in your app entry point before rendering the calendar. The Vue package includes the core engine.
 
 ## Basic usage
 
