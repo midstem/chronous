@@ -21,18 +21,30 @@ framework-specific examples, see the full documentation at
 Every adapter includes the engine, so you install one Chronous package for your
 framework. The core can also run on its own, without a framework or the DOM.
 
-| Package                                           | Version                          | Size                            |
-| ------------------------------------------------- | -------------------------------- | ------------------------------- |
-| [`@midstem/chronous`](packages/core) — the engine | [![npm][v-core]][npm-core]       | [![size][s-core]][b-core]       |
-| [`@midstem/chronous-react`](packages/react)       | [![npm][v-react]][npm-react]     | [![size][s-react]][b-react]     |
-| [`@midstem/chronous-vue`](packages/vue)           | [![npm][v-vue]][npm-vue]         | [![size][s-vue]][b-vue]         |
-| [`@midstem/chronous-svelte`](packages/svelte)     | [![npm][v-svelte]][npm-svelte]   | Requires Svelte compilation     |
-| [`@midstem/chronous-angular`](packages/angular)   | [![npm][v-angular]][npm-angular] | [![size][s-angular]][b-angular] |
+| Package                                           | Version                          | Min + gzip           | Compared to FullCalendar                                             |
+| ------------------------------------------------- | -------------------------------- | -------------------- | -------------------------------------------------------------------- |
+| [`@midstem/chronous`](packages/core) — the engine | [![npm][v-core]][npm-core]       | [12.2 kB][b-core]    | ~3.3× smaller than [`fullcalendar@7.1.1`][fc-vanilla] (39.7 kB)      |
+| [`@midstem/chronous-react`](packages/react)       | [![npm][v-react]][npm-react]     | [15.7 kB][b-react]   | ~2.0× smaller than [`@fullcalendar/react@7.1.1`][fc-react] (30.7 kB) |
+| [`@midstem/chronous-vue`](packages/vue)           | [![npm][v-vue]][npm-vue]         | [16.8 kB][b-vue]     | ~2.4× smaller than [`@fullcalendar/vue3@7.1.1`][fc-vue] (40.7 kB)    |
+| [`@midstem/chronous-svelte`](packages/svelte)     | [![npm][v-svelte]][npm-svelte]   | [17.7 kB][b-svelte]  | —                                                                    |
+| [`@midstem/chronous-angular`](packages/angular)   | [![npm][v-angular]][npm-angular] | [17.6 kB][b-angular] | Not directly comparable; see below                                   |
 
-Size badges link to bundlejs estimates of the package's JavaScript exports,
-gzipped with the framework kept external. They exclude application markup,
-styles and the Temporal polyfill. Svelte components are compiled by the
-consumer's Svelte toolchain, so no standalone bundlejs size is shown.
+Sizes are minified and gzipped package estimates from Bundlephobia, checked on
+October 6, 2026: Chronous core and React 1.0.2, Vue and Angular 1.0.0, and
+FullCalendar 7.1.1. Peer dependencies, including the frameworks and Temporal
+polyfill, are excluded. FullCalendar values cover the root package imports;
+view plugins, themes and CSS are additional. These are package-size comparisons,
+not measurements of equivalent complete calendars or application bundles.
+
+FullCalendar Angular's [2.8 kB estimate][fc-angular] covers its adapter only:
+`fullcalendar` is a separate peer dependency. Chronous Angular includes its
+engine, so no size ratio is given for that pair. There is no official Svelte
+integration listed in [FullCalendar's documentation](https://fullcalendar.io/docs).
+
+For Svelte 1.0.0, Bundlephobia reports a missing dependency, so its estimate is
+not used. The linked bundlejs estimate is measured separately with `svelte` and
+`svelte/*` kept external. Its result depends on Svelte compilation and should
+not be used for a direct ratio against the Bundlephobia figures.
 
 Follow a package link for its own README — installation and the shortest example
 that draws a calendar. React provides hooks and headless components, Vue provides
@@ -116,19 +128,20 @@ itself — layout, the playground, benchmarks and how a release is cut.
 
 [npm-core]: https://npmjs.org/package/@midstem/chronous
 [v-core]: https://img.shields.io/npm/v/%40midstem%2Fchronous.svg
-[s-core]: https://deno.bundlejs.com/badge?q=@midstem/chronous
-[b-core]: https://bundlejs.com/?q=%40midstem%2Fchronous
+[b-core]: https://bundlephobia.com/package/%40midstem%2Fchronous%401.0.2
 [npm-react]: https://npmjs.org/package/@midstem/chronous-react
 [v-react]: https://img.shields.io/npm/v/%40midstem%2Fchronous-react.svg
-[s-react]: https://deno.bundlejs.com/badge?q=@midstem/chronous-react&config=%7B%22esbuild%22%3A%7B%22external%22%3A%5B%22react%22%2C%22react-dom%22%5D%7D%7D
-[b-react]: https://bundlejs.com/?q=%40midstem%2Fchronous-react&config=%7B%22esbuild%22%3A%7B%22external%22%3A%5B%22react%22%2C%22react-dom%22%5D%7D%7D
+[b-react]: https://bundlephobia.com/package/%40midstem%2Fchronous-react%401.0.2
 [npm-vue]: https://npmjs.org/package/@midstem/chronous-vue
 [v-vue]: https://img.shields.io/npm/v/%40midstem%2Fchronous-vue.svg
-[s-vue]: https://deno.bundlejs.com/badge?q=@midstem/chronous-vue&config=%7B%22esbuild%22%3A%7B%22external%22%3A%5B%22vue%22%5D%7D%7D
-[b-vue]: https://bundlejs.com/?q=%40midstem%2Fchronous-vue&config=%7B%22esbuild%22%3A%7B%22external%22%3A%5B%22vue%22%5D%7D%7D
+[b-vue]: https://bundlephobia.com/package/%40midstem%2Fchronous-vue%401.0.0
 [npm-svelte]: https://npmjs.org/package/@midstem/chronous-svelte
 [v-svelte]: https://img.shields.io/npm/v/%40midstem%2Fchronous-svelte.svg
 [npm-angular]: https://npmjs.org/package/@midstem/chronous-angular
 [v-angular]: https://img.shields.io/npm/v/%40midstem%2Fchronous-angular.svg
-[s-angular]: https://deno.bundlejs.com/badge?q=@midstem/chronous-angular&config=%7B%22esbuild%22%3A%7B%22external%22%3A%5B%22%40angular%2Fcore%22%5D%7D%7D
-[b-angular]: https://bundlejs.com/?q=%40midstem%2Fchronous-angular&config=%7B%22esbuild%22%3A%7B%22external%22%3A%5B%22%40angular%2Fcore%22%5D%7D%7D
+[b-angular]: https://bundlephobia.com/package/%40midstem%2Fchronous-angular%401.0.0
+[b-svelte]: https://bundlejs.com/?q=%40midstem%2Fchronous-svelte%401.0.0&config=%7B%22esbuild%22%3A%7B%22external%22%3A%5B%22svelte%22%2C%22svelte%2F*%22%5D%7D%7D
+[fc-vanilla]: https://bundlephobia.com/package/fullcalendar%407.1.1
+[fc-react]: https://bundlephobia.com/package/%40fullcalendar%2Freact%407.1.1
+[fc-vue]: https://bundlephobia.com/package/%40fullcalendar%2Fvue3%407.1.1
+[fc-angular]: https://bundlephobia.com/package/%40fullcalendar%2Fangular%407.1.1
