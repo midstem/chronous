@@ -65,7 +65,7 @@ The package includes the core engine. Import `temporal-polyfill/global` once in 
 
 ## Documentation
 
-See the [full adapter guide](https://github.com/midstem/chronous/blob/main/packages/svelte/DOCUMENTATIONS.md) for month and agenda layouts, snippets, navigation, typed event data, stores, contexts, errors and SSR.
+See the [Svelte documentation](https://chronous.midstem.net/docs/?framework=svelte) for more examples, components, typed event data, navigation and how to load Temporal correctly. It also explains browser support and the behavior when Temporal is unavailable.
 
 ## License
 
