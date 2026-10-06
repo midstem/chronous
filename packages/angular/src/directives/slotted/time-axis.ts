@@ -3,6 +3,7 @@ import { Directive } from '@angular/core'
 import { injectTimeGridContext } from '../context'
 
 @Directive({
+  standalone: true,
   selector: '[chronousTimeAxis]',
   exportAs: 'chronousTimeAxis',
   host: {

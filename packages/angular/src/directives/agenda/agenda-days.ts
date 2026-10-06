@@ -40,7 +40,11 @@ type DayWithBars<TData> = {
   bars: CalendarBar<TData>[]
 }
 
-@Directive({ selector: '[chronousAgendaDays]', exportAs: 'chronousAgendaDays' })
+@Directive({
+  standalone: true,
+  selector: '[chronousAgendaDays]',
+  exportAs: 'chronousAgendaDays'
+})
 export class AgendaDaysDirective<TData> {
   static ngTemplateContextGuard<TData>(
     _directive: AgendaDaysDirective<TData>,

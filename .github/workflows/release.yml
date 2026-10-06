@@ -46,6 +46,14 @@ jobs:
       - name: Test
         run: npm run test
 
+      - name: Install Chromium for Angular package validation
+        if: env.PACKAGE == '@midstem/chronous-angular'
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify the Angular npm package and minimum runtime
+        if: env.PACKAGE == '@midstem/chronous-angular'
+        run: npm run test:package:angular
+
       - name: Publish
         run: npm publish --workspace "$PACKAGE" --tag "$NPM_TAG"
         env:

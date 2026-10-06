@@ -29,6 +29,7 @@ export type AllDayEventContext<TData> = ScopedContext<
 >
 
 @Directive({
+  standalone: true,
   selector: '[chronousAllDayEvents]',
   exportAs: 'chronousAllDayEvents'
 })

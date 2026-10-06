@@ -72,6 +72,10 @@ jobs:
           PLAYGROUND: ${{ matrix.playground }}
         run: npm run test:e2e -- --project=${{ matrix.playground }}
 
+      - name: Verify the Angular npm package and minimum runtime
+        if: matrix.playground == 'angular'
+        run: npm run test:package:angular
+
       - name: Upload Playwright artifacts
         uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
@@ -82,4 +86,3 @@ jobs:
             tools/e2e/test-results/
           if-no-files-found: ignore
           retention-days: 14
-

@@ -21,7 +21,11 @@ export type DayColumnContext<TData> = ScopedContext<
   DayColumnScope<TData>
 >
 
-@Directive({ selector: '[chronousDayColumns]', exportAs: 'chronousDayColumns' })
+@Directive({
+  standalone: true,
+  selector: '[chronousDayColumns]',
+  exportAs: 'chronousDayColumns'
+})
 export class DayColumnsDirective<TData> {
   static ngTemplateContextGuard<TData>(
     _directive: DayColumnsDirective<TData>,

@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
+import { dirname, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const REPOSITORY_ROOT = resolve(
@@ -13,7 +13,16 @@ const MODULE_FILE_NAMES = ['index.js', 'index.d.ts']
 const PACKAGES = [
   { name: 'core', fileNames: [...MODULE_FILE_NAMES, 'index.cjs'] },
   { name: 'react', fileNames: [...MODULE_FILE_NAMES, 'index.cjs'] },
-  { name: 'angular', fileNames: MODULE_FILE_NAMES },
+  {
+    name: 'angular',
+    fileNames: [
+      'fesm2022/midstem-chronous-angular.mjs',
+      'index.d.ts',
+      'esm2022/engine.js',
+      'engine.d.ts',
+      'package.json'
+    ]
+  },
   { name: 'vue', fileNames: [...MODULE_FILE_NAMES, 'index.cjs'] },
   {
     name: 'svelte',
@@ -22,9 +31,11 @@ const PACKAGES = [
 ]
 
 const PARTIAL_IVY_FILE_NAME =
-  'packages/angular/dist/directives/shared/header.js'
+  'packages/angular/dist/fesm2022/midstem-chronous-angular.mjs'
 
 const PARTIAL_IVY_DECLARATION = 'ngDeclareDirective'
+
+const ANGULAR_BUILD_VERSION = '18.0.0'
 
 const SUBPATH_IMPORT_PREFIX = '#src'
 
@@ -37,7 +48,7 @@ const TEMPORAL_NAMESPACE_PATTERN = new RegExp(
 const CORE_PACKAGE = '@midstem/chronous'
 
 const CORE_SPECIFIER_PATTERN = new RegExp(
-  `(from\\s*|require\\()['"]${CORE_PACKAGE}['"]`
+  `(?:\\bfrom\\s*|\\bimport\\s*(?:\\(\\s*)?|\\brequire\\s*\\(\\s*)['"]${CORE_PACKAGE}['"]`
 )
 
 const failures = []
@@ -94,6 +105,38 @@ const readSvelteModules = (directory) => {
 
 if (existsSync(svelteDist)) readSvelteModules(svelteDist)
 
+const angularDist = resolve(REPOSITORY_ROOT, 'packages/angular/dist')
+const readAngularModules = (directory) => {
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const path = resolve(directory, entry.name)
+
+    if (entry.isDirectory()) {
+      readAngularModules(path)
+    } else if (/(?:\.m?js|\.d\.ts)$/.test(entry.name)) {
+      const name = `packages/angular/dist/${relative(angularDist, path)}`
+
+      bundles.set(name, readFileSync(path, 'utf8'))
+    }
+  }
+}
+
+if (existsSync(angularDist)) readAngularModules(angularDist)
+
+const angularManifestPath = resolve(angularDist, 'package.json')
+if (existsSync(angularManifestPath)) {
+  const angularManifest = JSON.parse(readFileSync(angularManifestPath, 'utf8'))
+  const hasCoreDependency = [
+    angularManifest.dependencies,
+    angularManifest.optionalDependencies,
+    angularManifest.peerDependencies
+  ].some((section) => section?.[CORE_PACKAGE])
+
+  check(
+    'packages/angular/dist/package.json still declares @midstem/chronous',
+    !hasCoreDependency
+  )
+}
+
 bundles.forEach((content, name) => {
   const subpathLines = findLines(content, (line) =>
     line.includes(SUBPATH_IMPORT_PREFIX)
@@ -101,6 +144,7 @@ bundles.forEach((content, name) => {
 
   if (
     name.startsWith('packages/react/') ||
+    name.startsWith('packages/angular/') ||
     name.startsWith('packages/vue/') ||
     name.startsWith('packages/svelte/')
   ) {
@@ -142,6 +186,14 @@ if (existsSync(partialIvy)) {
   check(
     `${PARTIAL_IVY_FILE_NAME} carries no ${PARTIAL_IVY_DECLARATION}, so the Angular package was not compiled for publishing`,
     readFileSync(partialIvy, 'utf8').includes(PARTIAL_IVY_DECLARATION)
+  )
+  const compilerVersions = [
+    ...readFileSync(partialIvy, 'utf8').matchAll(/version: ["']([^"']+)["']/g)
+  ]
+  check(
+    `${PARTIAL_IVY_FILE_NAME} must be compiled with Angular ${ANGULAR_BUILD_VERSION}`,
+    compilerVersions.length > 0 &&
+      compilerVersions.every((match) => match[1] === ANGULAR_BUILD_VERSION)
   )
 }
 

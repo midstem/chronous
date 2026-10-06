@@ -20,7 +20,11 @@ export type TimeLabelScope = {
 
 export type TimeLabelContext = ScopedContext<CalendarSlot, TimeLabelScope>
 
-@Directive({ selector: '[chronousTimeLabels]', exportAs: 'chronousTimeLabels' })
+@Directive({
+  standalone: true,
+  selector: '[chronousTimeLabels]',
+  exportAs: 'chronousTimeLabels'
+})
 export class TimeLabelsDirective {
   static ngTemplateContextGuard(
     _directive: TimeLabelsDirective,

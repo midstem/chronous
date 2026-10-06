@@ -40,6 +40,7 @@ export type MonthAllDayEventContext<TData> = ScopedContext<
 >
 
 @Directive({
+  standalone: true,
   selector: '[chronousMonthAllDayEvents]',
   exportAs: 'chronousMonthAllDayEvents'
 })

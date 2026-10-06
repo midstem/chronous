@@ -2,7 +2,11 @@ import { Directive } from '@angular/core'
 
 import { injectCalendarContext } from '../context'
 
-@Directive({ selector: '[chronousAgendaList]', exportAs: 'chronousAgendaList' })
+@Directive({
+  standalone: true,
+  selector: '[chronousAgendaList]',
+  exportAs: 'chronousAgendaList'
+})
 export class AgendaListDirective {
   readonly #context = injectCalendarContext()
 
