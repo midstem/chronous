@@ -116,6 +116,16 @@ export default [
   },
 
   {
+    files: ['registry/default/**/*.tsx'],
+    languageOptions: {
+      parserOptions: {
+        projectService: false,
+        project: ['./tools/registry/tsconfig.json']
+      }
+    }
+  },
+
+  {
     files: [
       'packages/vue/**/*.{ts,js}',
       'apps/playground-vue/**/*.{ts,js}',

@@ -31,7 +31,7 @@
     "start:vue": "npm run dev --workspace @midstem/chronous-playground-vue",
     "start:svelte": "npm run dev --workspace @midstem/chronous-playground-svelte",
     "start:vanilla": "npm run dev --workspace @midstem/chronous-playground-vanilla",
-    "typecheck": "npm run typecheck --workspaces --if-present",
+    "typecheck": "npm run typecheck:registry && npm run typecheck --workspaces --if-present",
     "test": "npm run test:run --workspaces --if-present",
     "lint": "eslint .",
     "lint:fix": "eslint --cache ./packages --quiet --fix",
@@ -43,11 +43,14 @@
     "test:package:angular": "npm run build && npm run verify:dist && node tools/angular-build/scripts/verify-package.mjs",
     "format:check": "prettier --check \"./**/*.{js,mjs,ts,tsx,css,md,json,svelte,yml,yaml}\" \".github/**/*.{mjs,md,yml,yaml}\"",
     "check": "npm run build && npm run verify:dist && npm run format:check && npm run lint && npm run typecheck && npm test && npm run test:infra",
-    "test:infra": "node --test .github/scripts/*.test.mjs tools/maintenance/*.test.mjs tools/package-check/*.test.mjs",
+    "test:infra": "node --test .github/scripts/*.test.mjs tools/maintenance/*.test.mjs tools/package-check/*.test.mjs && npm run test:registry",
     "precommit": "node tools/maintenance/precommit.mjs",
     "verify:package": "node tools/package-check/index.mjs",
     "test:package": "npm run build && npm run verify:dist && npm run verify:package",
-    "size:report": "node tools/maintenance/report-size.mjs"
+    "size:report": "node tools/maintenance/report-size.mjs",
+    "build:registry": "node tools/registry/build.mjs",
+    "typecheck:registry": "tsc --project tools/registry/tsconfig.json",
+    "test:registry": "node --test tools/registry/build.test.mjs"
   },
   "devDependencies": {
     "@analogjs/vite-plugin-angular": "^2.7.1",

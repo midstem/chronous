@@ -12,6 +12,18 @@ styles. No stylesheet required.
 
 [chronous.midstem.net/docs](https://chronous.midstem.net/docs/)
 
+## Install the React calendar with shadcn/ui
+
+Install the editable calendar into a shadcn app after the Pages registry is
+published:
+
+```sh
+npx shadcn@latest add https://midstem.github.io/chronous/r/chronous-calendar.json
+```
+
+See the [registry installation guide](docs/SHADCN_REGISTRY.md) for setup,
+namespace installation and usage.
+
 ## Packages
 
 Each adapter includes the engine. Follow a package link for installation and examples.

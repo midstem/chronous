@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "paths": {
+      "@midstem/chronous-react": ["../../packages/react/dist/index.d.ts"]
+    }
+  },
+  "include": [
+    "../../registry/default/chronous-calendar/chronous-calendar.tsx",
+    "./shadcn.d.ts"
+  ]
+}

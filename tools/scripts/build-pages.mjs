@@ -3,6 +3,7 @@ import { cpSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { FRAMEWORK_LOGOS } from '../../packages/playground-core/src/frameworks/constants.ts'
+import { buildRegistry } from '../registry/build.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
 
@@ -185,5 +186,6 @@ PLAYGROUNDS.forEach(buildPlayground)
 
 writeFileSync(resolve(OUTPUT, 'index.html'), buildIndex())
 writeFileSync(resolve(OUTPUT, '.nojekyll'), '')
+await buildRegistry({ root: ROOT, output: resolve(OUTPUT, 'r') })
 
 console.error(`built ${PLAYGROUNDS.length} playgrounds into dist-pages`)
