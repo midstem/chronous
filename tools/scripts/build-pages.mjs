@@ -172,10 +172,15 @@ const buildIndex = () => `<!doctype html>
 
 `
 
+const arguments_ = process.argv.slice(2)
+if (arguments_.some((argument) => argument !== '--skip-package-build')) {
+  throw new Error('Usage: build-pages.mjs [--skip-package-build]')
+}
+
 rmSync(OUTPUT, { recursive: true, force: true })
 mkdirSync(OUTPUT, { recursive: true })
 
-buildPackages()
+if (!arguments_.includes('--skip-package-build')) buildPackages()
 PLAYGROUNDS.forEach(buildPlayground)
 
 writeFileSync(resolve(OUTPUT, 'index.html'), buildIndex())

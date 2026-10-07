@@ -5,3 +5,9 @@ package-lock.json
 CHANGELOG.md
 
 **/.svelte-kit/**
+
+dist-pages
+playwright-report
+test-results
+blob-report
+bench.json

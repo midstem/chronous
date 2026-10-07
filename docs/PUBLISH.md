@@ -1,5 +1,21 @@
 # Publishing
 
+## Release notes and versioning
+
+GitHub releases are the authoritative change history for each npm package.
+Write notes for the package named by the tag and describe user-visible fixes,
+features and breaking changes in plain language. For a breaking API change,
+include the migration steps and examples a consumer needs to update.
+
+Each package follows semantic versioning independently: patch for compatible
+fixes, minor for compatible features, and major for incompatible public API or
+behavior changes. An engine change also affects every adapter that bundles the
+engine. Release each affected adapter under its own package version and GitHub
+release, even when an adapter's source did not change. The release CLI derives
+draft notes from commits, but review and edit them to ensure the package's
+consumer-facing changes and migration guidance are clear. There is no separate
+changelog automation; GitHub releases remain the published history.
+
 This repository publishes the engine and framework adapters under the
 `@midstem` scope: `@midstem/chronous`, `@midstem/chronous-react`,
 `@midstem/chronous-angular`, `@midstem/chronous-vue` and
@@ -99,14 +115,30 @@ release each. They are independent, so the order does not matter.
 
 ## 2. Check it locally
 
-The build comes first — `apps/playground-react` resolves the packages through their `dist`,
-so lint and typecheck need it:
+Run the repository checks and package validation before publishing. The full
+check runs the package build, distributable verification, formatting, lint,
+typecheck, tests and maintenance-tool tests in that order. The React, Vue,
+Svelte and Vanilla playgrounds resolve package output from `dist`, so build
+before running them; Angular's normal development playground uses adapter
+source.
 
 ```bash
-npm run build && npm run verify:dist && npm run lint && npm run typecheck && npm run test
+npm run check
+npm run test:package
 ```
 
-`npm run test` runs the engine's suite on both the polyfill and native Temporal.
+`npm test` runs the engine's suite on both the polyfill and native Temporal.
+`npm run test:package` builds and validates the current-runtime npm archives for
+core, React, Vue and Svelte. CI and the release workflow also validate the
+adapter archives with their minimum supported framework versions before
+publishing. Run an individual minimum-runtime check locally after building:
+
+```bash
+npm run build
+npm run verify:package -- --package react --minimum
+```
+
+Use `vue` or `svelte` in place of `react` for those adapters.
 
 For an Angular release, also run:
 
@@ -114,12 +146,11 @@ For an Angular release, also run:
 npm run test:package:angular
 ```
 
-This builds and installs the npm archives locally, compiles and renders the
-README example with Angular 18.0.0, checks reactive input updates, and runs all
-28 E2E scenarios on a production playground consuming the package with the
-current Angular runtime. The normal playground continues to import adapter
-source for local feature development. CI and the Angular release workflow run
-this package validation too.
+This builds and installs the npm archive locally, compiles and renders the
+README example with Angular 18.0.0, checks reactive input updates, and runs the
+production playground against the current Angular runtime. The normal Angular
+development playground uses adapter source. CI and the Angular release
+workflow run this package validation too.
 
 ## 3. Merge into `main`
 
@@ -149,9 +180,11 @@ Publishing the release starts the `Release` workflow, which:
 
 1. reads the package name and the npm dist-tag out of the tag, and checks the
    version against `package.json`;
-2. builds the packages, then runs `verify:dist`, lint, typecheck and the tests
-   for the whole repository;
-3. runs `npm publish --workspace <package> --tag <latest|next>`.
+2. builds the packages, then runs `verify:dist`, formatting, maintenance-tool
+   checks, lint, typecheck and the tests for the whole repository;
+3. validates the selected npm archive and, for framework adapters, its minimum
+   supported framework runtime (Angular has its dedicated consumer check);
+4. runs `npm publish --workspace <package> --tag <latest|next>`.
 
 Publishing goes out with npm provenance, which is why the job asks for
 `id-token: write`. It needs an automation `NPM_TOKEN` in the repository secrets.

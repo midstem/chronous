@@ -1,19 +1,11 @@
 name: Playgrounds
 
 on:
-  workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'packages/**'
-      - 'apps/**'
-      - 'tools/scripts/build-pages.mjs'
-      - 'package-lock.json'
-      - '.github/workflows/pages.yml'
+  workflow_call:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -28,29 +20,39 @@ jobs:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
-      - name: Checkout
+      - name: Checkout the commit that passed CI
         uses: actions/checkout@v7
-
-      - name: Setup Node
-        uses: actions/setup-node@v7
         with:
-          node-version: 24.x
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
           cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
+      - run: npm ci
+      - name: Restore verified packages
+        uses: actions/download-artifact@v4
+        with:
+          name: package-dist
+          path: packages
       - name: Build the playgrounds
-        run: npm run build:pages
-
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload the site
-        uses: actions/upload-pages-artifact@v3
+        run: npm run build:pages -- --skip-package-build
+      - name: Skip a commit superseded on main
+        id: current
+        run: |
+          git fetch origin main
+          if [ "$(git rev-parse FETCH_HEAD)" = "$GITHUB_SHA" ]; then
+            echo 'deploy=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'deploy=false' >> "$GITHUB_OUTPUT"
+            echo 'A newer commit is on main; skipping this deployment.'
+          fi
+      - uses: actions/configure-pages@v5
+        if: steps.current.outputs.deploy == 'true'
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.current.outputs.deploy == 'true'
         with:
           path: dist-pages
-
       - name: Deploy
         id: deploy
         uses: actions/deploy-pages@v4
+        if: steps.current.outputs.deploy == 'true'

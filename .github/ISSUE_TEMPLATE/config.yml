@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Documentation
+    url: https://chronous.midstem.net/docs/
+    about: Read the Chronous documentation.
+  - name: Live playgrounds
+    url: https://midstem.github.io/chronous/
+    about: Try Chronous with React, Angular, Vue, Svelte, or Vanilla JS.

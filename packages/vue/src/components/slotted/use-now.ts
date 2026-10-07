@@ -1,6 +1,6 @@
 import type { IsoDate, TimeZoneId } from '@midstem/chronous'
 import type { ComputedRef, MaybeRefOrGetter } from 'vue'
-import { computed, onScopeDispose, ref, toValue } from 'vue'
+import { computed, getCurrentScope, onScopeDispose, ref, toValue } from 'vue'
 
 export type CalendarNow = {
   date: IsoDate
@@ -60,7 +60,7 @@ export const useNow = (
       at.value = new Date()
     }, TICK_MS)
 
-    onScopeDispose(() => window.clearInterval(id), true)
+    if (getCurrentScope()) onScopeDispose(() => window.clearInterval(id))
   }
 
   return computed(() => nowOf(formatter.value, at.value))

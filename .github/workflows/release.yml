@@ -19,7 +19,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v7
         with:
-          node-version: 24.x
+          node-version-file: .nvmrc
           cache: npm
           registry-url: https://registry.npmjs.org
 
@@ -37,6 +37,12 @@ jobs:
       - name: Verify the build invariants
         run: npm run verify:dist
 
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Test maintenance checks
+        run: npm run test:infra
+
       - name: Lint
         run: npm run lint
 
@@ -46,13 +52,30 @@ jobs:
       - name: Test
         run: npm run test
 
+      - name: Verify the npm archive and framework compatibility
+        if: env.PACKAGE != '@midstem/chronous-angular'
+        env:
+          RELEASE_PACKAGE: ${{ env.PACKAGE }}
+        run: |
+          case "$RELEASE_PACKAGE" in
+            @midstem/chronous) selector=core ;;
+            @midstem/chronous-react) selector=react ;;
+            @midstem/chronous-vue) selector=vue ;;
+            @midstem/chronous-svelte) selector=svelte ;;
+            *) echo 'Unknown publishable package'; exit 1 ;;
+          esac
+          npm run verify:package -- --package "$selector"
+          if [ "$selector" != core ]; then
+            npm run verify:package -- --package "$selector" --minimum
+          fi
+
       - name: Install Chromium for Angular package validation
         if: env.PACKAGE == '@midstem/chronous-angular'
         run: npx playwright install --with-deps chromium
 
       - name: Verify the Angular npm package and minimum runtime
         if: env.PACKAGE == '@midstem/chronous-angular'
-        run: npm run test:package:angular
+        run: node tools/angular-build/scripts/verify-package.mjs
 
       - name: Publish
         run: npm publish --workspace "$PACKAGE" --tag "$NPM_TAG"
