@@ -5,43 +5,88 @@ on:
     branches: [main]
   push:
     branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.areas.outputs.code }}
+      pages: ${{ steps.areas.outputs.pages }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
+        with:
+          install: 'false'
+      - name: Classify changed files
+        id: areas
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node .github/scripts/detect-changes.mjs
+
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - name: Check formatting, including docs and workflows
+        run: npm run format:check
+      - name: Test maintenance checks
+        run: npm run test:infra
+
   quality:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Setup Node
-        uses: actions/setup-node@v7
-        with:
-          node-version: 24.x
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build the packages
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - name: Build the packages once
         run: npm run build
-
       - name: Verify the build invariants
         run: npm run verify:dist
-
       - name: Lint
         run: npm run lint
-
       - name: Typecheck
         run: npm run typecheck
-
       - name: Test
-        run: npm run test
-
+        run: npm test
       - name: Build the playgrounds
         run: npm run build --workspace apps
+      - name: Measure package sizes
+        run: npm run size:report -- --json "$RUNNER_TEMP/current-size.json"
+      - name: Share built packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-dist
+          path: packages/*/dist/
+          if-no-files-found: error
+          retention-days: 3
+      - name: Share size measurements
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-size
+          path: ${{ runner.temp }}/current-size.json
+          if-no-files-found: error
+          retention-days: 3
 
   e2e:
+    needs: [changes, quality]
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -49,33 +94,16 @@ jobs:
       matrix:
         playground: [react, angular, vue, svelte, vanilla]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Setup Node
-        uses: actions/setup-node@v7
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
         with:
-          node-version: 24.x
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build the packages
-        run: npm run build
-
-      - name: Install Playwright browsers
+          packages: 'true'
+      - name: Install Chromium
         run: npx playwright install --with-deps chromium
-
       - name: Run E2E tests
         env:
           PLAYGROUND: ${{ matrix.playground }}
         run: npm run test:e2e -- --project=${{ matrix.playground }}
-
-      - name: Verify the Angular npm package and minimum runtime
-        if: matrix.playground == 'angular'
-        run: npm run test:package:angular
-
       - name: Upload Playwright artifacts
         uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
@@ -86,3 +114,103 @@ jobs:
             tools/e2e/test-results/
           if-no-files-found: ignore
           retention-days: 14
+
+  packages:
+    needs: [changes, quality]
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    name: package (${{ matrix.package }}, ${{ matrix.runtime }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { package: core, runtime: current }
+          - { package: react, runtime: current }
+          - { package: react, runtime: minimum }
+          - { package: vue, runtime: current }
+          - { package: vue, runtime: minimum }
+          - { package: svelte, runtime: current }
+          - { package: svelte, runtime: minimum }
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+        with:
+          packages: 'true'
+      - name: Validate the installed npm archive
+        env:
+          PACKAGE: ${{ matrix.package }}
+          RUNTIME: ${{ matrix.runtime }}
+        run: node .github/scripts/verify-package.mjs "$PACKAGE" "$RUNTIME"
+
+  angular-package:
+    needs: [changes, quality]
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+        with:
+          packages: 'true'
+      - run: npx playwright install --with-deps chromium
+      - name: Verify Angular 18 consumer and current production playground
+        run: node tools/angular-build/scripts/verify-package.mjs
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-angular-package
+          path: tools/e2e/test-results/angular-package/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  size:
+    needs: [changes, quality]
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
+        with:
+          install: 'false'
+      - uses: actions/download-artifact@v4
+        with:
+          name: package-size
+          path: ${{ runner.temp }}
+      - name: Report sizes and gzip deltas
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: node .github/scripts/size-report.mjs
+
+  checks:
+    name: CI checks
+    if: always()
+    needs: [changes, format, quality, e2e, packages, angular-package]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+        with:
+          install: 'false'
+      - name: Require all applicable checks to pass
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: node .github/scripts/ci-checks.mjs
+
+  pages:
+    needs: [changes, checks]
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+      needs.changes.outputs.pages == 'true'
+    uses: ./.github/workflows/pages.yml
+    permissions:
+      contents: read
+      pages: write
+      id-token: write

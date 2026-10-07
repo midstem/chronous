@@ -1,4 +1,5 @@
 import { resolve } from 'path'
+import { createRequire } from 'node:module'
 import dts from 'vite-plugin-dts'
 import { defineConfig } from 'vitest/config'
 
@@ -8,6 +9,11 @@ const FILE_NAME_BY_FORMAT: Record<string, string> = {
 }
 
 const CORE_PACKAGE = '@midstem/chronous'
+
+const minimumVueRequire = createRequire(
+  resolve('../../tools/vue-build/package.json')
+)
+const minimumVueTypes = minimumVueRequire.resolve('vue/dist/vue.d.ts')
 
 export default defineConfig({
   test: {
@@ -26,7 +32,13 @@ export default defineConfig({
   plugins: [
     dts({
       bundleTypes: { bundledPackages: [CORE_PACKAGE] },
-      compilerOptions: { paths: { '#src/*': ['./src/*/index.ts'] } },
+      aliasesExclude: ['vue'],
+      compilerOptions: {
+        paths: {
+          '#src/*': ['./src/*/index.ts'],
+          vue: [minimumVueTypes]
+        }
+      },
       include: ['src'],
       exclude: ['src/test', 'src/**/__test__/**', 'src/**/*.test.ts']
     })

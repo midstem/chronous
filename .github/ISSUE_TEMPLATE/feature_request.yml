@@ -1,0 +1,41 @@
+name: Feature request
+description: Suggest a behavior or capability for Chronous.
+body:
+  - type: dropdown
+    id: package
+    attributes:
+      label: Related package
+      options:
+        - '@midstem/chronous (core)'
+        - '@midstem/chronous-react'
+        - '@midstem/chronous-angular'
+        - '@midstem/chronous-vue'
+        - '@midstem/chronous-svelte'
+        - All packages
+        - Unsure
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem should this solve?
+      description: Describe your use case and what is difficult today.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Explain what you would like Chronous to do.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Describe any workaround or alternative you have considered.
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Add examples or links that help explain the request.

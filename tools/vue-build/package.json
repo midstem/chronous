@@ -1,0 +1,10 @@
+{
+  "name": "@tools/vue-build",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Minimum supported Vue types for published declaration generation",
+  "devDependencies": {
+    "vue": "3.4.0"
+  }
+}

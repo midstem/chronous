@@ -35,12 +35,19 @@
     "test": "npm run test:run --workspaces --if-present",
     "lint": "eslint .",
     "lint:fix": "eslint --cache ./packages --quiet --fix",
-    "lint:format": "prettier --write --log-level warn \"./**/*.{js,mjs,ts,tsx,css,md,json,svelte}\"",
+    "lint:format": "prettier --write --log-level warn \"./**/*.{js,mjs,ts,tsx,css,md,json,svelte,yml,yaml}\" \".github/**/*.{mjs,md,yml,yaml}\"",
     "lint-tsc": "npm run build && npm run lint:format && npm run lint:fix && npm run typecheck",
     "test:e2e": "npm run test:e2e --workspace @tools/e2e --",
     "test:e2e:firefox": "npm run test:e2e:firefox --workspace @tools/e2e --",
     "release": "node tools/release/index.mjs",
-    "test:package:angular": "npm run build && npm run verify:dist && node tools/angular-build/scripts/verify-package.mjs"
+    "test:package:angular": "npm run build && npm run verify:dist && node tools/angular-build/scripts/verify-package.mjs",
+    "format:check": "prettier --check \"./**/*.{js,mjs,ts,tsx,css,md,json,svelte,yml,yaml}\" \".github/**/*.{mjs,md,yml,yaml}\"",
+    "check": "npm run build && npm run verify:dist && npm run format:check && npm run lint && npm run typecheck && npm test && npm run test:infra",
+    "test:infra": "node --test .github/scripts/*.test.mjs tools/maintenance/*.test.mjs tools/package-check/*.test.mjs",
+    "precommit": "node tools/maintenance/precommit.mjs",
+    "verify:package": "node tools/package-check/index.mjs",
+    "test:package": "npm run build && npm run verify:dist && npm run verify:package",
+    "size:report": "node tools/maintenance/report-size.mjs"
   },
   "devDependencies": {
     "@analogjs/vite-plugin-angular": "^2.7.1",
@@ -89,5 +96,9 @@
     "vitest": "^4.1.11",
     "vue": "^3.5.41"
   },
-  "pre-commit": "lint-tsc"
+  "pre-commit": "precommit",
+  "engines": {
+    "node": ">=24 <25",
+    "npm": ">=11 <12"
+  }
 }

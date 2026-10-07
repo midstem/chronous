@@ -2,7 +2,7 @@ import type { CalendarRange } from '@midstem/chronous'
 import { screen } from '@testing-library/dom'
 import { describe, expect, it, vi } from 'vitest'
 import type { VNode } from 'vue'
-import { h } from 'vue'
+import { effectScope, h } from 'vue'
 
 import { Calendar } from '../../index'
 import { mount } from '../../test/helpers'
@@ -136,6 +136,33 @@ describe('the time grid', () => {
 })
 
 describe('useNow', () => {
+  it('clears its timer when the owning scope stops', () => {
+    vi.useFakeTimers()
+    const scope = effectScope()
+    try {
+      scope.run(() => useNow('Europe/Kyiv'))
+      expect(vi.getTimerCount()).toBe(1)
+      scope.stop()
+      expect(vi.getTimerCount()).toBe(0)
+    } finally {
+      scope.stop()
+      vi.useRealTimers()
+    }
+  })
+
+  it('does not warn when called outside a scope', () => {
+    vi.useFakeTimers()
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    try {
+      useNow('Europe/Kyiv')
+      expect(warning).not.toHaveBeenCalled()
+    } finally {
+      vi.clearAllTimers()
+      vi.useRealTimers()
+      warning.mockRestore()
+    }
+  })
+
   it('reports nothing when the zone cannot be read', () => {
     const now = useNow('Not/AZone')
 

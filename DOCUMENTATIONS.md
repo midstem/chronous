@@ -29,6 +29,10 @@ adapter reference together with the core reference. Verify changes against
 `src/index.ts`, the relevant implementation and `package.json`; examples from
 another adapter do not define this adapter's reactive or rendering contract.
 
+For contributor setup and pull requests, see [CONTRIBUTING.md](CONTRIBUTING.md).
+GitHub-specific workflows, shared setup and CI scripts are described in
+[GitHub automation](.github/README.md).
+
 What follows is the repository itself — how it is laid out, how the playground
 runs, how the benchmarks are read and how a release is cut.
 
@@ -49,9 +53,12 @@ runs, how the benchmarks are read and how a release is cut.
 | `apps/playground-svelte`   | Svelte playground                                            |
 | `tools/release`            | the interactive release CLI                                  |
 | `tools/scripts`            | `prepack` and the build invariants                           |
+| `tools/package-check`      | isolated npm archive consumers and framework compatibility   |
+| `tools/maintenance`        | staged checks and bundle size reports                        |
+| `tools/vue-build`          | Vue 3.4 types for compatible published declarations          |
 
 ```bash
-npm install
+npm ci
 npm run build
 npm run start:vanilla
 npm run start
@@ -123,9 +130,10 @@ npm run start:vue     # starts Vue playground
 npm run start:svelte  # starts Svelte playground
 ```
 
-Every push to `main` publishes all playgrounds to GitHub Pages through
-[`.github/workflows/pages.yml`](.github/workflows/pages.yml), which runs
-`npm run build:pages` and uploads `dist-pages`.
+After CI succeeds on a push to `main`, the Pages workflow publishes all
+playgrounds to GitHub Pages. It can also be run manually from the CI workflow
+on `main`. The reusable Pages workflow builds with `npm run build:pages` and
+uploads `dist-pages`.
 
 ## Benchmarks
 

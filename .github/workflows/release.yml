@@ -16,11 +16,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Setup Node
-        uses: actions/setup-node@v7
+      - uses: ./.github/actions/setup
         with:
-          node-version: 24.x
-          cache: npm
+          install: 'false'
           registry-url: https://registry.npmjs.org
 
       - name: Read the package out of the release tag
@@ -37,6 +35,12 @@ jobs:
       - name: Verify the build invariants
         run: npm run verify:dist
 
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Test maintenance checks
+        run: npm run test:infra
+
       - name: Lint
         run: npm run lint
 
@@ -50,9 +54,8 @@ jobs:
         if: env.PACKAGE == '@midstem/chronous-angular'
         run: npx playwright install --with-deps chromium
 
-      - name: Verify the Angular npm package and minimum runtime
-        if: env.PACKAGE == '@midstem/chronous-angular'
-        run: npm run test:package:angular
+      - name: Verify the npm archive and framework compatibility
+        run: node .github/scripts/verify-package.mjs "$PACKAGE" release
 
       - name: Publish
         run: npm publish --workspace "$PACKAGE" --tag "$NPM_TAG"

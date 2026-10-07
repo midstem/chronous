@@ -41,6 +41,13 @@ and generated code.
 
 [MIT](LICENSE)
 
+## Contributing
+
+Bug reports, feature ideas and pull requests are welcome. See the
+[contributing guide](CONTRIBUTING.md) for setup and checks. Public API and
+release details live in the [package references](DOCUMENTATIONS.md) and
+[publishing guide](docs/PUBLISH.md).
+
 [npm-core]: https://npmjs.org/package/@midstem/chronous
 [v-core]: https://img.shields.io/npm/v/%40midstem%2Fchronous.svg
 [s-core]: https://deno.bundlejs.com/badge?q=%40midstem%2Fchronous

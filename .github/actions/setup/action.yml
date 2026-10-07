@@ -1,0 +1,30 @@
+name: Setup project
+description: Set up Node and optionally install dependencies and restore built packages.
+inputs:
+  install:
+    description: Install locked workspace dependencies.
+    default: 'true'
+  packages:
+    description: Restore the package-dist artifact from this workflow run.
+    default: 'false'
+  registry-url:
+    description: npm registry for publishing.
+    default: ''
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v7
+      with:
+        node-version-file: .nvmrc
+        cache: npm
+        registry-url: ${{ inputs.registry-url }}
+    - name: Install dependencies
+      if: inputs.install == 'true'
+      shell: bash
+      run: npm ci
+    - name: Restore built packages
+      if: inputs.packages == 'true'
+      uses: actions/download-artifact@v4
+      with:
+        name: package-dist
+        path: packages
