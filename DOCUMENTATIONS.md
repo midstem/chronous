@@ -30,30 +30,32 @@ adapter reference together with the core reference. Verify changes against
 another adapter do not define this adapter's reactive or rendering contract.
 
 For contributor setup and pull requests, see [CONTRIBUTING.md](CONTRIBUTING.md).
+GitHub-specific workflows, shared setup and CI scripts are described in
+[GitHub automation](.github/README.md).
 
 What follows is the repository itself — how it is laid out, how the playground
 runs, how the benchmarks are read and how a release is cut.
 
 ## Layout
 
-| Path                       | What it is                                                      |
-| -------------------------- | --------------------------------------------------------------- |
-| `packages/core`            | `@midstem/chronous` — the engine                                |
-| `packages/react`           | `@midstem/chronous-react` — hooks and primitives                |
-| `packages/angular`         | `@midstem/chronous-angular` — signals and directives            |
-| `packages/vue`             | `@midstem/chronous-vue` — composables and components            |
-| `packages/svelte`          | `@midstem/chronous-svelte` — reactive helpers and components    |
-| `packages/playground-core` | `@midstem/playground-core` — shared playground logic            |
-| `apps/playground-vanilla`  | Vanilla JS playground                                           |
-| `apps/playground-react`    | React playground                                                |
-| `apps/playground-angular`  | Angular playground                                              |
-| `apps/playground-vue`      | Vue playground                                                  |
-| `apps/playground-svelte`   | Svelte playground                                               |
-| `tools/release`            | the interactive release CLI                                     |
-| `tools/scripts`            | `prepack` and the build invariants                              |
-| `tools/package-check`      | isolated npm archive consumers and framework compatibility      |
-| `tools/maintenance`        | staged checks, CI change classification and bundle size reports |
-| `tools/vue-build`          | Vue 3.4 types for compatible published declarations             |
+| Path                       | What it is                                                   |
+| -------------------------- | ------------------------------------------------------------ |
+| `packages/core`            | `@midstem/chronous` — the engine                             |
+| `packages/react`           | `@midstem/chronous-react` — hooks and primitives             |
+| `packages/angular`         | `@midstem/chronous-angular` — signals and directives         |
+| `packages/vue`             | `@midstem/chronous-vue` — composables and components         |
+| `packages/svelte`          | `@midstem/chronous-svelte` — reactive helpers and components |
+| `packages/playground-core` | `@midstem/playground-core` — shared playground logic         |
+| `apps/playground-vanilla`  | Vanilla JS playground                                        |
+| `apps/playground-react`    | React playground                                             |
+| `apps/playground-angular`  | Angular playground                                           |
+| `apps/playground-vue`      | Vue playground                                               |
+| `apps/playground-svelte`   | Svelte playground                                            |
+| `tools/release`            | the interactive release CLI                                  |
+| `tools/scripts`            | `prepack` and the build invariants                           |
+| `tools/package-check`      | isolated npm archive consumers and framework compatibility   |
+| `tools/maintenance`        | staged checks and bundle size reports                        |
+| `tools/vue-build`          | Vue 3.4 types for compatible published declarations          |
 
 ```bash
 npm ci

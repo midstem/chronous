@@ -25,34 +25,23 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v7
+      - uses: ./.github/actions/setup
         with:
-          node-version-file: .nvmrc
+          install: 'false'
       - name: Classify changed files
         id: areas
         env:
           EVENT: ${{ github.event_name }}
           BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
           HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
-        run: |
-          if [ "$EVENT" = workflow_dispatch ]; then
-            printf 'code=true\npages=true\n' >> "$GITHUB_OUTPUT"
-          elif [ "$EVENT" = pull_request ]; then
-            node tools/maintenance/detect-changes.mjs --base "$BASE" --head "$HEAD" --merge-base
-          else
-            node tools/maintenance/detect-changes.mjs --base "$BASE" --head "$HEAD"
-          fi
+        run: node .github/scripts/detect-changes.mjs
 
   format:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
+      - uses: ./.github/actions/setup
       - name: Check formatting, including docs and workflows
         run: npm run format:check
       - name: Test maintenance checks
@@ -65,11 +54,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
+      - uses: ./.github/actions/setup
       - name: Build the packages once
         run: npm run build
       - name: Verify the build invariants
@@ -110,16 +95,9 @@ jobs:
         playground: [react, angular, vue, svelte, vanilla]
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: ./.github/actions/setup
         with:
-          node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
-      - name: Restore built packages
-        uses: actions/download-artifact@v4
-        with:
-          name: package-dist
-          path: packages
+          packages: 'true'
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Run E2E tests
@@ -156,25 +134,14 @@ jobs:
           - { package: svelte, runtime: minimum }
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: ./.github/actions/setup
         with:
-          node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
-      - uses: actions/download-artifact@v4
-        with:
-          name: package-dist
-          path: packages
+          packages: 'true'
       - name: Validate the installed npm archive
         env:
           PACKAGE: ${{ matrix.package }}
           RUNTIME: ${{ matrix.runtime }}
-        run: |
-          if [ "$RUNTIME" = minimum ]; then
-            npm run verify:package -- --package "$PACKAGE" --minimum
-          else
-            npm run verify:package -- --package "$PACKAGE"
-          fi
+        run: node .github/scripts/verify-package.mjs "$PACKAGE" "$RUNTIME"
 
   angular-package:
     needs: [changes, quality]
@@ -183,15 +150,9 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: ./.github/actions/setup
         with:
-          node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
-      - uses: actions/download-artifact@v4
-        with:
-          name: package-dist
-          path: packages
+          packages: 'true'
       - run: npx playwright install --with-deps chromium
       - name: Verify Angular 18 consumer and current production playground
         run: node tools/angular-build/scripts/verify-package.mjs
@@ -213,38 +174,18 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v7
+      - uses: ./.github/actions/setup
         with:
-          node-version-file: .nvmrc
-          cache: npm
+          install: 'false'
       - uses: actions/download-artifact@v4
         with:
           name: package-size
           path: ${{ runner.temp }}
-      - name: Save the reporting tool before checking out the baseline
-        run: cp -R tools/maintenance "$RUNNER_TEMP/size-tool"
-      - name: Measure the PR base
-        if: github.event_name == 'pull_request'
-        env:
-          BASE: ${{ github.event.pull_request.base.sha }}
-        run: |
-          git checkout --detach "$BASE"
-          npm ci
-          npm run build
-          node "$RUNNER_TEMP/size-tool/report-size.mjs" --root "$GITHUB_WORKSPACE" --json "$RUNNER_TEMP/base-size.json"
       - name: Report sizes and gzip deltas
-        if: ${{ !cancelled() }}
         env:
           EVENT: ${{ github.event_name }}
-        run: |
-          if [ "$EVENT" = pull_request ] && [ -f "$RUNNER_TEMP/base-size.json" ]; then
-            node "$RUNNER_TEMP/size-tool/report-size.mjs" --current "$RUNNER_TEMP/current-size.json" --base "$RUNNER_TEMP/base-size.json" >> "$GITHUB_STEP_SUMMARY"
-          else
-            if [ "$EVENT" = pull_request ]; then
-              echo "Baseline measurement unavailable; reporting current sizes." >> "$GITHUB_STEP_SUMMARY"
-            fi
-            node "$RUNNER_TEMP/size-tool/report-size.mjs" --current "$RUNNER_TEMP/current-size.json" >> "$GITHUB_STEP_SUMMARY"
-          fi
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: node .github/scripts/size-report.mjs
 
   checks:
     name: CI checks
@@ -253,20 +194,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+        with:
+          install: 'false'
       - name: Require all applicable checks to pass
         env:
           RESULTS: ${{ toJSON(needs) }}
-        run: |
-          node -e '
-            const jobs = JSON.parse(process.env.RESULTS)
-            const required = jobs.changes.outputs.code === "true"
-              ? Object.keys(jobs)
-              : ["changes", "format"]
-            if (required.some(name => jobs[name].result !== "success")) {
-              console.error("One or more required CI checks failed or were skipped.")
-              process.exit(1)
-            }
-          '
+        run: node .github/scripts/ci-checks.mjs
 
   pages:
     needs: [changes, checks]

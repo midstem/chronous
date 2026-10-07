@@ -43,7 +43,7 @@
     "test:package:angular": "npm run build && npm run verify:dist && node tools/angular-build/scripts/verify-package.mjs",
     "format:check": "prettier --check \"./**/*.{js,mjs,ts,tsx,css,md,json,svelte,yml,yaml}\" \".github/**/*.{mjs,md,yml,yaml}\"",
     "check": "npm run build && npm run verify:dist && npm run format:check && npm run lint && npm run typecheck && npm test && npm run test:infra",
-    "test:infra": "node --test tools/maintenance/*.test.mjs tools/package-check/*.test.mjs",
+    "test:infra": "node --test .github/scripts/*.test.mjs tools/maintenance/*.test.mjs tools/package-check/*.test.mjs",
     "precommit": "node tools/maintenance/precommit.mjs",
     "verify:package": "node tools/package-check/index.mjs",
     "test:package": "npm run build && npm run verify:dist && npm run verify:package",

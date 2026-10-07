@@ -24,28 +24,14 @@ jobs:
         uses: actions/checkout@v7
         with:
           ref: ${{ github.sha }}
-      - uses: actions/setup-node@v7
+      - uses: ./.github/actions/setup
         with:
-          node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
-      - name: Restore verified packages
-        uses: actions/download-artifact@v4
-        with:
-          name: package-dist
-          path: packages
+          packages: 'true'
       - name: Build the playgrounds
         run: npm run build:pages -- --skip-package-build
       - name: Skip a commit superseded on main
         id: current
-        run: |
-          git fetch origin main
-          if [ "$(git rev-parse FETCH_HEAD)" = "$GITHUB_SHA" ]; then
-            echo 'deploy=true' >> "$GITHUB_OUTPUT"
-          else
-            echo 'deploy=false' >> "$GITHUB_OUTPUT"
-            echo 'A newer commit is on main; skipping this deployment.'
-          fi
+        run: node .github/scripts/pages-current.mjs
       - uses: actions/configure-pages@v5
         if: steps.current.outputs.deploy == 'true'
       - uses: actions/upload-pages-artifact@v3

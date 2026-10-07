@@ -1,5 +1,7 @@
 import { appendFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
+import { resolve } from 'node:path'
+import { pathToFileURL } from 'node:url'
 
 const ZERO_SHA = /^0+$/
 
@@ -36,6 +38,17 @@ function changedPaths(base, head, useMergeBase) {
   return result.toString('utf8').split('\0').filter(Boolean)
 }
 
+const isSha = (value) => /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/i.test(value ?? '')
+
+export function planEvent(event, base, head) {
+  if (event === 'workflow_dispatch') return { manual: true }
+  if (event !== 'push' && event !== 'pull_request')
+    throw new Error(`Unsupported EVENT: ${event || '(missing)'}`)
+  if (!isSha(base)) throw new Error(`Invalid BASE SHA for ${event}`)
+  if (!isSha(head)) throw new Error(`Invalid HEAD SHA for ${event}`)
+  return { manual: false, base, head, mergeBase: event === 'pull_request' }
+}
+
 function parseArgs(args) {
   const options = { base: undefined, head: 'HEAD', mergeBase: false }
   for (let i = 0; i < args.length; i += 1) {
@@ -51,16 +64,38 @@ function parseArgs(args) {
   return options
 }
 
+function writeOutput(classification) {
+  const output = `code=${classification.code}\npages=${classification.pages}\n`
+  if (process.env.GITHUB_OUTPUT)
+    appendFileSync(process.env.GITHUB_OUTPUT, output)
+  else process.stdout.write(output)
+}
+
 function main() {
   try {
-    const options = parseArgs(process.argv.slice(2))
-    const classification = classifyChangedPaths(
-      changedPaths(options.base, options.head, options.mergeBase)
+    const args = process.argv.slice(2)
+    if (args.length === 0) {
+      const plan = planEvent(
+        process.env.EVENT,
+        process.env.BASE,
+        process.env.HEAD
+      )
+      if (plan.manual) {
+        writeOutput({ code: true, pages: true })
+        return
+      }
+      writeOutput(
+        classifyChangedPaths(changedPaths(plan.base, plan.head, plan.mergeBase))
+      )
+      return
+    }
+
+    const options = parseArgs(args)
+    writeOutput(
+      classifyChangedPaths(
+        changedPaths(options.base, options.head, options.mergeBase)
+      )
     )
-    const output = `code=${classification.code}\npages=${classification.pages}\n`
-    if (process.env.GITHUB_OUTPUT)
-      appendFileSync(process.env.GITHUB_OUTPUT, output)
-    else process.stdout.write(output)
   } catch (error) {
     process.stderr.write(`${error.message}\n`)
     process.exitCode = 1
@@ -69,6 +104,6 @@ function main() {
 
 if (
   process.argv[1] &&
-  import.meta.url === new URL(`file://${process.argv[1]}`).href
+  import.meta.url === pathToFileURL(resolve(process.argv[1])).href
 )
   main()
