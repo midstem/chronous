@@ -1,19 +1,18 @@
 # Install Chronous with shadcn/ui
 
-Chronous provides an editable React week calendar as a shadcn registry item.
-The installed component uses your app's shadcn `Button`, Tailwind semantic
-colors and the public `@midstem/chronous-react` API. It installs
-`temporal-polyfill` and imports its global entry before initializing Chronous.
-The calendar keeps its day headings and all-day events visible while the time
-slots scroll. On narrow screens, the days scroll horizontally inside the
-calendar region. Event titles and times use the app's semantic theme colors.
+Chronous provides a customizable React calendar with week, month and agenda
+views as a shadcn registry item. The editable component uses your app's shadcn
+`Button`, semantic Tailwind surfaces and the public `@midstem/chronous-react`
+API. It installs `temporal-polyfill` and imports its global entry before
+initializing Chronous.
 
 ## Requirements
 
 Use a React project initialized with shadcn/ui and Tailwind CSS. The installed
 component imports `Button` from `@/components/ui/button`; the shadcn CLI rewrites
 that import to the `aliases.ui` path configured in your `components.json`. Run
-installation commands from the app root where `components.json` lives.
+installation commands from the app root where `components.json` lives. The
+theme must expose shadcn's `chart-1` through `chart-5` color tokens.
 
 ## Install
 
@@ -47,13 +46,14 @@ The CLI writes an editable `components/ui/chronous-calendar.tsx`, installs
 ```tsx
 import { ChronousCalendar } from '@/components/ui/chronous-calendar'
 import type { EventInput } from '@midstem/chronous-react'
+import type { ChronousCalendarEventData } from '@/components/ui/chronous-calendar'
 
-const events: EventInput<{ title: string }>[] = [
+const events: EventInput<ChronousCalendarEventData>[] = [
   {
     id: 'standup',
     start: '2026-03-18T09:00',
     duration: 'PT30M',
-    data: { title: 'Standup' }
+    data: { title: 'Standup', color: 'chart-1' }
   },
   {
     id: 'holiday',
@@ -69,21 +69,34 @@ export function Schedule() {
     <ChronousCalendar
       events={events}
       initialDate="2026-03-18"
+      initialView="week"
       locale="en-GB"
-      timeZone="Europe/Kyiv"
     />
   )
 }
 ```
 
-`events` defaults to an empty list. `initialDate` chooses the initial week and
-is read on mount. When omitted, the component starts from today's date in the
-selected `timeZone`. Change `timeZone` to render the same week in another zone;
-`locale` controls the month label and Chronous day headings. `scrollToHour`
-sets the initial vertical scroll position; it defaults to `8`, accepts `0` to
-show midnight, and accepts `null` to keep the grid at the top. For server-rendered
-apps, pass a stable `initialDate` so the server and browser start on the same
-week, including around midnight.
+The toolbar switches between Week, Month and Agenda, and the previous, next and
+today controls follow the selected view. Events default to an empty list. Each
+event's `data.title` is required. Optional `data.color` accepts `chart-1` through
+`chart-5`; events default to `chart-2`. Event cards use a subtle chart-color fill, a colored leading edge,
+and semantic foreground text. `initialView` defaults to `week`; `className` adds classes to the outer
+panel.
+
+`initialDate` and `initialView` are read when the component mounts. When
+`timeZone` is omitted, the component starts in UTC for server rendering, then
+uses the browser's local IANA time zone after hydration. Pass `timeZone` to
+choose a zone explicitly; all date and event calculations use that zone. Pass
+a stable `initialDate` when rendering on the server so server and browser begin
+on the same week around midnight. `locale` controls date and event-time labels.
+`scrollToHour` applies to the week view; it defaults to `8`, accepts `0` to start
+at midnight, and accepts `null` to keep the grid at the top.
+
+The week view keeps day headings and all-day events visible while the time grid
+scrolls. On narrow screens, the week and month days scroll horizontally within
+the calendar. The month view shows two all-day lanes and up to two timed events
+per day, with a count for additional events. Agenda shows event details and an
+empty state when the selected period has no events.
 
 ## Build and preview locally
 

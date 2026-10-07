@@ -14,8 +14,8 @@ styles. No stylesheet required.
 
 ## Install the React calendar with shadcn/ui
 
-Install the editable calendar into a shadcn app after the Pages registry is
-published:
+Install the week, month and agenda calendar into a shadcn app after the
+Pages registry is published:
 
 ```sh
 npx shadcn@latest add https://midstem.github.io/chronous/r/chronous-calendar.json
