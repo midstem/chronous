@@ -14,7 +14,7 @@ styles. No stylesheet required.
 
 ## Install the React calendar with shadcn/ui
 
-Install the week, month and agenda calendar into a shadcn app after the
+Install the day, week, month and agenda calendar into a shadcn app after the
 Pages registry is published:
 
 ```sh

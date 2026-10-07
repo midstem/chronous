@@ -1,6 +1,6 @@
 # Install Chronous with shadcn/ui
 
-Chronous provides a customizable React calendar with week, month and agenda
+Chronous provides a customizable React calendar with day, week, month and agenda
 views as a shadcn registry item. The editable component uses your app's shadcn
 `Button`, semantic Tailwind surfaces and the public `@midstem/chronous-react`
 API. It installs `temporal-polyfill` and imports its global entry before
@@ -76,7 +76,7 @@ export function Schedule() {
 }
 ```
 
-The toolbar switches between Week, Month and Agenda, and the previous, next and
+The toolbar switches between Day, Week, Month and Agenda, and the previous, next and
 today controls follow the selected view. Events default to an empty list. Each
 event's `data.title` is required. Optional `data.color` accepts `chart-1` through
 `chart-5`; events default to `chart-2`. Event cards use a subtle chart-color fill, a colored leading edge,
@@ -89,7 +89,7 @@ uses the browser's local IANA time zone after hydration. Pass `timeZone` to
 choose a zone explicitly; all date and event calculations use that zone. Pass
 a stable `initialDate` when rendering on the server so server and browser begin
 on the same week around midnight. `locale` controls date and event-time labels.
-`scrollToHour` applies to the week view; it defaults to `8`, accepts `0` to start
+`scrollToHour` applies to day and week views; it defaults to `8`, accepts `0` to start
 at midnight, and accepts `null` to keep the grid at the top.
 
 The week view keeps day headings and all-day events visible while the time grid

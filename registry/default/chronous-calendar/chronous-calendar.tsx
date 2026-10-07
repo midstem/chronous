@@ -30,7 +30,13 @@ const MONTH_YEAR = { month: 'long', year: 'numeric' } as const
 const WEEK_DAY = { month: 'short', day: 'numeric' } as const
 const EVENT_CLOCK = { hour: '2-digit', minute: '2-digit' } as const
 const EMPTY_EVENTS: readonly EventInput<ChronousCalendarEvent>[] = []
-const VIEWS: { id: 'week' | 'month' | 'agenda'; label: string }[] = [
+export type ChronousCalendarView = Extract<
+  ViewKind,
+  'day' | 'week' | 'month' | 'agenda'
+>
+
+const VIEWS: { id: ChronousCalendarView; label: string }[] = [
+  { id: 'day', label: 'Day' },
   { id: 'week', label: 'Week' },
   { id: 'month', label: 'Month' },
   { id: 'agenda', label: 'Agenda' }
@@ -39,7 +45,7 @@ const VIEWS: { id: 'week' | 'month' | 'agenda'; label: string }[] = [
 export type ChronousCalendarProps = {
   events?: readonly EventInput<ChronousCalendarEvent>[]
   initialDate?: string
-  initialView?: 'week' | 'month' | 'agenda'
+  initialView?: ChronousCalendarView
   timeZone?: string
   locale?: LocaleId
   scrollToHour?: number | null
@@ -108,6 +114,8 @@ const periodLabel = (
   range: CalendarRange,
   locale: LocaleId
 ): string => {
+  if (range.view === 'day') return dateLabel(range.currentDate, locale)
+
   if (range.view === 'month') {
     const dates = calendar.days
       .filter((day) => day.inCurrentPeriod)
@@ -380,7 +388,7 @@ export function ChronousCalendar({
   const goTo = (nextRange: CalendarRange | null): void => {
     if (nextRange) setRange(nextRange)
   }
-  const goToView = (view: 'week' | 'month' | 'agenda'): void => {
+  const goToView = (view: ChronousCalendarView): void => {
     setRange(navigation.withView(view))
   }
 
@@ -479,14 +487,18 @@ export function ChronousCalendar({
                 </div>
               </header>
 
-              {visibleRange.view === 'week' ? (
+              {visibleRange.view === 'week' || visibleRange.view === 'day' ? (
                 <div
                   aria-label="Calendar days"
                   className="overflow-x-auto overscroll-x-contain focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
                   role="region"
                   tabIndex={0}
                 >
-                  <div className="min-w-[720px]">
+                  <div
+                    className={
+                      visibleRange.view === 'week' ? 'min-w-[720px]' : 'min-w-0'
+                    }
+                  >
                     <Calendar.Header className="border-b border-border/60 bg-card">
                       <Calendar.DayHeadings className="px-2 py-3 text-center text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                         {({ date, weekdayLabel, dayLabel }) => (

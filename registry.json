@@ -7,7 +7,7 @@
       "name": "chronous-calendar",
       "type": "registry:ui",
       "title": "Chronous Calendar",
-      "description": "A customizable React calendar with week, month and agenda views, powered by Chronous and styled with your shadcn/ui theme.",
+      "description": "A customizable React calendar with day, week, month and agenda views, powered by Chronous and styled with your shadcn/ui theme.",
       "dependencies": [
         "@midstem/chronous-react@^1.0.2",
         "temporal-polyfill@^1.0.4"
