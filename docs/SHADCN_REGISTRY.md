@@ -7,6 +7,10 @@ API. Like every shadcn/ui component, it is a single editable file. Safari still
 lacks Temporal, so the component installs `temporal-polyfill` and imports its
 global entry at the top of the file.
 
+**[Open the live playground](https://midstem.github.io/chronous/shadcn/)** to
+try every view, locale, time zone and the light and dark themes before you
+install.
+
 ## Requirements
 
 Use a React project initialized with shadcn/ui and Tailwind CSS. The installed
@@ -128,6 +132,30 @@ From the consuming shadcn app, install the locally served item with:
 npx shadcn@latest add http://localhost:3000/r/chronous-calendar.json
 ```
 
-`npm run typecheck:registry` checks the component against the published
-`@midstem/chronous-react` types, with `Button` and `cn` stubbed in
-`tools/registry/shadcn.d.ts`.
+## Playground and tests
+
+`apps/playground-shadcn` is a real shadcn/ui project (`components.json`, the
+nova `Button`, `cn` and theme) that renders the registry file directly through
+an alias, so the playground always shows the code `shadcn add` installs:
+
+```sh
+npm run start:shadcn
+```
+
+It is published with the other playgrounds at
+[midstem.github.io/chronous/shadcn](https://midstem.github.io/chronous/shadcn/).
+Its typecheck covers the registry file against the real `Button` and `cn`, and
+the Playwright suite in `tools/e2e/shadcn` drives it in Chromium and WebKit:
+
+```sh
+PLAYGROUND=shadcn npm run test:e2e -- --project=shadcn
+BROWSER=webkit PLAYGROUND=shadcn npm run test:e2e -- --project=shadcn
+```
+
+## Updating the registry
+
+Every push to `main` that touches more than Markdown redeploys GitHub Pages, and
+`build:pages` rebuilds `r/chronous-calendar.json` from the current registry file.
+The `@midstem/chronous-react` range lives in the `dependencies` of
+`registry.json`. A caret range already admits patches and minors, so raise it
+only when the component starts relying on a newer API.

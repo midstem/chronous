@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url'
 import { defineConfig, devices } from '@playwright/test'
-import { PLAYGROUNDS } from './playgrounds'
+import { PLAYGROUNDS, SHADCN_PLAYGROUND } from './playgrounds'
 
 const browserName = process.env.BROWSER || 'chromium'
 const validBrowsers = ['chromium', 'firefox', 'webkit'] as const
@@ -20,7 +20,9 @@ const device =
       ? devices['Desktop Safari']
       : devices['Desktop Chrome']
 
-const validPlaygroundIds = PLAYGROUNDS.map((pg) => pg.id)
+const validPlaygroundIds = [...PLAYGROUNDS, SHADCN_PLAYGROUND].map(
+  (pg) => pg.id
+)
 const playgroundEnv = process.env.PLAYGROUND?.trim()
 if (playgroundEnv && !validPlaygroundIds.includes(playgroundEnv)) {
   throw new Error(
@@ -31,6 +33,10 @@ if (playgroundEnv && !validPlaygroundIds.includes(playgroundEnv)) {
 const activePlaygrounds = playgroundEnv
   ? PLAYGROUNDS.filter((pg) => pg.id === playgroundEnv)
   : PLAYGROUNDS
+
+const shadcnActive = !playgroundEnv || playgroundEnv === SHADCN_PLAYGROUND.id
+
+const shadcnPlaygrounds = shadcnActive ? [SHADCN_PLAYGROUND] : []
 
 export default defineConfig({
   testDir: './tests',
@@ -46,14 +52,26 @@ export default defineConfig({
     trace: 'retain-on-failure',
     video: 'retain-on-failure'
   },
-  projects: activePlaygrounds.map((pg) => ({
-    name: pg.id,
-    use: {
-      baseURL: `http://localhost:${pg.port}`,
-      ...device
-    }
-  })),
-  webServer: activePlaygrounds.map((pg) => ({
+  projects: [
+    ...activePlaygrounds.map((pg) => ({
+      name: pg.id,
+      use: {
+        baseURL: `http://localhost:${pg.port}`,
+        ...device
+      }
+    })),
+    ...shadcnPlaygrounds.map((pg) => ({
+      name: pg.id,
+      testDir: './shadcn',
+      use: {
+        baseURL: `http://localhost:${pg.port}`,
+        ...device,
+        locale: 'en-US',
+        timezoneId: 'UTC'
+      }
+    }))
+  ],
+  webServer: [...activePlaygrounds, ...shadcnPlaygrounds].map((pg) => ({
     command: `npx vite --port ${pg.port} --strictPort --no-open`,
     cwd: fileURLToPath(new URL(pg.path, import.meta.url)),
     url: `http://localhost:${pg.port}`,

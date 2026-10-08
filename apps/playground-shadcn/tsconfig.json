@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": ["src", "../../registry/default"],
+  "exclude": ["dist", "node_modules"],
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["vite/client"],
+    "paths": {
+      "@/components/ui/chronous-calendar": [
+        "../../registry/default/chronous-calendar/chronous-calendar.tsx"
+      ],
+      "@/*": ["./src/*"]
+    }
+  }
+}

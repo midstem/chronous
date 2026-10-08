@@ -31,7 +31,8 @@
     "start:vue": "npm run dev --workspace @midstem/chronous-playground-vue",
     "start:svelte": "npm run dev --workspace @midstem/chronous-playground-svelte",
     "start:vanilla": "npm run dev --workspace @midstem/chronous-playground-vanilla",
-    "typecheck": "npm run typecheck:registry && npm run typecheck --workspaces --if-present",
+    "start:shadcn": "npm run dev --workspace @midstem/chronous-playground-shadcn",
+    "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test:run --workspaces --if-present",
     "lint": "eslint .",
     "lint:fix": "eslint --cache ./packages --quiet --fix",
@@ -48,8 +49,7 @@
     "verify:package": "node tools/package-check/index.mjs",
     "test:package": "npm run build && npm run verify:dist && npm run verify:package",
     "size:report": "node tools/maintenance/report-size.mjs",
-    "build:registry": "npx shadcn@4.21.4 build --output dist-registry/r",
-    "typecheck:registry": "tsc --project tools/registry/tsconfig.json"
+    "build:registry": "npx shadcn@4.21.4 build --output dist-registry/r"
   },
   "devDependencies": {
     "@analogjs/vite-plugin-angular": "^2.7.1",
@@ -73,7 +73,6 @@
     "@typescript-eslint/parser": "^8.67.0",
     "@vitejs/plugin-vue": "^6.0.9",
     "@vitest/coverage-v8": "^4.1.11",
-    "class-variance-authority": "^0.7.1",
     "eslint": "^9.39.5",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
@@ -83,7 +82,6 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.11.0",
     "jsdom": "^30.0.1",
-    "lucide-react": "^1.52.0",
     "pre-commit": "^2.0.0",
     "prettier": "^3.9.6",
     "prettier-plugin-svelte": "^3.5.2",

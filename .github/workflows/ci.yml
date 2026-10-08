@@ -92,7 +92,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        playground: [react, angular, vue, svelte, vanilla]
+        playground: [react, angular, vue, svelte, vanilla, shadcn]
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
@@ -103,6 +103,15 @@ jobs:
       - name: Run E2E tests
         env:
           PLAYGROUND: ${{ matrix.playground }}
+        run: npm run test:e2e -- --project=${{ matrix.playground }}
+      - name: Install WebKit for the Temporal polyfill path
+        if: matrix.playground == 'shadcn'
+        run: npx playwright install --with-deps webkit
+      - name: Run E2E tests in WebKit
+        if: matrix.playground == 'shadcn'
+        env:
+          PLAYGROUND: ${{ matrix.playground }}
+          BROWSER: webkit
         run: npm run test:e2e -- --project=${{ matrix.playground }}
       - name: Upload Playwright artifacts
         uses: actions/upload-artifact@v4
