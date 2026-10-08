@@ -391,7 +391,7 @@ function CalendarMonthView({
             }}
           </Calendar.MonthDays>
           <Calendar.MonthAllDayEvents
-            className="font-medium"
+            className="px-1.5 font-medium"
             lanesTopOffset={40}
           >
             {({ event }) => <CalendarEvent size="sm" {...eventProps(event)} />}
