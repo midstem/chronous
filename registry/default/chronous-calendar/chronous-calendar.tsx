@@ -180,7 +180,7 @@ function CalendarToolbar({
             <div
               role="group"
               aria-label="Calendar view"
-              className="bg-muted/30 inline-flex items-center rounded-md border p-0.5"
+              className="bg-muted/30 inline-flex h-9 items-center rounded-md border p-0.5"
             >
               {VIEWS.map(({ value, label }) => (
                 <Button
@@ -189,20 +189,20 @@ function CalendarToolbar({
                   size="sm"
                   variant={range.view === value ? 'default' : 'ghost'}
                   aria-pressed={range.view === value}
-                  className="h-8 px-2.5 text-xs sm:px-3"
+                  className="h-full px-2.5 text-xs sm:px-3"
                   onClick={() => goTo(navigation.withView(value))}
                 >
                   {label}
                 </Button>
               ))}
             </div>
-            <div className="inline-flex items-center rounded-md border">
+            <div className="inline-flex h-9 items-center rounded-md border">
               <Button
                 type="button"
                 size="icon"
                 variant="ghost"
                 aria-label="Previous period"
-                className="rounded-r-none"
+                className="h-full w-9 rounded-r-none"
                 disabled={!navigation.prev}
                 onClick={() => navigation.prev && goTo(navigation.prev)}
               >
@@ -213,7 +213,7 @@ function CalendarToolbar({
                 size="icon"
                 variant="ghost"
                 aria-label="Next period"
-                className="rounded-l-none border-l"
+                className="h-full w-9 rounded-l-none border-l"
                 disabled={!navigation.next}
                 onClick={() => navigation.next && goTo(navigation.next)}
               >
@@ -224,6 +224,7 @@ function CalendarToolbar({
               type="button"
               size="sm"
               variant="outline"
+              className="h-9 px-3"
               disabled={!navigation.today}
               onClick={() => navigation.today && goTo(navigation.today())}
             >

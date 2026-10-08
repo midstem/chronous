@@ -75,6 +75,7 @@ test.describe('registry calendar views', () => {
     await calendar.goto()
 
     const times = calendar.region('Calendar times')
+    await times.scrollIntoViewIfNeeded()
     await expect
       .poll(() => times.evaluate((element) => element.scrollTop))
       .toBeGreaterThan(400)

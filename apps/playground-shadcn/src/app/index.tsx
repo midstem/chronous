@@ -6,11 +6,13 @@ import { Button } from '@/components/ui/button'
 import { ChronousCalendar } from '@/components/ui/chronous-calendar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CopyButton } from '@/copy-button'
+import { DocsSection } from '@/docs'
+import { DOCS_HOME_URL } from '@/docs/constants'
 import { demoEvents } from '@/events'
 import { Settings, readSettings, todayIn } from '@/settings'
 import { ThemeToggle } from '@/theme'
 
-import { DOCS_URL, PLAYGROUNDS_URL } from './constants'
+import { PLAYGROUNDS_URL } from './constants'
 
 const INITIAL = readSettings(window.location.search)
 
@@ -36,7 +38,7 @@ export const App = (): ReactElement => {
           </a>
           <nav className="flex items-center gap-1">
             <Button asChild size="sm" variant="ghost">
-              <a href={DOCS_URL}>Docs</a>
+              <a href={DOCS_HOME_URL}>Docs</a>
             </Button>
             <Button asChild size="sm" variant="ghost">
               <a href={PLAYGROUNDS_URL}>All playgrounds</a>
@@ -60,6 +62,7 @@ export const App = (): ReactElement => {
             <CopyButton label="Copy install command" value={INSTALL_COMMAND} />
           </div>
         </section>
+        <DocsSection />
         <Tabs defaultValue="preview" className="gap-6">
           <TabsList>
             <TabsTrigger value="preview">Preview</TabsTrigger>
