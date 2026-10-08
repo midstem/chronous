@@ -1,9 +1,12 @@
 import { useMemo, useState, type ReactElement } from 'react'
 
+import { CodePanel } from '@/code'
+import { INSTALL_COMMAND } from '@/code/constants'
 import { Button } from '@/components/ui/button'
 import { ChronousCalendar } from '@/components/ui/chronous-calendar'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { CopyButton } from '@/copy-button'
 import { demoEvents } from '@/events'
-import { InstallCommand } from '@/install'
 import { Settings, readSettings, todayIn } from '@/settings'
 import { ThemeToggle } from '@/theme'
 
@@ -42,7 +45,7 @@ export const App = (): ReactElement => {
           </nav>
         </div>
       </header>
-      <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6">
+      <main className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-8 sm:px-6">
         <section className="flex flex-col gap-3">
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
             Chronous Calendar for shadcn/ui
@@ -52,21 +55,39 @@ export const App = (): ReactElement => {
             your <code>components/ui</code>, uses your <code>Button</code> and
             follows your theme tokens, light and dark.
           </p>
-          <InstallCommand />
+          <div className="bg-muted/40 flex max-w-full items-center gap-2 self-start rounded-lg border py-1 pr-1 pl-3 font-mono text-sm">
+            <code className="truncate">{INSTALL_COMMAND}</code>
+            <CopyButton label="Copy install command" value={INSTALL_COMMAND} />
+          </div>
         </section>
-        <Settings
-          locale={locale}
-          timeZone={timeZone}
-          onLocale={setLocale}
-          onTimeZone={setTimeZone}
-        />
-        <ChronousCalendar
-          events={events}
-          locale={locale}
-          timeZone={timeZone}
-          defaultDate={INITIAL.date}
-          defaultView={INITIAL.view}
-        />
+        <Tabs defaultValue="preview" className="gap-6">
+          <TabsList>
+            <TabsTrigger value="preview">Preview</TabsTrigger>
+            <TabsTrigger value="code">Code</TabsTrigger>
+          </TabsList>
+          <TabsContent
+            forceMount
+            value="preview"
+            className="flex flex-col gap-6 data-[state=inactive]:hidden"
+          >
+            <Settings
+              locale={locale}
+              timeZone={timeZone}
+              onLocale={setLocale}
+              onTimeZone={setTimeZone}
+            />
+            <ChronousCalendar
+              events={events}
+              locale={locale}
+              timeZone={timeZone}
+              defaultDate={INITIAL.date}
+              defaultView={INITIAL.view}
+            />
+          </TabsContent>
+          <TabsContent value="code">
+            <CodePanel />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   )

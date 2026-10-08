@@ -17,7 +17,7 @@ export default defineConfig({
   resolve: {
     alias: [
       {
-        find: '@/components/ui/chronous-calendar',
+        find: /^@\/components\/ui\/chronous-calendar(?=$|\?)/,
         replacement: REGISTRY_CALENDAR
       },
       { find: /^@\//, replacement: SOURCE }

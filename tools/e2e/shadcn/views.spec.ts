@@ -11,7 +11,7 @@ test.describe('registry calendar views', () => {
     await expect(calendar.view('Week')).toHaveAttribute('aria-pressed', 'true')
     await expect(calendar.today).toHaveCount(1)
     await expect(calendar.today).toHaveText('18')
-    await expect(calendar.event('Standup')).toBeVisible()
+    await expect(calendar.event('Daily standup')).toHaveCount(5)
     await expect(calendar.event('Team offsite')).toBeVisible()
   })
 
@@ -31,9 +31,7 @@ test.describe('registry calendar views', () => {
     await calendar.selectView('Agenda')
     await expect(calendar.region('Calendar agenda')).toBeVisible()
     await expect(calendar.caption).toHaveText('Mar 18 – Apr 16')
-    await expect(calendar.event('Sprint planning')).toContainText(
-      'Sprint planning'
-    )
+    await expect(calendar.event('Sprint planning').first()).toBeVisible()
     await expect(calendar.event('Team offsite').first()).toContainText(
       'All day'
     )
@@ -47,10 +45,12 @@ test.describe('registry calendar views', () => {
   }) => {
     await calendar.goto({ view: 'month' })
 
-    const busyDay = calendar.calendar.getByText('+2 more')
-    await expect(busyDay).toBeVisible()
-    await expect(calendar.event('Standup')).toBeVisible()
-    await expect(calendar.event('1:1')).toHaveCount(0)
+    const busyDay = calendar.monthDay('2026-03-18')
+    await expect(busyDay.getByText('+2 more')).toBeVisible()
+    await expect(busyDay.locator('[data-slot="calendar-event"]')).toHaveText([
+      /Morning run/,
+      /Daily standup/
+    ])
   })
 
   test('shows an empty state for an agenda without events', async ({
