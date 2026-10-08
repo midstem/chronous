@@ -37,9 +37,12 @@ Or add the namespace to `components.json` and install by item name:
 npx shadcn@latest add @chronous/chronous-calendar
 ```
 
-The CLI writes an editable `components/ui/chronous-calendar.tsx`, installs
-`@midstem/chronous-react` and `temporal-polyfill`, and installs the shadcn
-`button` registry dependency when it is not already present.
+The CLI writes the editable entry at `components/ui/chronous-calendar.tsx` and
+its support modules under `components/ui/chronous-calendar/`. It installs
+`@midstem/chronous-react` and `temporal-polyfill`, plus the shadcn `button`
+registry dependency when it is not already present. All four views share the
+same calendar state and navigation; the support modules only organize the
+editable implementation.
 
 ## Use
 

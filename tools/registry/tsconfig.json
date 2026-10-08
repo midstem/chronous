@@ -6,8 +6,5 @@
       "@midstem/chronous-react": ["../../packages/react/dist/index.d.ts"]
     }
   },
-  "include": [
-    "../../registry/default/chronous-calendar/chronous-calendar.tsx",
-    "./shadcn.d.ts"
-  ]
+  "include": ["../../registry/default/chronous-calendar/**/*", "./shadcn.d.ts"]
 }

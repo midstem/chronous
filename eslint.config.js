@@ -116,7 +116,7 @@ export default [
   },
 
   {
-    files: ['registry/default/**/*.tsx'],
+    files: ['registry/default/**/*.{ts,tsx}'],
     languageOptions: {
       parserOptions: {
         projectService: false,

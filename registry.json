@@ -18,6 +18,26 @@
           "path": "registry/default/chronous-calendar/chronous-calendar.tsx",
           "type": "registry:ui",
           "target": "@ui/chronous-calendar.tsx"
+        },
+        {
+          "path": "registry/default/chronous-calendar/chronous-calendar/calendar.ts",
+          "type": "registry:ui",
+          "target": "@ui/chronous-calendar/calendar.ts"
+        },
+        {
+          "path": "registry/default/chronous-calendar/chronous-calendar/events.tsx",
+          "type": "registry:ui",
+          "target": "@ui/chronous-calendar/events.tsx"
+        },
+        {
+          "path": "registry/default/chronous-calendar/chronous-calendar/toolbar.tsx",
+          "type": "registry:ui",
+          "target": "@ui/chronous-calendar/toolbar.tsx"
+        },
+        {
+          "path": "registry/default/chronous-calendar/chronous-calendar/views.tsx",
+          "type": "registry:ui",
+          "target": "@ui/chronous-calendar/views.tsx"
         }
       ]
     }

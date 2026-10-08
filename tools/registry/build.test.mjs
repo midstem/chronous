@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { after, describe, it } from 'node:test'
@@ -31,6 +31,15 @@ describe('shadcn registry build', () => {
     const catalog = JSON.parse(
       await readFile(join(output, 'registry.json'), 'utf8')
     )
+    const sourceRegistry = JSON.parse(
+      await readFile(join(root, 'registry.json'), 'utf8')
+    )
+    const expectedFiles = await Promise.all(
+      sourceRegistry.items[0].files.map(async (file) => ({
+        ...file,
+        content: await readFile(join(root, file.path), 'utf8')
+      }))
+    )
 
     assert.equal(catalog.items[0].name, 'chronous-calendar')
     assert.deepEqual(item.dependencies, [
@@ -38,20 +47,23 @@ describe('shadcn registry build', () => {
       'temporal-polyfill@^1.0.4'
     ])
     assert.deepEqual(item.registryDependencies, ['button'])
-    assert.equal(item.files[0].target, '@ui/chronous-calendar.tsx')
     assert.equal(
       item.$schema,
       'https://ui.shadcn.com/schema/registry-item.json'
     )
-    assert.equal(
-      item.files[0].content,
-      await readFile(
-        join(root, 'registry/default/chronous-calendar/chronous-calendar.tsx'),
-        'utf8'
-      )
+    assert.deepEqual(item.files, expectedFiles)
+    assert.deepEqual(
+      item.files.map((file) => file.target),
+      [
+        '@ui/chronous-calendar.tsx',
+        '@ui/chronous-calendar/calendar.ts',
+        '@ui/chronous-calendar/events.tsx',
+        '@ui/chronous-calendar/toolbar.tsx',
+        '@ui/chronous-calendar/views.tsx'
+      ]
     )
-    assert.match(item.files[0].content, /useCalendarNavigation/)
-    assert.match(item.files[0].content, /from '@\/components\/ui\/button'/)
+    assert.match(item.files[0].content, /export function ChronousCalendar/)
+    assert.match(item.files[3].content, /from '@\/components\/ui\/button'/)
   })
 
   it('fails when the catalog does not declare registry items', async () => {
@@ -67,16 +79,37 @@ describe('shadcn registry build', () => {
     )
   })
 
-  it('fails when a source file declared by the catalog is missing', async () => {
+  it('fails when a declared calendar support module is missing', async () => {
     const root = await temporaryDirectory()
+    const mainPath = 'registry/default/chronous-calendar/chronous-calendar.tsx'
+    const supportPath =
+      'registry/default/chronous-calendar/chronous-calendar/calendar.ts'
+    await mkdir(join(root, 'registry/default/chronous-calendar'), {
+      recursive: true
+    })
     await writeFile(
       join(root, 'registry.json'),
       JSON.stringify({
-        items: [{ name: 'missing', files: [{ path: 'missing.tsx' }] }]
+        items: [
+          {
+            name: 'chronous-calendar',
+            files: [
+              { path: mainPath, target: '@ui/chronous-calendar.tsx' },
+              {
+                path: supportPath,
+                target: '@ui/chronous-calendar/calendar.ts'
+              }
+            ]
+          }
+        ]
       })
     )
+    await writeFile(join(root, mainPath), 'export const calendar = true')
 
-    await assert.rejects(buildRegistry({ root, output: 'out' }), /missing\.tsx/)
+    await assert.rejects(
+      buildRegistry({ root, output: 'out' }),
+      /chronous-calendar\/calendar\.ts/
+    )
   })
 
   it('supports a caller-selected output directory', async () => {
