@@ -4,6 +4,17 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@custom-variant embed (&:where([data-embed='true'] *));
+
+:root[data-embed='true'] [data-embed-hidden] {
+  display: none;
+}
+
+:root[data-embed='true'] [data-app] {
+  min-height: 0;
+  background: transparent;
+}
+
 @custom-variant data-active {
   &:where([data-state='active']),
   &:where([data-active]:not([data-active='false'])) {

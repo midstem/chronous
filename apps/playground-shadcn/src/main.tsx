@@ -1,10 +1,14 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
+import { startEmbedBridge } from '@midstem/playground-core'
+
 import { App } from './app'
 import { ROOT_ID } from './app/constants'
 
 import './index.css'
+
+startEmbedBridge()
 
 const container = document.getElementById(ROOT_ID)
 

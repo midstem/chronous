@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@midstem/chronous-react": "*",
+    "@midstem/playground-core": "*",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.4.0",
     "lucide-react": "^1.52.0",

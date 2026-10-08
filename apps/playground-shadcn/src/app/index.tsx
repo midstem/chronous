@@ -24,8 +24,8 @@ export const App = (): ReactElement => {
   )
 
   return (
-    <div className="bg-background text-foreground min-h-svh">
-      <header className="border-b">
+    <div data-app className="bg-background text-foreground min-h-svh">
+      <header data-embed-hidden className="border-b">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <a
             href={PLAYGROUNDS_URL}
@@ -45,8 +45,8 @@ export const App = (): ReactElement => {
           </nav>
         </div>
       </header>
-      <main className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-8 sm:px-6">
-        <section className="flex flex-col gap-3">
+      <main className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-8 sm:px-6 embed:max-w-none embed:p-4 embed:sm:p-6">
+        <section data-embed-hidden className="flex flex-col gap-3">
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
             Chronous Calendar for shadcn/ui
           </h1>
