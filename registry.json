@@ -10,34 +10,15 @@
       "description": "A customizable React calendar with day, week, month and agenda views, powered by Chronous and styled with your shadcn/ui theme.",
       "dependencies": [
         "@midstem/chronous-react@^1.0.2",
+        "class-variance-authority",
+        "lucide-react",
         "temporal-polyfill@^1.0.4"
       ],
       "registryDependencies": ["button"],
       "files": [
         {
           "path": "registry/default/chronous-calendar/chronous-calendar.tsx",
-          "type": "registry:ui",
-          "target": "@ui/chronous-calendar.tsx"
-        },
-        {
-          "path": "registry/default/chronous-calendar/chronous-calendar/calendar.ts",
-          "type": "registry:ui",
-          "target": "@ui/chronous-calendar/calendar.ts"
-        },
-        {
-          "path": "registry/default/chronous-calendar/chronous-calendar/events.tsx",
-          "type": "registry:ui",
-          "target": "@ui/chronous-calendar/events.tsx"
-        },
-        {
-          "path": "registry/default/chronous-calendar/chronous-calendar/toolbar.tsx",
-          "type": "registry:ui",
-          "target": "@ui/chronous-calendar/toolbar.tsx"
-        },
-        {
-          "path": "registry/default/chronous-calendar/chronous-calendar/views.tsx",
-          "type": "registry:ui",
-          "target": "@ui/chronous-calendar/views.tsx"
+          "type": "registry:ui"
         }
       ]
     }

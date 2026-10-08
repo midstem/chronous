@@ -122,6 +122,9 @@ export default [
         projectService: false,
         project: ['./tools/registry/tsconfig.json']
       }
+    },
+    rules: {
+      '@typescript-eslint/explicit-function-return-type': 'off'
     }
   },
 

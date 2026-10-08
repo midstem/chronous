@@ -43,14 +43,13 @@
     "test:package:angular": "npm run build && npm run verify:dist && node tools/angular-build/scripts/verify-package.mjs",
     "format:check": "prettier --check \"./**/*.{js,mjs,ts,tsx,css,md,json,svelte,yml,yaml}\" \".github/**/*.{mjs,md,yml,yaml}\"",
     "check": "npm run build && npm run verify:dist && npm run format:check && npm run lint && npm run typecheck && npm test && npm run test:infra",
-    "test:infra": "node --test .github/scripts/*.test.mjs tools/maintenance/*.test.mjs tools/package-check/*.test.mjs && npm run test:registry",
+    "test:infra": "node --test .github/scripts/*.test.mjs tools/maintenance/*.test.mjs tools/package-check/*.test.mjs",
     "precommit": "node tools/maintenance/precommit.mjs",
     "verify:package": "node tools/package-check/index.mjs",
     "test:package": "npm run build && npm run verify:dist && npm run verify:package",
     "size:report": "node tools/maintenance/report-size.mjs",
-    "build:registry": "node tools/registry/build.mjs",
-    "typecheck:registry": "tsc --project tools/registry/tsconfig.json",
-    "test:registry": "node --test tools/registry/build.test.mjs"
+    "build:registry": "npx shadcn@4.21.4 build --output dist-registry/r",
+    "typecheck:registry": "tsc --project tools/registry/tsconfig.json"
   },
   "devDependencies": {
     "@analogjs/vite-plugin-angular": "^2.7.1",
@@ -74,6 +73,7 @@
     "@typescript-eslint/parser": "^8.67.0",
     "@vitejs/plugin-vue": "^6.0.9",
     "@vitest/coverage-v8": "^4.1.11",
+    "class-variance-authority": "^0.7.1",
     "eslint": "^9.39.5",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
@@ -83,6 +83,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.11.0",
     "jsdom": "^30.0.1",
+    "lucide-react": "^1.52.0",
     "pre-commit": "^2.0.0",
     "prettier": "^3.9.6",
     "prettier-plugin-svelte": "^3.5.2",
