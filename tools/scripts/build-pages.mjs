@@ -13,8 +13,20 @@ const PLAYGROUNDS = [
   { id: 'angular', title: 'Angular', packageName: '@midstem/chronous-angular' },
   { id: 'vue', title: 'Vue', packageName: '@midstem/chronous-vue' },
   { id: 'svelte', title: 'Svelte', packageName: '@midstem/chronous-svelte' },
-  { id: 'vanilla', title: 'Vanilla JS', packageName: '@midstem/chronous' }
+  { id: 'vanilla', title: 'Vanilla JS', packageName: '@midstem/chronous' },
+  {
+    id: 'shadcn',
+    title: 'shadcn/ui',
+    packageName: '@chronous/chronous-calendar'
+  }
 ]
+
+const EXTRA_LOGOS = {
+  shadcn: {
+    viewBox: '0 0 256 256',
+    svg: '<g fill="none" stroke="currentColor" stroke-width="24" stroke-linecap="round"><path d="M208 128 128 208"/><path d="M192 40 40 192"/></g>'
+  }
+}
 
 const run = (workspace) =>
   execFileSync('npm', ['run', 'build', '--workspace', workspace], {
@@ -41,7 +53,7 @@ const buildPlayground = ({ id }) => {
 }
 
 const logoOf = (id) => {
-  const { viewBox, svg } = FRAMEWORK_LOGOS[id]
+  const { viewBox, svg } = FRAMEWORK_LOGOS[id] ?? EXTRA_LOGOS[id]
   const [x, y, width, height] = viewBox.split(' ').map(Number)
   const paddedViewBox = `${x - 3} ${y - 3} ${width + 6} ${height + 6}`
 
@@ -65,7 +77,7 @@ const buildIndex = () => `<!doctype html>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
-    <meta name="description" content="Explore Chronous in vanilla JavaScript, React, Angular, Vue and Svelte. Try calendar views, event examples and live options with generated code." />
+    <meta name="description" content="Explore Chronous in vanilla JavaScript, React, Angular, Vue, Svelte and shadcn/ui. Try calendar views, event examples and live options with generated code." />
     <title>Chronous playgrounds</title>
     <style>
       :root {
@@ -130,6 +142,7 @@ const buildIndex = () => `<!doctype html>
       .card--vue { --tint: light-dark(#047857, #6ee7b7); }
       .card--svelte { --tint: light-dark(#c2410c, #fdba74); }
       .card--vanilla { --tint: light-dark(#ca8a04, #facc15); }
+      .card--shadcn { --tint: light-dark(#0f172a, #e2e8f0); }
       .card:hover { border-color: var(--tint); transform: translateY(-2px); }
       a:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; border-radius: 12px; }
       .card__top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
@@ -158,12 +171,12 @@ const buildIndex = () => `<!doctype html>
       <section class="intro" aria-labelledby="title">
         <div class="eyebrow">Interactive playgrounds</div>
         <h1 id="title">Your framework.<br />Your calendar.</h1>
-        <p>Explore the same Chronous calendar in vanilla JavaScript and four frameworks. Try event examples, adjust calendar options, and see the code behind every view.</p>
+        <p>Explore the same Chronous calendar in vanilla JavaScript, four frameworks and the shadcn/ui registry. Try event examples, adjust calendar options, and see the code behind every view.</p>
       </section>
       <nav class="cards" aria-label="Choose a framework">${PLAYGROUNDS.map(toCard).join('')}
       </nav>
       <footer>
-        <span>One scheduling engine. Four framework integrations and vanilla JavaScript.</span>
+        <span>One scheduling engine. Four framework integrations, vanilla JavaScript and a shadcn/ui component.</span>
         <span>Day · Week · Month · Agenda</span>
       </footer>
     </main>
@@ -185,5 +198,13 @@ PLAYGROUNDS.forEach(buildPlayground)
 
 writeFileSync(resolve(OUTPUT, 'index.html'), buildIndex())
 writeFileSync(resolve(OUTPUT, '.nojekyll'), '')
+execFileSync(
+  'npx',
+  ['shadcn@4.21.4', 'build', '--output', resolve(OUTPUT, 'r')],
+  {
+    cwd: ROOT,
+    stdio: 'inherit'
+  }
+)
 
 console.error(`built ${PLAYGROUNDS.length} playgrounds into dist-pages`)

@@ -43,3 +43,11 @@ export const PLAYGROUNDS: readonly PlaygroundConfig[] = [
     packageName: '@midstem/chronous'
   }
 ]
+
+export const SHADCN_PLAYGROUND: PlaygroundConfig = {
+  id: 'shadcn',
+  name: 'shadcn/ui',
+  port: 3105,
+  path: '../../apps/playground-shadcn',
+  packageName: '@chronous/chronous-calendar'
+}

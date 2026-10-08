@@ -116,6 +116,29 @@ export default [
   },
 
   {
+    files: ['registry/default/**/*.{ts,tsx}'],
+    languageOptions: {
+      parserOptions: {
+        projectService: false,
+        project: ['./apps/playground-shadcn/tsconfig.json']
+      }
+    },
+    rules: {
+      '@typescript-eslint/explicit-function-return-type': 'off'
+    }
+  },
+
+  {
+    files: [
+      'apps/playground-shadcn/src/components/ui/**/*.tsx',
+      'apps/playground-shadcn/src/lib/**/*.ts'
+    ],
+    rules: {
+      '@typescript-eslint/explicit-function-return-type': 'off'
+    }
+  },
+
+  {
     files: [
       'packages/vue/**/*.{ts,js}',
       'apps/playground-vue/**/*.{ts,js}',

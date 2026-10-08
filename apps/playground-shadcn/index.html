@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      {
+        const theme = new URLSearchParams(location.search).get('theme')
+        const pinned = theme ?? localStorage.getItem('chronous-shadcn-theme')
+        const dark =
+          pinned === 'dark' ||
+          (pinned !== 'light' &&
+            matchMedia('(prefers-color-scheme: dark)').matches)
+
+        document.documentElement.classList.toggle('dark', dark)
+      }
+    </script>
+    <title>Chronous playground (shadcn/ui)</title>
+    <meta
+      name="description"
+      content="The Chronous calendar from the shadcn/ui registry: day, week, month and agenda views styled by your theme."
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

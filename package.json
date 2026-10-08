@@ -31,6 +31,7 @@
     "start:vue": "npm run dev --workspace @midstem/chronous-playground-vue",
     "start:svelte": "npm run dev --workspace @midstem/chronous-playground-svelte",
     "start:vanilla": "npm run dev --workspace @midstem/chronous-playground-vanilla",
+    "start:shadcn": "npm run dev --workspace @midstem/chronous-playground-shadcn",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test:run --workspaces --if-present",
     "lint": "eslint .",
@@ -47,7 +48,8 @@
     "precommit": "node tools/maintenance/precommit.mjs",
     "verify:package": "node tools/package-check/index.mjs",
     "test:package": "npm run build && npm run verify:dist && npm run verify:package",
-    "size:report": "node tools/maintenance/report-size.mjs"
+    "size:report": "node tools/maintenance/report-size.mjs",
+    "build:registry": "npx shadcn@4.21.4 build --output dist-registry/r"
   },
   "devDependencies": {
     "@analogjs/vite-plugin-angular": "^2.7.1",

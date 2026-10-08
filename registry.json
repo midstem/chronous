@@ -1,0 +1,26 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "chronous",
+  "homepage": "https://midstem.github.io/chronous/",
+  "items": [
+    {
+      "name": "chronous-calendar",
+      "type": "registry:ui",
+      "title": "Chronous Calendar",
+      "description": "A customizable React calendar with day, week, month and agenda views, powered by Chronous and styled with your shadcn/ui theme.",
+      "dependencies": [
+        "@midstem/chronous-react@^1.0.2",
+        "class-variance-authority",
+        "lucide-react",
+        "temporal-polyfill@^1.0.4"
+      ],
+      "registryDependencies": ["button"],
+      "files": [
+        {
+          "path": "registry/default/chronous-calendar/chronous-calendar.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    }
+  ]
+}

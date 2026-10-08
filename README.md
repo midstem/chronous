@@ -12,6 +12,19 @@ styles. No stylesheet required.
 
 [chronous.midstem.net/docs](https://chronous.midstem.net/docs/)
 
+## Install the React calendar with shadcn/ui
+
+Install the day, week, month and agenda calendar into a shadcn app after the
+Pages registry is published:
+
+```sh
+npx shadcn@latest add https://midstem.github.io/chronous/r/chronous-calendar.json
+```
+
+[Try it live](https://midstem.github.io/chronous/shadcn/) in a shadcn/ui
+playground, or see the [registry installation guide](docs/SHADCN_REGISTRY.md)
+for setup, namespace installation and usage.
+
 ## Packages
 
 Each adapter includes the engine. Follow a package link for installation and examples.
@@ -31,9 +44,9 @@ Gzipped bundlejs estimates with frameworks external; ratios checked October 6, 2
 Try each integration: change calendar options and events, then inspect the result
 and generated code.
 
-| React                                             | Vue                                             | Svelte                                             | Angular                                             | Vanilla JS                                          |
-| ------------------------------------------------- | ----------------------------------------------- | -------------------------------------------------- | --------------------------------------------------- | --------------------------------------------------- |
-| [live](https://midstem.github.io/chronous/react/) | [live](https://midstem.github.io/chronous/vue/) | [live](https://midstem.github.io/chronous/svelte/) | [live](https://midstem.github.io/chronous/angular/) | [live](https://midstem.github.io/chronous/vanilla/) |
+| React                                             | Vue                                             | Svelte                                             | Angular                                             | Vanilla JS                                          | shadcn/ui                                          |
+| ------------------------------------------------- | ----------------------------------------------- | -------------------------------------------------- | --------------------------------------------------- | --------------------------------------------------- | -------------------------------------------------- |
+| [live](https://midstem.github.io/chronous/react/) | [live](https://midstem.github.io/chronous/vue/) | [live](https://midstem.github.io/chronous/svelte/) | [live](https://midstem.github.io/chronous/angular/) | [live](https://midstem.github.io/chronous/vanilla/) | [live](https://midstem.github.io/chronous/shadcn/) |
 
 [All playgrounds](https://midstem.github.io/chronous/)
 
