@@ -43,4 +43,16 @@ export class RegistryCalendarPage {
   event(title: string): Locator {
     return this.events.filter({ hasText: title })
   }
+
+  monthDay(date: string): Locator {
+    return this.calendar.locator(
+      `[data-date="${date}"][data-in-current-period]`
+    )
+  }
+
+  async openTab(
+    name: 'Preview' | 'Code' | 'Command' | 'Manual'
+  ): Promise<void> {
+    await this.page.getByRole('tab', { name, exact: true }).click()
+  }
 }

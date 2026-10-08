@@ -1,6 +1,8 @@
 import type { ReactElement } from 'react'
 
-import { LOCAL_TIME_ZONE, LOCALES, SELECT_CLASS, TIME_ZONES } from './constants'
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
+
+import { LOCAL_TIME_ZONE, LOCALES, TIME_ZONES } from './constants'
 import type { SettingsProps } from './types'
 
 export const Settings = ({
@@ -12,31 +14,29 @@ export const Settings = ({
   <div className="flex flex-wrap items-end gap-4">
     <label className="flex flex-col gap-1.5 text-sm font-medium">
       Locale
-      <select
-        className={SELECT_CLASS}
+      <NativeSelect
         value={locale}
         onChange={(event) => onLocale(event.target.value)}
       >
         {LOCALES.map(({ value, label }) => (
-          <option key={value} value={value}>
+          <NativeSelectOption key={value} value={value}>
             {label}
-          </option>
+          </NativeSelectOption>
         ))}
-      </select>
+      </NativeSelect>
     </label>
     <label className="flex flex-col gap-1.5 text-sm font-medium">
       Time zone
-      <select
-        className={SELECT_CLASS}
+      <NativeSelect
         value={timeZone ?? LOCAL_TIME_ZONE}
         onChange={(event) => onTimeZone(event.target.value || undefined)}
       >
         {TIME_ZONES.map(({ value, label }) => (
-          <option key={value} value={value}>
+          <NativeSelectOption key={value} value={value}>
             {label}
-          </option>
+          </NativeSelectOption>
         ))}
-      </select>
+      </NativeSelect>
     </label>
   </div>
 )

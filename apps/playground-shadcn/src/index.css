@@ -4,6 +4,25 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@custom-variant data-active {
+  &:where([data-state='active']),
+  &:where([data-active]:not([data-active='false'])) {
+    @slot;
+  }
+}
+
+@custom-variant data-horizontal {
+  &:where([data-orientation='horizontal']) {
+    @slot;
+  }
+}
+
+@custom-variant data-vertical {
+  &:where([data-orientation='vertical']) {
+    @slot;
+  }
+}
+
 @theme inline {
   --font-sans:
     ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
@@ -41,6 +60,15 @@
 }
 
 :root {
+  --sh-class: oklch(0.5 0.2 260);
+  --sh-identifier: oklch(0.3 0 0);
+  --sh-sign: oklch(0.55 0 0);
+  --sh-property: oklch(0.5 0.15 230);
+  --sh-entity: oklch(0.5 0.17 300);
+  --sh-jsxliterals: oklch(0.45 0.12 260);
+  --sh-string: oklch(0.5 0.13 150);
+  --sh-keyword: oklch(0.55 0.2 15);
+  --sh-comment: oklch(0.6 0 0);
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -68,6 +96,15 @@
 }
 
 .dark {
+  --sh-class: oklch(0.8 0.12 260);
+  --sh-identifier: oklch(0.9 0 0);
+  --sh-sign: oklch(0.65 0 0);
+  --sh-property: oklch(0.8 0.1 230);
+  --sh-entity: oklch(0.78 0.13 300);
+  --sh-jsxliterals: oklch(0.82 0.08 260);
+  --sh-string: oklch(0.8 0.13 150);
+  --sh-keyword: oklch(0.75 0.15 15);
+  --sh-comment: oklch(0.6 0 0);
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);

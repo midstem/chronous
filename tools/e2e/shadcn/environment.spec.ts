@@ -46,10 +46,10 @@ test.describe('registry calendar environment', () => {
   test('paints events with the theme chart tokens', async ({ calendar }) => {
     await calendar.goto()
 
-    const standup = calendar.event('Standup')
-    const lunch = calendar.event('Lunch')
+    const standup = calendar.event('Daily standup').first()
+    const sync = calendar.event('Team sync')
     await expect(standup).toHaveClass(/bg-chart-1\/10/)
-    await expect(lunch).toHaveClass(/bg-chart-2\/10/)
+    await expect(sync).toHaveClass(/bg-chart-2\/10/)
     await expect(standup).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
   })
 

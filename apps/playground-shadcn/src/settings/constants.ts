@@ -27,6 +27,3 @@ export const TIME_ZONES = [
   { value: 'America/New_York', label: 'America/New_York' },
   { value: 'Asia/Tokyo', label: 'Asia/Tokyo' }
 ] as const
-
-export const SELECT_CLASS =
-  'border-input bg-background focus-visible:border-ring focus-visible:ring-ring/50 h-8 rounded-lg border px-2.5 text-sm outline-none focus-visible:ring-3'

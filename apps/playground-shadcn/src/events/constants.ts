@@ -1,0 +1,5 @@
+export const SERIES_LEAD_DAYS = -56
+
+export const WEEKDAYS = 'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR'
+
+export const EVERY_OTHER_WEEK = 'FREQ=WEEKLY;INTERVAL=2'
