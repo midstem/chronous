@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { ChronousCalendar } from '@/components/ui/chronous-calendar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CopyButton } from '@/copy-button'
+import { DocsSection } from '@/docs'
 import { demoEvents } from '@/events'
 import { Settings, readSettings, todayIn } from '@/settings'
 import { ThemeToggle } from '@/theme'
@@ -60,6 +61,7 @@ export const App = (): ReactElement => {
             <CopyButton label="Copy install command" value={INSTALL_COMMAND} />
           </div>
         </section>
+        <DocsSection />
         <Tabs defaultValue="preview" className="gap-6">
           <TabsList>
             <TabsTrigger value="preview">Preview</TabsTrigger>
